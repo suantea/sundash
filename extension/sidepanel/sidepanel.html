@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SunDash Monitor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px; background: #16213e; border-bottom: 1px solid #0f3460;
+    }
+    .header h1 { font-size: 16px; font-weight: 600; color: #2080f0; }
+    .content { padding: 16px; }
+    .section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #aaa; }
+    .item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; margin-bottom: 8px; background: #16213e;
+      border-radius: 8px; cursor: pointer; transition: background 0.2s;
+    }
+    .item:hover { background: #1a2744; }
+    .item-icon { font-size: 20px; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-url { font-size: 11px; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-badge {
+      padding: 2px 8px; border-radius: 4px; font-size: 11px; flex-shrink: 0;
+    }
+    .item-badge.changed { background: rgba(255, 152, 0, 0.15); color: #ff9800; }
+    .item-badge.ok { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+    .empty { text-align: center; padding: 48px 16px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>SunDash Monitor</h1>
+  </div>
+  <div class="content">
+    <div class="section-title">监控中的页面</div>
+    <div id="items"></div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

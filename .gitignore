@@ -1,0 +1,41 @@
+# Node / frontend
+node_modules/
+web/dist/
+web/.vite/
+web/.env.local
+
+# Tooling-installed universal agent skills (not project code)
+.agents/
+skills-lock.json
+
+# Go build artifacts
+server/sundash.exe
+server/sundash_test.exe
+server/*.exe~
+server/*.test
+server/main
+
+# Frontend build output copied into server
+server/static/
+
+# Database & runtime data
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/
+server/data/
+
+# Temp / import scratch (may contain personal data)
+temp/
+
+# Env & secrets
+.env
+.env.local
+.env.production
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/

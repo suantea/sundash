@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  asuan:
+    image: asuan:latest
+    container_name: asuan
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SUNDASH_PORT=3000
+      - SUNDASH_DATA_DIR=/app/data
+      - TZ=Asia/Shanghai

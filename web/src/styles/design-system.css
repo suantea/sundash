@@ -1,0 +1,155 @@
+/* ============================================================
+   Asuan Design System
+   Inspired by Apple HIG, Google Material 3, Samsung One UI
+   ============================================================ */
+
+:root {
+  /* === Color System === */
+  /* Primary - Sophisticated Blue */
+  --sd-primary: #007AFF;
+  --sd-primary-hover: #0056CC;
+  --sd-primary-light: rgba(0, 122, 255, 0.08);
+  --sd-primary-medium: rgba(0, 122, 255, 0.15);
+
+  /* Surface Colors - Apple-style layered surfaces */
+  --sd-bg-root: #F2F2F7;
+  --sd-bg-surface: #FFFFFF;
+  --sd-bg-surface-secondary: #F9F9FB;
+  --sd-bg-elevated: #FFFFFF;
+  --sd-bg-grouped: #F2F2F7;
+
+  /* Text Colors */
+  --sd-text-primary: #1C1C1E;
+  --sd-text-secondary: #8E8E93;
+  --sd-text-tertiary: #C7C7CC;
+  --sd-text-inverse: #FFFFFF;
+
+  /* Border & Divider */
+  --sd-border: rgba(0, 0, 0, 0.06);
+  --sd-divider: rgba(0, 0, 0, 0.08);
+  --sd-border-focus: rgba(0, 122, 255, 0.4);
+
+  /* Semantic Colors */
+  --sd-success: #34C759;
+  --sd-warning: #FF9500;
+  --sd-error: #FF3B30;
+  --sd-info: #5AC8FA;
+
+  /* Role Colors */
+  --sd-color-admin: #FF9500;
+  --sd-color-admin-bg: rgba(255, 149, 0, 0.12);
+  --sd-color-user: #007AFF;
+  --sd-color-user-bg: rgba(0, 122, 255, 0.1);
+  --sd-color-success: #34C759;
+  --sd-color-success-bg: rgba(52, 199, 89, 0.1);
+  --sd-color-warning: #FF9500;
+  --sd-color-warning-bg: rgba(255, 149, 0, 0.12);
+  --sd-color-danger: #FF3B30;
+  --sd-color-danger-bg: rgba(255, 59, 48, 0.1);
+
+  /* === Typography === */
+  --sd-font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', 'Segoe UI', Roboto, 'Noto Sans SC', 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+  --sd-font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+
+  /* Font Sizes - Standard 12px base */
+  --sd-text-xs: 10px;
+  --sd-text-sm: 11px;
+  --sd-text-base: 12px;
+  --sd-text-lg: 14px;
+  --sd-text-xl: 16px;
+  --sd-text-2xl: 20px;
+  --sd-text-3xl: 24px;
+  --sd-text-4xl: 30px;
+
+  /* Font Weights */
+  --sd-weight-normal: 400;
+  --sd-weight-medium: 500;
+  --sd-weight-semibold: 600;
+  --sd-weight-bold: 700;
+
+  /* Line Heights */
+  --sd-leading-tight: 1.2;
+  --sd-leading-normal: 1.5;
+  --sd-leading-relaxed: 1.65;
+
+  /* === Spacing Scale === */
+  --sd-space-0: 0;
+  --sd-space-1: 4px;
+  --sd-space-2: 8px;
+  --sd-space-3: 12px;
+  --sd-space-4: 16px;
+  --sd-space-5: 20px;
+  --sd-space-6: 24px;
+  --sd-space-8: 32px;
+  --sd-space-10: 40px;
+  --sd-space-12: 48px;
+  --sd-space-16: 64px;
+
+  /* === Border Radius === */
+  --sd-radius-xs: 6px;
+  --sd-radius-sm: 8px;
+  --sd-radius-md: 12px;
+  --sd-radius-lg: 16px;
+  --sd-radius-xl: 20px;
+  --sd-radius-2xl: 24px;
+  --sd-radius-full: 9999px;
+
+  /* === Shadows - Apple-style layered === */
+  --sd-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --sd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --sd-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --sd-shadow-float: 0 24px 48px -12px rgba(0, 0, 0, 0.12);
+  --sd-shadow-glow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+
+  /* === Blur / Glassmorphism === */
+  --sd-blur: blur(20px);
+  --sd-blur-heavy: blur(40px);
+  --sd-glass-bg: rgba(255, 255, 255, 0.72);
+  --sd-glass-border: rgba(255, 255, 255, 0.5);
+
+  /* === Transitions === */
+  --sd-duration-fast: 150ms;
+  --sd-duration-normal: 250ms;
+  --sd-duration-slow: 400ms;
+  --sd-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --sd-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sd-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Layout === */
+  --sd-max-width: 1200px;
+  --sd-header-height: 64px;
+  --sd-sidebar-width: 260px;
+}
+
+/* === Dark Mode === */
+[data-theme="dark"] {
+  --sd-bg-root: #000000;
+  --sd-bg-surface: #1C1C1E;
+  --sd-bg-surface-secondary: #2C2C2E;
+  --sd-bg-elevated: #2C2C2E;
+  --sd-bg-grouped: #000000;
+
+  --sd-text-primary: #F2F2F7;
+  --sd-text-secondary: #8E8E93;
+  --sd-text-tertiary: #636366;
+
+  --sd-border: rgba(255, 255, 255, 0.08);
+  --sd-divider: rgba(255, 255, 255, 0.1);
+
+  --sd-primary-light: rgba(0, 122, 255, 0.12);
+  --sd-primary-medium: rgba(0, 122, 255, 0.2);
+
+  --sd-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --sd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --sd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+  --sd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+  --sd-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+  --sd-shadow-float: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+
+  --sd-glass-bg: rgba(28, 28, 30, 0.72);
+  --sd-glass-border: rgba(255, 255, 255, 0.06);
+}

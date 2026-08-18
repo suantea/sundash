@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$ATOMCODE_FILE\" in *.go) gofmt -w \"$ATOMCODE_FILE\";; esac"
+          },
+          {
+            "type": "command",
+            "command": "case \"$ATOMCODE_FILE\" in *.vue|*.ts) (cd web && npx vue-tsc --noEmit);; esac"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$ATOMCODE_FILE\" in *package-lock.json|*go.sum) echo '锁定文件请通过包管理器修改，禁止直接编辑'; exit 1;; esac; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

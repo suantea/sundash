@@ -1,0 +1,262 @@
+/* Import Design System */
+@import './design-system.css';
+
+/* === Reset & Base === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
+}
+
+html, body {
+  font-family: var(--sd-font);
+  font-size: var(--sd-text-base);
+  line-height: var(--sd-leading-normal);
+  color: var(--sd-text-primary);
+  background: var(--sd-bg-root);
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* === Scrollbar - Minimal === */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sd-text-tertiary);
+  border-radius: var(--sd-radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sd-text-secondary);
+}
+
+/* === Selection === */
+::selection {
+  background: var(--sd-primary-medium);
+  color: var(--sd-text-primary);
+}
+
+/* === Links === */
+a {
+  color: var(--sd-primary);
+  text-decoration: none;
+}
+
+/* === Page Transitions === */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--sd-duration-normal) var(--sd-ease),
+              transform var(--sd-duration-normal) var(--sd-ease);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--sd-duration-fast) var(--sd-ease);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* === Naive UI Theme Overrides === */
+.n-button {
+  font-family: var(--sd-font) !important;
+}
+
+.n-modal-mask {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+.n-card {
+  border-radius: 16px !important;
+  border: 1px solid var(--sd-border) !important;
+  font-family: var(--sd-font) !important;
+}
+
+
+.n-input {
+  border-radius: 10px !important;
+  font-family: var(--sd-font) !important;
+}
+
+.n-data-table {
+  border-radius: 14px !important;
+}
+
+.n-message {
+  font-family: var(--sd-font) !important;
+  border-radius: 12px !important;
+}
+
+.n-notification {
+  border-radius: 14px !important;
+  font-family: var(--sd-font) !important;
+}
+
+.n-dropdown-menu {
+  border-radius: 12px !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+
+:root[data-theme="dark"] .n-dropdown-menu {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+.n-select-menu {
+  border-radius: 12px !important;
+}
+
+.n-color-picker {
+  border-radius: 10px !important;
+}
+
+/* === Global 12px Font Standard === */
+body, html, #app {
+  font-size: 12px !important;
+}
+
+/* Naive UI form components */
+.n-input,
+.n-select,
+.n-checkbox,
+.n-radio,
+.n-form-item,
+.n-form-item-label,
+.n-form-item-feedback,
+.n-popover,
+.n-dropdown-menu,
+.n-select-menu,
+.n-color-picker,
+.n-data-table,
+.n-message,
+.n-notification {
+  font-size: 12px !important;
+}
+
+/* Input & placeholder */
+.n-input .n-input__input-el,
+.n-input .n-input__textarea-el,
+.n-input .n-input__input-el::placeholder,
+.n-input .n-input__textarea-el::placeholder {
+  font-size: 12px !important;
+}
+
+/* Select */
+.n-select .n-base-select-option,
+.n-select .n-base-select-option__content {
+  font-size: 12px !important;
+}
+
+/* Checkbox & Radio */
+.n-checkbox__label,
+.n-radio__label {
+  font-size: 12px !important;
+}
+
+/* Dropdown items */
+.n-dropdown-menu .n-dropdown-option-body__label {
+  font-size: 12px !important;
+}
+
+/* Color picker value text */
+.n-color-picker-trigger__value {
+  font-size: 11px !important;
+}
+
+/* Dialog */
+.n-dialog .n-dialog__title {
+  font-size: 14px !important;
+}
+.n-dialog .n-dialog__content {
+  font-size: 12px !important;
+}
+
+/* Data table */
+.n-data-table .n-data-table-th,
+.n-data-table .n-data-table-td {
+  font-size: 12px !important;
+}
+
+/* Message & Notification */
+.n-message {
+  font-size: 12px !important;
+}
+.n-notification {
+  font-size: 12px !important;
+}
+
+/* === Custom Color Overrides === */
+:root {
+  --sd-custom-bg: '';
+  --sd-custom-text: '';
+  --sd-custom-border: '';
+  --sd-custom-primary: '';
+}
+
+/* Apply custom colors when set */
+body.custom-bg {
+  background: var(--sd-custom-bg) !important;
+}
+
+body.custom-text {
+  color: var(--sd-custom-text) !important;
+}
+
+body.custom-border {
+  --sd-border: var(--sd-custom-border);
+}
+
+body.custom-primary {
+  --sd-primary: var(--sd-custom-primary);
+  --sd-primary-hover: var(--sd-custom-primary);
+}
+
+/* === Performance: Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Disable backdrop-filter blur on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+  .home-header,
+  .page-header,
+  .login-card,
+  .settings-card,
+  .table-card,
+  .card-item,
+  .settings-drawer {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+

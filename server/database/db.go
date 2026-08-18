@@ -1,0 +1,222 @@
+package database
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
+	_ "modernc.org/sqlite"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var DB *sql.DB
+
+func Init(dbPath string) (*sql.DB, error) {
+	dir := filepath.Dir(dbPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("create data directory: %w", err)
+	}
+
+	// _pragma=foreign_keys(1) enables FK cascades (ON DELETE CASCADE) which the schema relies on.
+	dsn := "file:" + dbPath +
+		"?_journal_mode=WAL" +
+		"&_busy_timeout=5000" +
+		"&_pragma=foreign_keys(1)"
+
+	db, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("open database: %w", err)
+	}
+	// WAL mode supports concurrent readers; a small pool lets parallel API
+	// requests (panel + settings + wallpaper) avoid serializing on one conn.
+	db.SetMaxOpenConns(4)
+	db.SetMaxIdleConns(4)
+
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("ping database: %w", err)
+	}
+
+	if err := runMigrations(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+	if err := createDefaultAdmin(db); err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	DB = db
+	log.Println("Database initialized successfully")
+	return db, nil
+}
+
+func Close() {
+	if DB != nil {
+		DB.Close()
+	}
+}
+
+// --- Versioned migrations ---
+
+type migration struct {
+	version int
+	sql     string
+	table   string // when set, the migration only runs if the column is missing
+	column  string
+}
+
+var migrations = []migration{
+	{1, `CREATE TABLE IF NOT EXISTS users (
+		id TEXT PRIMARY KEY,
+		username TEXT UNIQUE NOT NULL,
+		password_hash TEXT NOT NULL,
+		display_name TEXT,
+		avatar TEXT,
+		role TEXT DEFAULT 'user',
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`, "", ""},
+	{2, `CREATE TABLE IF NOT EXISTS panel_groups (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		name TEXT NOT NULL,
+		sort_order INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+	)`, "", ""},
+	{3, `CREATE TABLE IF NOT EXISTS cards (
+		id TEXT PRIMARY KEY,
+		group_id TEXT NOT NULL,
+		user_id TEXT NOT NULL,
+		title TEXT NOT NULL,
+		url TEXT NOT NULL,
+		url_internal TEXT,
+		icon TEXT,
+		icon_color TEXT,
+		bg_color TEXT,
+		description TEXT,
+		open_type TEXT DEFAULT 'new_tab',
+		sort_order INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (group_id) REFERENCES panel_groups(id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+	)`, "", ""},
+	// Column additions are guarded by existence checks so both fresh and legacy databases migrate cleanly.
+	{4, `ALTER TABLE cards ADD COLUMN bg_color TEXT`, "cards", "bg_color"},
+	{5, `ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'approved'`, "users", "status"},
+	{6, `CREATE TABLE IF NOT EXISTS settings (
+		key TEXT PRIMARY KEY,
+		value TEXT,
+		user_id TEXT,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`, "", ""},
+	{7, `CREATE INDEX IF NOT EXISTS idx_panel_groups_user ON panel_groups(user_id)`, "", ""},
+	{8, `CREATE INDEX IF NOT EXISTS idx_cards_group ON cards(group_id)`, "", ""},
+	{9, `CREATE INDEX IF NOT EXISTS idx_cards_user ON cards(user_id)`, "", ""},
+	{10, `CREATE INDEX IF NOT EXISTS idx_settings_user ON settings(user_id)`, "", ""},
+	{11, `CREATE UNIQUE INDEX IF NOT EXISTS idx_settings_key_user ON settings(key, user_id) WHERE user_id IS NOT NULL`, "", ""},
+}
+
+func runMigrations(db *sql.DB) error {
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS schema_migrations (
+		version INTEGER PRIMARY KEY,
+		applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	)`); err != nil {
+		return fmt.Errorf("create schema_migrations: %w", err)
+	}
+
+	applied := map[int]bool{}
+	rows, err := db.Query("SELECT version FROM schema_migrations")
+	if err != nil {
+		return fmt.Errorf("read schema_migrations: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var v int
+		if err := rows.Scan(&v); err != nil {
+			return err
+		}
+		applied[v] = true
+	}
+
+	for _, m := range migrations {
+		if applied[m.version] {
+			continue
+		}
+		// Guarded column additions: skip silently when the column already exists.
+		if m.table != "" && columnExists(db, m.table, m.column) {
+			if err := markApplied(db, m.version); err != nil {
+				return err
+			}
+			continue
+		}
+
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		if _, err := tx.Exec(m.sql); err != nil {
+			tx.Rollback()
+			return fmt.Errorf("migration %d failed: %w\nSQL: %s", m.version, err, m.sql)
+		}
+		if _, err := tx.Exec("INSERT INTO schema_migrations (version) VALUES (?)", m.version); err != nil {
+			tx.Rollback()
+			return err
+		}
+		if err := tx.Commit(); err != nil {
+			return err
+		}
+		log.Printf("Applied database migration %d", m.version)
+	}
+	return nil
+}
+
+func columnExists(db *sql.DB, table, column string) bool {
+	rows, err := db.Query(fmt.Sprintf("PRAGMA table_info(%s)", table))
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, ctype string
+		var dflt sql.NullString
+		if err := rows.Scan(&cid, &name, &ctype, &notnull, &dflt, &pk); err != nil {
+			return false
+		}
+		if name == column {
+			return true
+		}
+	}
+	return false
+}
+
+func markApplied(db *sql.DB, version int) error {
+	_, err := db.Exec("INSERT INTO schema_migrations (version) VALUES (?)", version)
+	return err
+}
+
+func createDefaultAdmin(db *sql.DB) error {
+	var count int
+	if err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count); err != nil {
+		return fmt.Errorf("count users: %w", err)
+	}
+	if count > 0 {
+		return nil
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("hash default admin password: %w", err)
+	}
+	if _, err := db.Exec(
+		`INSERT INTO users (id, username, password_hash, display_name, role, status) VALUES (?, ?, ?, ?, ?, 'approved')`,
+		"admin", "admin", string(hash), "Administrator", "admin",
+	); err != nil {
+		return fmt.Errorf("create default admin: %w", err)
+	}
+	log.Println("Default admin user created (username: admin, password: admin) — CHANGE THE PASSWORD IMMEDIATELY")
+	return nil
+}

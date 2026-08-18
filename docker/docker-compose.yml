@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  asuan:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: asuan
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - asuan-data:/app/data
+    environment:
+      - SUNDASH_PORT=3000
+      - SUNDASH_DATA_DIR=/app/data
+      - TZ=Asia/Shanghai
+      # Required: the server refuses to start without an explicit JWT secret.
+      - SUNDASH_JWT_SECRET=${SUNDASH_JWT_SECRET:?请在 .env 或 shell 环境中设置 SUNDASH_JWT_SECRET}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/site-config"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  asuan-data:
+    driver: local
