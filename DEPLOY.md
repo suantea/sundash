@@ -1,105 +1,97 @@
-# Asuan 部署交接说明（给 workbuddy 执行）
+# SunDash 部署说明
 
-本文件由 opencode 生成，因本机无法连通腾讯云服务器，部署任务转交 workbuddy 执行。
+本文档覆盖三种部署方式：**Docker**（推荐）、**裸二进制 + systemd**、**NAS 脚本**。
 
-## 一、目标服务器
+> ⚠️ **重要**：`SUNDASH_JWT_SECRET` 为必填环境变量，未设置时服务**拒绝启动**（`SUNDASH_DEBUG=true` 仅限开发）。生产环境务必使用随机长密钥：`openssl rand -base64 48`。
 
-- 公网 IP：`43.133.45.67`
-- SSH 用户：`root`
-- SSH 私钥：`D:\下载\temp.pem`（RSA 私钥，OpenSSH 格式，可直接 `-i` 使用）
-- 系统：Linux（架构未知，需先探测，大概率 x86_64 / amd64）
-- 项目类型：腾讯云轻量应用服务器（Lighthouse）
-
-## 二、连接注意事项（重要）
-
-> 本机（opencode 所在 Windows）测试 `43.133.45.67:22` 一直 **Connection timed out**，
-> 排查过密钥、ssh 客户端均正常，判断是服务器侧网络/防火墙/实例状态问题。
-> workbuddy 执行前务必先确认：
-
-1. 实例处于「运行中」（轻量服务器关机时端口全不通）。
-2. 轻量服务器控制台「防火墙」入站规则放行 `TCP:22`，来源 `0.0.0.0/0`。
-3. 公网 IP 确实为 `43.133.45.67`（可能已变更）。
-4. 若本机到服务器的 22 仍不通，可让用户从自己电脑连一次：
-   `ssh -i D:\下载\temp.pem root@43.133.45.67`，确认服务器本身可用。
-
-连接测试命令（Windows PowerShell）：
-
-```powershell
-ssh -i "D:\下载\temp.pem" -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@43.133.45.67 "uname -a; nproc; free -h"
-```
-
-## 三、部署内容
-
-项目名 **Asuan**：个人导航/面板应用，前端 Vue 3 + Vite，后端 Go + Gin + SQLite。
-Docker 方案见 `docker/` 与 `nas-deploy/`，本次目标是**不用 Docker、直接跑二进制**。
-
-部署后访问：`http://43.133.45.67:3000`，默认账号 `admin / admin`。
-
-### 构件清单（3 样东西放同一目录，例如 `/opt/asuan/`）
+## 构件说明
 
 | 构件 | 来源 | 说明 |
 |---|---|---|
-| `sundash` | 交叉编译 | Go 源码 `server/`，Linux/amd64 二进制 |
-| `static/` | 前端构建 | `web/` 下 `npm run build` 产物，重命名为 `static/` |
+| `sundash`（二进制） | `server/` 编译 | Go 1.26+，纯 Go 无 CGO |
+| `static/` | `web/` 构建产物 | `npm run build` 输出 `web/dist/` 重命名 |
 | `data/` | 运行时创建 | SQLite 数据库 `sundash.db` 所在目录 |
 
-### 环境变量（`server/config/config.go`）
+---
 
-| 变量 | 默认值 | 说明 |
-|---|---|---|
-| `SUNDASH_PORT` | `3000` | 监听端口 |
-| `SUNDASH_DATA_DIR` | `./data` | 数据库目录 |
-| `SUNDASH_JWT_SECRET` | `sundash-default-secret-change-me` | **务必改成随机长字符串**（默认值已公开） |
-| `SUNDASH_DEBUG` | 空 | 设 `true` 开启 debug |
+## 方式 A：Docker（推荐）
 
-## 四、构建步骤（在本机执行）
+### 1. 准备密钥
 
-前端（在项目根目录 `D:\WEB 开发\index`）：
+```bash
+cd docker
+echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+```
 
-```powershell
-cd "D:\WEB 开发\index\web"
+> `docker-compose.yml` 使用 `${SUNDASH_JWT_SECRET:?...}` 强制检查，未设置会直接报错。
+
+### 2. 构建并启动
+
+```bash
+docker compose up -d --build
+```
+
+- 镜像：多阶段构建（node 构建前端 → golang 编译后端 → alpine 运行时）
+- 容器以**非 root** 用户运行，带 **healthcheck**（`/api/site-config` 探活）
+- 数据持久化到 Docker volume `asuan-data`（`/app/data`）
+- 访问：`http://<主机IP>:3000`
+
+### 3. 更新与日志
+
+```bash
+docker compose pull && docker compose up -d   # 更新
+docker compose logs -f asuan                  # 查看日志
+docker compose down                           # 停止
+```
+
+---
+
+## 方式 B：裸二进制 + systemd
+
+### 1. 构建（本机执行）
+
+```bash
+# 前端
+cd web
 npm install
-npm run build
+npm run build            # 产物 web/dist/
+
+# 后端交叉编译（Linux/amd64；ARM 机器改 GOARCH=arm64）
+cd ../server
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sundash .
 ```
 
-后端交叉编译（Go 1.26.4 已装）：
-
-```powershell
-cd "D:\WEB 开发\index\server"
-$env:CGO_ENABLED="0"; $env:GOOS="linux"; $env:GOARCH="amd64"
-go build -o sundash .
-# 若服务器是 arm64，把 GOARCH 改为 arm64
-```
-
-## 五、部署步骤（在服务器上执行）
+### 2. 上传与目录布局（服务器执行）
 
 ```bash
 mkdir -p /opt/asuan
-# 上传 sundash、static/（前端 dist）、data/ 到 /opt/asuan/
+# 上传 sundash 二进制与 web/dist 内容（重命名为 static/）到 /opt/asuan/
+# 最终结构：
+#   /opt/asuan/sundash
+#   /opt/asuan/static/
 cd /opt/asuan
 chmod +x sundash
 ```
 
-启动（前台验证）：
+### 3. 前台验证
 
 ```bash
 export SUNDASH_PORT=3000
 export SUNDASH_DATA_DIR=/opt/asuan/data
-export SUNDASH_JWT_SECRET='换成随机长字符串'
+export SUNDASH_JWT_SECRET='随机长字符串'
 ./sundash
+
+# 另开终端自测
+curl -s http://127.0.0.1:3000/api/site-config   # 期望 {"site_title":"",...}
 ```
 
-curl 自测：
+### 4. 注册 systemd 服务
 
-```bash
-curl -s http://127.0.0.1:3000/api/site-config
-```
-
-### 建议注册为 systemd 服务 `/etc/systemd/system/asuan.service`
+`/etc/systemd/system/asuan.service`：
 
 ```ini
 [Unit]
-Description=Asuan Panel
+Description=SunDash Panel
 After=network.target
 
 [Service]
@@ -109,7 +101,7 @@ Restart=always
 RestartSec=3
 Environment=SUNDASH_PORT=3000
 Environment=SUNDASH_DATA_DIR=/opt/asuan/data
-Environment=SUNDASH_JWT_SECRET=换成随机长字符串
+Environment=SUNDASH_JWT_SECRET=随机长字符串
 
 [Install]
 WantedBy=multi-user.target
@@ -118,11 +110,27 @@ WantedBy=multi-user.target
 ```bash
 systemctl daemon-reload
 systemctl enable --now asuan
+systemctl status asuan
 ```
 
-## 六、可选：nginx 反代（80/443 端口访问）
+---
 
-腾讯云轻量服务器防火墙需额外放行 `TCP:80`（和 443）。
+## 方式 C：NAS 部署
+
+`nas-deploy/` 目录提供 NAS 场景脚本：
+
+- `docker-compose.yml`：NAS Docker 部署编排（卷挂载到 NAS 存储路径）
+- `start.sh` / `start.bat`：一键启动脚本（自动检查 JWT 密钥并生成 `.env`）
+
+```bash
+cd nas-deploy
+./start.sh        # Linux/NAS（群晖等）
+# 或 start.bat（Windows）
+```
+
+---
+
+## nginx 反向代理（80/443 端口访问）
 
 ```nginx
 server {
@@ -138,20 +146,35 @@ server {
 }
 ```
 
-## 七、验收清单
+如需 HTTPS，请为 `server_name` 配置证书并添加 443 监听；若 nginx 与后端不同机，记得把 `SUNDASH_ALLOWED_ORIGINS` 配成你的域名。
 
-- [ ] `http://43.133.45.67:3000` 打开页面（静态 + SPA 路由正常）
-- [ ] 登录成功（admin / admin）
-- [ ] 重启后服务自动拉起（systemd）
-- [ ] `data/sundash.db` 已持久化到 `/opt/asuan/data/`
-- [ ] JWT 密钥已改，非默认值
+---
 
-## 八、源码说明（给执行者快速定位）
+## 环境变量一览
 
-- `server/main.go`：入口，Gin 路由 + 静态托管 + SPA fallback + 站点配置注入
-- `server/config/config.go`：环境变量加载
-- `server/database/`：SQLite 初始化
-- `server/handlers/`：业务接口
-- `server/middleware/`：JWT 鉴权 / 管理鉴权 / 登录限流
-- `web/`：Vue 3 前端源码（Vite 构建，产物 `web/dist/`）
-- `docker/Dockerfile`：官方 Docker 构建方式（交叉编译参考）
+| 变量 | 默认 | 说明 |
+|---|---|---|
+| `SUNDASH_PORT` | `3000` | 监听端口 |
+| `SUNDASH_DATA_DIR` | `./data` | 数据库目录 |
+| `SUNDASH_JWT_SECRET` | **必填** | 签名密钥，生产用 `openssl rand -base64 48` |
+| `SUNDASH_DEBUG` | 空 | `true` = 开发模式（Gin 调试 + 开发密钥） |
+| `SUNDASH_ALLOWED_ORIGINS` | 空 | CORS 白名单（逗号分隔），空 = 仅同源 |
+
+## 验收清单
+
+- [ ] 页面打开正常（静态资源 + SPA 路由）
+- [ ] 登录成功（默认 `admin / admin`，登录后立即修改密码）
+- [ ] 服务重启后自动拉起（systemd / Docker restart）
+- [ ] `data/sundash.db` 持久化且可备份
+- [ ] `SUNDASH_JWT_SECRET` 已设置且非默认值
+- [ ] Docker 方式下 healthcheck 状态为 healthy
+
+## 故障排查
+
+| 现象 | 原因与处理 |
+|---|---|
+| 启动即退出，日志提示 `SUNDASH_JWT_SECRET ... required` | 未设置密钥；生产环境设置随机密钥，开发用 `SUNDASH_DEBUG=true` |
+| 打开页面只有 API 没有界面 | `static/` 目录缺失或为空，重新执行前端构建并上传 |
+| 登录后接口返回 401 | 更换过 `SUNDASH_JWT_SECRET` 导致旧 token 失效，重新登录即可 |
+| 端口被占用 | 检查 `SUNDASH_PORT` 是否被其他进程占用（`ss -lntp` / `netstat -ano`） |
+| 数据库文件被锁 | 确保只有一个实例在运行；SQLite 使用 WAL 模式，勿直接拷贝运行中的 db 文件（应使用备份或 `VACUUM INTO`） |
