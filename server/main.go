@@ -18,11 +18,13 @@ import (
 	"sundash/config"
 	"sundash/database"
 	"sundash/handlers"
+	"sundash/mcp"
 	"sundash/middleware"
 	"sundash/repository"
 	"sundash/service"
 
 	"github.com/gin-gonic/gin"
+	mcpserver "github.com/mark3labs/mcp-go/server"
 )
 
 func main() {
@@ -56,6 +58,12 @@ func main() {
 	wallpaperH := handlers.NewWallpaperHandler(wallpaperSvc)
 	faviconH := handlers.NewFaviconHandler(faviconSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
+
+	// MCP server: AI agents can list / create / organize bookmarks.
+	// Endpoint: POST /mcp (Streamable HTTP). Auth: Bearer <SUNDASH_MCP_TOKEN>
+	// or a regular sundash JWT; the resolved user is bound to the session.
+	mcpSrv := mcp.New(panelSvc)
+	mcpHTTP := mcpserver.NewStreamableHTTPServer(mcpSrv.MCPServer())
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -130,6 +138,18 @@ func main() {
 			}
 		}
 	}
+
+	// MCP endpoint (Streamable HTTP). Authenticate via static token or JWT,
+	// then inject the resolved user id into the request context.
+	r.Any("/mcp", func(c *gin.Context) {
+		uid := mcp.Auth(c.Request, userRepo, []byte(cfg.JWTSecret), cfg.MCPToken, cfg.MCPUsername)
+		if uid == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or missing MCP token"})
+			return
+		}
+		req := c.Request.WithContext(mcp.WithUserID(c.Request.Context(), uid))
+		mcpHTTP.ServeHTTP(c.Writer, req)
+	})
 
 	// SPA fallback with cached index.html + per-request site config injection.
 	spa := newSPAHandler(staticPath, settingsSvc)

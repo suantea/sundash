@@ -114,6 +114,41 @@ systemd / nginx 反代示例见 [DEPLOY.md](DEPLOY.md)。
 | `SUNDASH_JWT_SECRET` | **无** | **必填**；生产环境请用 `openssl rand -base64 48` 生成；`SUNDASH_DEBUG=true` 时可用开发密钥 |
 | `SUNDASH_DEBUG` | 空 | `true` 开启 debug（Gin 调试 + 开发 JWT 密钥） |
 | `SUNDASH_ALLOWED_ORIGINS` | 空 | 逗号分隔的 CORS 白名单；空 = 仅同源 |
+| `SUNDASH_MCP_TOKEN` | 空 | **MCP 端点专用静态 token**（可选）。设置后 AI 客户端以 `Authorization: Bearer <token>` 访问 `/mcp` 管理书签 |
+| `SUNDASH_MCP_USERNAME` | `admin` | MCP 静态 token 绑定的用户（默认管理员） |
+
+## MCP（AI 接入）
+
+SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol）服务端，AI 助手（如 Claude Desktop / Cursor / 本地 agent）可直接接入来**录入、整理书签**（分组 = 标签）。
+
+- **端点**：`POST /mcp`（Streamable HTTP），挂载在 Web 服务同端口
+- **认证**：`Authorization: Bearer <SUNDASH_MCP_TOKEN>`（推荐），或直接使用登录 JWT
+- **工具**（均绑定到 token 对应用户）：
+
+| 工具 | 说明 |
+|---|---|
+| `sundash_list_groups` | 列出全部分组及组内卡片（只读） |
+| `sundash_create_group` | 新建分组（标签分类） |
+| `sundash_rename_group` | 重命名分组 |
+| `sundash_delete_group` | 删除分组（组内卡片一并删除） |
+| `sundash_create_card` | 组内新增书签（title/url 必填） |
+| `sundash_update_card` | 更新卡片标题/链接/描述 |
+| `sundash_move_card` | 把卡片移动到其他分组（整理归类） |
+| `sundash_delete_card` | 删除卡片 |
+
+### 配置示例（Claude Desktop）
+
+```json
+{
+  "mcpServers": {
+    "sundash": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp",
+      "headers": { "Authorization": "Bearer <你的 SUNDASH_MCP_TOKEN>" }
+    }
+  }
+}
+```
 
 ## 主要 API
 

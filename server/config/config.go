@@ -14,6 +14,10 @@ type Config struct {
 	DataDir        string
 	Debug          bool
 	AllowedOrigins []string
+	// MCPToken 是 MCP 端点专用静态 token（可选）。设置后 AI 客户端用
+	// Authorization: Bearer <MCPToken> 访问 /mcp，绑定到 MCPUsername 指定的用户。
+	MCPToken    string
+	MCPUsername string
 }
 
 func Load() *Config {
@@ -48,6 +52,8 @@ func Load() *Config {
 		DataDir:        dataDir,
 		Debug:          debug,
 		AllowedOrigins: origins,
+		MCPToken:       os.Getenv("SUNDASH_MCP_TOKEN"),
+		MCPUsername:    getEnv("SUNDASH_MCP_USERNAME", "admin"),
 	}
 }
 

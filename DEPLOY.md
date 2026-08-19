@@ -159,6 +159,29 @@ server {
 | `SUNDASH_JWT_SECRET` | **必填** | 签名密钥，生产用 `openssl rand -base64 48` |
 | `SUNDASH_DEBUG` | 空 | `true` = 开发模式（Gin 调试 + 开发密钥） |
 | `SUNDASH_ALLOWED_ORIGINS` | 空 | CORS 白名单（逗号分隔），空 = 仅同源 |
+| `SUNDASH_MCP_TOKEN` | 空 | MCP 端点静态 token（可选），设置后 AI 客户端可用它管理书签 |
+| `SUNDASH_MCP_USERNAME` | `admin` | MCP 静态 token 绑定的用户 |
+
+## MCP（AI 接入）
+
+服务启动后 MCP 端点为 `POST /mcp`（Streamable HTTP，与 Web 同端口）。启用步骤：
+
+1. 设置 `SUNDASH_MCP_TOKEN`（如 `openssl rand -base64 32`）与 `SUNDASH_MCP_USERNAME`（默认 admin）
+2. 在 AI 客户端（Claude Desktop / Cursor 等）配置 MCP server：
+
+```json
+{
+  "mcpServers": {
+    "sundash": {
+      "type": "http",
+      "url": "http://<主机>:3000/mcp",
+      "headers": { "Authorization": "Bearer <SUNDASH_MCP_TOKEN>" }
+    }
+  }
+}
+```
+
+3. 可用工具：`sundash_list_groups` / `sundash_create_group` / `sundash_rename_group` / `sundash_delete_group` / `sundash_create_card` / `sundash_update_card` / `sundash_move_card` / `sundash_delete_card`（详见 README「MCP」章节）
 
 ## 验收清单
 
@@ -168,6 +191,7 @@ server {
 - [ ] `data/sundash.db` 持久化且可备份
 - [ ] `SUNDASH_JWT_SECRET` 已设置且非默认值
 - [ ] Docker 方式下 healthcheck 状态为 healthy
+- [ ] （可选）`SUNDASH_MCP_TOKEN` 已设置，AI 客户端可调用 `/mcp` 管理书签
 
 ## 故障排查
 
