@@ -39,3 +39,6 @@ Thumbs.db
 .DS_Store
 .idea/
 .vscode/
+
+# QNAP 构建产物（镜像 tar）
+qnap/

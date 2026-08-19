@@ -8,6 +8,8 @@ RUN npm run build
 
 # Build backend (match the Go version required by server/go.mod)
 FROM golang:1.26-alpine AS backend
+# 容器内默认 proxy.golang.org 易超时，改用国内镜像
+ENV GOPROXY=https://goproxy.cn,direct
 WORKDIR /app/server
 COPY server/go.* ./
 RUN go mod download
