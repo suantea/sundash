@@ -9,9 +9,9 @@ import type { Card, PanelGroup } from '../types'
 export function useGroupVisibility() {
   const panelStore = usePanelStore()
 
-  const collapsedGroupIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('asuan-collapsed-groups') || '[]')))
-  const hiddenGroupIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('asuan-hidden-groups') || '[]')))
-  const hiddenCardIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('asuan-hidden-cards') || '[]')))
+  const collapsedGroupIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('sundash-collapsed-groups') || '[]')))
+  const hiddenGroupIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('sundash-hidden-groups') || '[]')))
+  const hiddenCardIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('sundash-hidden-cards') || '[]')))
   const showHiddenGroups = ref(false)
   const showHiddenCardsGroup = ref<Set<string>>(new Set())
 
@@ -24,7 +24,7 @@ export function useGroupVisibility() {
     const s = new Set(collapsedGroupIds.value)
     s.has(id) ? s.delete(id) : s.add(id)
     collapsedGroupIds.value = s
-    persist('asuan-collapsed-groups', s)
+    persist('sundash-collapsed-groups', s)
   }
 
   function isGroupHidden(id: string) { return hiddenGroupIds.value.has(id) }
@@ -32,7 +32,7 @@ export function useGroupVisibility() {
     const s = new Set(hiddenGroupIds.value)
     s.has(id) ? s.delete(id) : s.add(id)
     hiddenGroupIds.value = s
-    persist('asuan-hidden-groups', s)
+    persist('sundash-hidden-groups', s)
   }
 
   function isCardHidden(id: string) { return hiddenCardIds.value.has(id) }
@@ -40,7 +40,7 @@ export function useGroupVisibility() {
     const s = new Set(hiddenCardIds.value)
     s.has(id) ? s.delete(id) : s.add(id)
     hiddenCardIds.value = s
-    persist('asuan-hidden-cards', s)
+    persist('sundash-hidden-cards', s)
   }
 
   const visibleGroups = computed(() => panelStore.groups.filter(g => !hiddenGroupIds.value.has(g.id)))

@@ -94,7 +94,7 @@
               <div class="setting-desc">浏览器标签页显示的标题</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_title" class="mini-text-input" placeholder="Asuan" />
+          <input v-model="siteConfig.site_title" class="mini-text-input" placeholder="SunDash" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">

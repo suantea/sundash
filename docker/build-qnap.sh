@@ -2,11 +2,11 @@
 # ============================================================
 # 构建 sundash 的 QNAP (linux/amd64) 可运行 Docker 镜像
 # 用法: ./docker/build-qnap.sh  [镜像标签]
-# 默认标签: asuan:latest
+# 默认标签: sundash:latest
 #
 # 说明:
 #  - 宿主机 arm64 (M 系 Mac) 需用 buildx 交叉编译 linux/amd64
-#  - 产物: qnap/asuan-image.tar.gz (供 NAS 上 docker load)
+#  - 产物: qnap/sundash-image.tar.gz (供 NAS 上 docker load)
 #  - QNAP 部署: 见 nas-deploy/start.sh / start.bat
 # ============================================================
 set -euo pipefail
@@ -15,9 +15,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-TAG="${1:-asuan:latest}"
+TAG="${1:-sundash:latest}"
 OUT_DIR="${ROOT}/qnap"
-OUT_TAR="${OUT_DIR}/asuan-image.tar.gz"
+OUT_TAR="${OUT_DIR}/sundash-image.tar.gz"
 
 echo "======================"
 echo "  构建平台: linux/amd64"

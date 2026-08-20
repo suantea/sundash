@@ -33,14 +33,14 @@ docker compose up -d --build
 
 - 镜像：多阶段构建（node 构建前端 → golang 编译后端 → alpine 运行时）
 - 容器以**非 root** 用户运行，带 **healthcheck**（`/api/site-config` 探活）
-- 数据持久化到 Docker volume `asuan-data`（`/app/data`）
+- 数据持久化到 Docker volume `sundash-data`（`/app/data`）
 - 访问：`http://<主机IP>:3000`
 
 ### 3. 更新与日志
 
 ```bash
 docker compose pull && docker compose up -d   # 更新
-docker compose logs -f asuan                  # 查看日志
+docker compose logs -f sundash                  # 查看日志
 docker compose down                           # 停止
 ```
 
@@ -64,12 +64,12 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sundash .
 ### 2. 上传与目录布局（服务器执行）
 
 ```bash
-mkdir -p /opt/asuan
-# 上传 sundash 二进制与 web/dist 内容（重命名为 static/）到 /opt/asuan/
+mkdir -p /opt/sundash
+# 上传 sundash 二进制与 web/dist 内容（重命名为 static/）到 /opt/sundash/
 # 最终结构：
-#   /opt/asuan/sundash
-#   /opt/asuan/static/
-cd /opt/asuan
+#   /opt/sundash/sundash
+#   /opt/sundash/static/
+cd /opt/sundash
 chmod +x sundash
 ```
 
@@ -77,7 +77,7 @@ chmod +x sundash
 
 ```bash
 export SUNDASH_PORT=3000
-export SUNDASH_DATA_DIR=/opt/asuan/data
+export SUNDASH_DATA_DIR=/opt/sundash/data
 export SUNDASH_JWT_SECRET='随机长字符串'
 ./sundash
 
@@ -87,7 +87,7 @@ curl -s http://127.0.0.1:3000/api/site-config   # 期望 {"site_title":"",...}
 
 ### 4. 注册 systemd 服务
 
-`/etc/systemd/system/asuan.service`：
+`/etc/systemd/system/sundash.service`：
 
 ```ini
 [Unit]
@@ -95,12 +95,12 @@ Description=SunDash Panel
 After=network.target
 
 [Service]
-WorkingDirectory=/opt/asuan
-ExecStart=/opt/asuan/sundash
+WorkingDirectory=/opt/sundash
+ExecStart=/opt/sundash/sundash
 Restart=always
 RestartSec=3
 Environment=SUNDASH_PORT=3000
-Environment=SUNDASH_DATA_DIR=/opt/asuan/data
+Environment=SUNDASH_DATA_DIR=/opt/sundash/data
 Environment=SUNDASH_JWT_SECRET=随机长字符串
 
 [Install]
@@ -109,8 +109,8 @@ WantedBy=multi-user.target
 
 ```bash
 systemctl daemon-reload
-systemctl enable --now asuan
-systemctl status asuan
+systemctl enable --now sundash
+systemctl status sundash
 ```
 
 ---

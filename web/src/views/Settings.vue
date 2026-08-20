@@ -368,7 +368,7 @@
                 <div class="setting-desc">自定义浏览器标签页标题</div>
               </div>
             </div>
-            <input v-model="siteTitleInput" class="site-input" placeholder="Asuan" @change="updateSiteTitle" />
+            <input v-model="siteTitleInput" class="site-input" placeholder="SunDash" @change="updateSiteTitle" />
           </div>
           <div class="setting-divider"></div>
           <div class="setting-row">
@@ -571,7 +571,7 @@ function toggleSearchBar(val: boolean) {
 }
 
 function updateSiteTitle() {
-  const title = siteTitleInput.value.trim() || 'Asuan'
+  const title = siteTitleInput.value.trim() || 'SunDash'
   appStore.setSiteTitle(title)
   message.success('站点标题已更新')
 }
@@ -646,7 +646,7 @@ function handleExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `asuan-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `sundash-backup-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
   message.success('数据已导出')

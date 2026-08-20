@@ -10,7 +10,7 @@ export const api = axios.create({
 
 // Request interceptor - add token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('asuan-token')
+  const token = localStorage.getItem('sundash-token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('asuan-token')
+      localStorage.removeItem('sundash-token')
       // Use dynamic import to avoid circular dependency
       import('../router').then(({ default: router }) => {
         router.push('/login')

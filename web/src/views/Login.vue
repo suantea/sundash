@@ -24,7 +24,7 @@
             <rect x="26" y="26" width="18" height="18" rx="5" fill="#007AFF" opacity="0.2"/>
           </svg>
         </div>
-        <h1>Asuan</h1>
+        <h1>SunDash</h1>
         <p class="subtitle">自托管导航面板</p>
       </div>
 
@@ -119,7 +119,7 @@
         <button class="theme-toggle" @click="toggleTheme" :title="isDark ? '浅色模式' : '深色模式'">
           <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :size="18" />
         </button>
-        <div class="copyright-notice">Asuan · Open Source · MIT License</div>
+        <div class="copyright-notice">SunDash · Open Source · MIT License</div>
       </div>
     </div>
   </div>

@@ -54,7 +54,7 @@
                   <div class="setting-desc">浏览器标签页标题</div>
                 </div>
               </div>
-              <input v-model="siteTitleInput" class="mini-text-input" placeholder="Asuan" @change="updateSiteTitle" />
+              <input v-model="siteTitleInput" class="mini-text-input" placeholder="SunDash" @change="updateSiteTitle" />
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -67,7 +67,7 @@
                   <div class="setting-desc">支持 HTML 代码</div>
                 </div>
               </div>
-              <textarea v-model="footerInput" class="footer-input" placeholder="<p>Powered by Asuan</p>" rows="2" @change="appStore.setFooterHtml(footerInput)"></textarea>
+              <textarea v-model="footerInput" class="footer-input" placeholder="<p>Powered by SunDash</p>" rows="2" @change="appStore.setFooterHtml(footerInput)"></textarea>
             </div>
           </div>
         </section>
@@ -496,7 +496,7 @@ function applyCustomBackground() {
 }
 
 function updateSiteTitle() {
-  const title = siteTitleInput.value.trim() || 'Asuan'
+  const title = siteTitleInput.value.trim() || 'SunDash'
   appStore.setSiteTitle(title)
 }
 
@@ -519,7 +519,7 @@ function handleExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `asuan-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `sundash-backup-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
   message.success('数据已导出')

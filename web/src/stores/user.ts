@@ -5,7 +5,7 @@ import type { User } from '../types'
 import router from '../router'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref<string | null>(localStorage.getItem('asuan-token'))
+  const token = ref<string | null>(localStorage.getItem('sundash-token'))
   const user = ref<User | null>(null)
 
   const isLoggedIn = computed(() => !!token.value)
@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', () => {
     const res = await api.post('auth/login', { username, password })
     token.value = res.data.token
     user.value = res.data.user
-    localStorage.setItem('asuan-token', res.data.token)
+    localStorage.setItem('sundash-token', res.data.token)
     api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`
     router.push('/')
   }
@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', () => {
     }
     token.value = res.data.token
     user.value = res.data.user
-    localStorage.setItem('asuan-token', res.data.token)
+    localStorage.setItem('sundash-token', res.data.token)
     api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`
     router.push('/')
     return res.data
@@ -52,7 +52,7 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     token.value = null
     user.value = null
-    localStorage.removeItem('asuan-token')
+    localStorage.removeItem('sundash-token')
     delete api.defaults.headers.common['Authorization']
     router.push('/login')
   }

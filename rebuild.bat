@@ -1,19 +1,19 @@
 @echo off
 chcp 65001 >nul
 echo ================================
-echo  Asuan Build ^& Export
+echo  SunDash Build ^& Export
 echo ================================
 
 cd /d "%~dp0"
 
-set IMAGE_NAME=asuan
+set IMAGE_NAME=sundash
 set TAG=latest
-set EXPORT_FILE=asuan-image.tar.gz
+set EXPORT_FILE=sundash-image.tar.gz
 
 echo.
 echo [1/4] Stopping old container...
-docker stop asuan 2>nul
-docker rm asuan 2>nul
+docker stop sundash 2>nul
+docker rm sundash 2>nul
 
 echo.
 echo [2/4] Building new image...
@@ -39,7 +39,7 @@ if errorlevel 1 (
 
 echo.
 echo [4/4] Starting container...
-docker run -d --name asuan -p 3000:3000 -v asuan-data:/app/data -e SUNDASH_PORT=3000 -e SUNDASH_DATA_DIR=/app/data -e TZ=Asia/Shanghai %IMAGE_NAME%:%TAG%
+docker run -d --name sundash -p 3000:3000 -v sundash-data:/app/data -e SUNDASH_PORT=3000 -e SUNDASH_DATA_DIR=/app/data -e TZ=Asia/Shanghai %IMAGE_NAME%:%TAG%
 
 echo.
 echo ================================

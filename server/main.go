@@ -164,7 +164,7 @@ func main() {
 	}
 
 	go func() {
-		slog.Info("Asuan server starting", "addr", "http://0.0.0.0:"+cfg.Port)
+		slog.Info("SunDash server starting", "addr", "http://0.0.0.0:"+cfg.Port)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Failed to start server: %v", err)
 		}
@@ -229,7 +229,7 @@ func (s *spaHandler) ServeHTTP(c *gin.Context) {
 // injectSiteConfig replaces placeholders in the built HTML with site settings.
 func injectSiteConfig(html string, settings map[string]string) string {
 	if title := settings["site_title"]; title != "" {
-		html = strings.Replace(html, "<title>Asuan</title>", fmt.Sprintf("<title>%s</title>", title), 1)
+		html = strings.Replace(html, "<title>SunDash</title>", fmt.Sprintf("<title>%s</title>", title), 1)
 	}
 	if icon := settings["site_icon_url"]; icon != "" {
 		html = strings.Replace(html, "/favicon.svg", icon, 1)

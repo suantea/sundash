@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
 import { api } from '../api'
 
-// Helper to migrate old sundash- keys to asuan-
+// Helper to migrate old asuan- keys to sundash-
 function migrateKeys() {
   const keys = [
     'theme', 'network', 'wallpaper-type', 'wallpaper-url', 'wallpaper-blur',
@@ -16,25 +16,25 @@ function migrateKeys() {
     'group-card-transparent', 'search-engine',
   ]
   for (const k of keys) {
-    const old = localStorage.getItem(`sundash-${k}`)
-    if (old !== null && localStorage.getItem(`asuan-${k}`) === null) {
-      localStorage.setItem(`asuan-${k}`, old)
+    const old = localStorage.getItem(`asuan-${k}`)
+    if (old !== null && localStorage.getItem(`sundash-${k}`) === null) {
+      localStorage.setItem(`sundash-${k}`, old)
     }
-    localStorage.removeItem(`sundash-${k}`)
+    localStorage.removeItem(`asuan-${k}`)
   }
   // Also migrate token
-  const oldToken = localStorage.getItem('sundash-token')
-  if (oldToken && !localStorage.getItem('asuan-token')) {
-    localStorage.setItem('asuan-token', oldToken)
+  const oldToken = localStorage.getItem('asuan-token')
+  if (oldToken && !localStorage.getItem('sundash-token')) {
+    localStorage.setItem('sundash-token', oldToken)
   }
-  localStorage.removeItem('sundash-token')
+  localStorage.removeItem('asuan-token')
 }
 
 // Run migration on import
 migrateKeys()
 
 // localStorage key helper
-const L = (key: string) => `asuan-${key}`
+const L = (key: string) => `sundash-${key}`
 
 export const useAppStore = defineStore('app', () => {
   const prefersDark = usePreferredDark()
@@ -88,7 +88,7 @@ export const useAppStore = defineStore('app', () => {
   // Logo settings
   const logoType = ref<'image' | 'text'>((localStorage.getItem(L('logo-type')) as 'image' | 'text') || 'text')
   const logoImageUrl = ref(localStorage.getItem(L('logo-image')) || '')
-  const logoText = ref(localStorage.getItem(L('logo-text')) || 'Asuan')
+  const logoText = ref(localStorage.getItem(L('logo-text')) || 'SunDash')
 
   // Card settings
   const cardLabelSize = ref(localStorage.getItem(L('card-label-size')) || '12')
@@ -118,7 +118,7 @@ export const useAppStore = defineStore('app', () => {
   const footerHtml = ref(localStorage.getItem(L('footer-html')) || '')
 
   // Site settings
-  const siteTitle = ref(localStorage.getItem(L('site-title')) || 'Asuan')
+  const siteTitle = ref(localStorage.getItem(L('site-title')) || 'SunDash')
   const siteIconUrl = ref(localStorage.getItem(L('site-icon')) || '')
   const loginBgUrl = ref(localStorage.getItem(L('login-bg')) || '')
   const enableCaptcha = ref(localStorage.getItem(L('enable-captcha')) === 'true')

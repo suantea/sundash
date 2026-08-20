@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  asuan:
-    image: asuan:latest
-    container_name: asuan
+  sundash:
+    image: sundash:latest
+    container_name: sundash
     restart: unless-stopped
     ports:
       - "3000:3000"

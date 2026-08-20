@@ -82,7 +82,7 @@
             <rect x="26" y="26" width="18" height="18" rx="5" fill="#007AFF" opacity="0.15"/>
           </svg>
         </div>
-        <h2>欢迎使用 Asuan</h2>
+        <h2>欢迎使用 SunDash</h2>
         <p>创建你的第一个分组，开始组织你的导航</p>
         <button class="cta-btn" @click="showAddGroup = true">
           <Icon icon="mdi:plus" :size="18" />
@@ -157,7 +157,7 @@
       <!-- Footer -->
       <footer class="home-footer">
         <div v-if="appStore.footerHtml" class="footer-content" v-text="appStore.footerHtml"></div>
-        <div class="copyright-notice">Asuan · Open Source · MIT License</div>
+        <div class="copyright-notice">SunDash · Open Source · MIT License</div>
       </footer>
     </main>
 

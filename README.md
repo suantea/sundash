@@ -93,13 +93,13 @@ cd web && npm install && npm run build   # 产物 dist/
 cd ../server
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o sundash .
 
-# 服务器上：目录布局 /opt/asuan/{sundash, static/, data/}
+# 服务器上：目录布局 /opt/sundash/{sundash, static/, data/}
 # static/ = web/dist 的内容；data/ 运行时自动创建
 ```
 
 ```bash
 export SUNDASH_JWT_SECRET='随机长字符串'   # 必填，否则拒绝启动
-export SUNDASH_DATA_DIR=/opt/asuan/data
+export SUNDASH_DATA_DIR=/opt/sundash/data
 ./sundash
 ```
 

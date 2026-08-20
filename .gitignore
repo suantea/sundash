@@ -10,6 +10,7 @@ skills-lock.json
 
 # Go build artifacts
 server/sundash.exe
+server/sundash
 server/sundash_test.exe
 server/*.exe~
 server/*.test
