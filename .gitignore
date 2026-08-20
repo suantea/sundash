@@ -23,7 +23,7 @@ server/static/
 *.db-journal
 *.db-wal
 *.db-shm
-data/
+/data/
 server/data/
 
 # Temp / import scratch (may contain personal data)
