@@ -298,6 +298,19 @@
             <div class="setting-divider"></div>
             <div class="setting-row">
               <div class="setting-left">
+                <div class="setting-icon" style="background: rgba(88,86,214,0.1);">
+                  <Icon icon="mdi:monitor-dashboard" :size="18" color="#5856D6" />
+                </div>
+                <div>
+                  <div class="setting-title">系统监控</div>
+                  <div class="setting-desc">显示 CPU/内存/磁盘/网络实时状态</div>
+                </div>
+              </div>
+              <n-switch v-model:value="appStore.showSystemMonitor" @update:value="appStore.setShowSystemMonitor" />
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-row">
+              <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
                   <Icon icon="mdi:format-size" :size="18" color="#FF9500" />
                 </div>

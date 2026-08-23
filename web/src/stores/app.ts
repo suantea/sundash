@@ -125,6 +125,7 @@ export const useAppStore = defineStore('app', () => {
 
   // Component settings
   const showSystemStatus = ref(localStorage.getItem(L('show-system-status')) === 'true')
+  const showSystemMonitor = ref(localStorage.getItem(L('show-system-monitor')) !== 'false')
   const networkModeAuto = ref(localStorage.getItem(L('network-auto')) === 'true')
   const groupCardTransparent = ref(localStorage.getItem(L('group-card-transparent')) === 'true')
   const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Google')
@@ -168,6 +169,7 @@ export const useAppStore = defineStore('app', () => {
   function setLoginBgUrl(url: string) { loginBgUrl.value = url; setLocal(L('login-bg'), url) }
   function setEnableCaptcha(enable: boolean) { enableCaptcha.value = enable; setLocal(L('enable-captcha'), enable.toString()) }
   function setShowSystemStatus(show: boolean) { showSystemStatus.value = show; setLocal(L('show-system-status'), show.toString()) }
+  function setShowSystemMonitor(show: boolean) { showSystemMonitor.value = show; setLocal(L('show-system-monitor'), show.toString()) }
   function setNetworkModeAuto(auto: boolean) { networkModeAuto.value = auto; setLocal(L('network-auto'), auto.toString()) }
   function setGroupCardTransparent(transparent: boolean) { groupCardTransparent.value = transparent; setLocal(L('group-card-transparent'), transparent.toString()) }
   function setSearchEngine(engine: string) { searchEngine.value = engine; setLocal(L('search-engine'), engine) }

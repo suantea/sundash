@@ -29,11 +29,12 @@ type Server struct {
 	server  *server.MCPServer
 	panels  *service.PanelService
 	favicon *service.FaviconService
+	system  *service.SystemService
 }
 
 // New creates an MCPServer with all sundash bookmark-management tools.
-func New(panels *service.PanelService, favicon *service.FaviconService) *Server {
-	s := &Server{panels: panels, favicon: favicon}
+func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService) *Server {
+	s := &Server{panels: panels, favicon: favicon, system: system}
 	mcps := server.NewMCPServer(
 		"sundash",
 		"0.1.0",
@@ -43,6 +44,7 @@ func New(panels *service.PanelService, favicon *service.FaviconService) *Server 
 	registerGroupTools(mcps, s)
 	registerCardTools(mcps, s)
 	registerIconTools(mcps, s)
+	registerSystemTools(mcps, s)
 
 	s.server = mcps
 	return s
@@ -509,6 +511,25 @@ func (s *Server) handleAutoIconify(ctx context.Context, req mcp.CallToolRequest)
 		"results":         results,
 	}
 	return mcp.NewToolResultJSON(summary)
+}
+
+// --- system tools ------------------------------------------------------------
+
+func registerSystemTools(mcps *server.MCPServer, s *Server) {
+	// sundash_system_status: get system monitoring stats
+	mcps.AddTool(mcp.NewTool(
+		"sundash_system_status",
+		mcp.WithDescription("获取系统监控状态：CPU 使用率、内存使用、磁盘空间、网络流量、主机信息、运行时间。用于 AI 分析 NAS/服务器健康度。"),
+		mcp.WithReadOnlyHintAnnotation(true),
+	), s.handleSystemStatus)
+}
+
+func (s *Server) handleSystemStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	stats, err := s.system.GetStats()
+	if err != nil {
+		return mcp.NewToolResultError("获取系统状态失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultJSON(stats)
 }
 
 func (s *Server) handleDeleteCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {

@@ -52,17 +52,19 @@ func main() {
 	settingsSvc := service.NewSettingsService(settingsRepo)
 	wallpaperSvc := service.NewWallpaperService()
 	faviconSvc := service.NewFaviconService()
+	systemSvc := service.NewSystemService()
 
 	authH := handlers.NewAuthHandler(userSvc, panelSvc, settingsSvc)
 	panelH := handlers.NewPanelHandler(panelSvc, settingsSvc)
 	wallpaperH := handlers.NewWallpaperHandler(wallpaperSvc)
 	faviconH := handlers.NewFaviconHandler(faviconSvc)
+	systemH := handlers.NewSystemHandler(systemSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
 
 	// MCP server: AI agents can list / create / organize bookmarks.
 	// Endpoint: POST /mcp (Streamable HTTP). Auth: Bearer <SUNDASH_MCP_TOKEN>
 	// or a regular sundash JWT; the resolved user is bound to the session.
-	mcpSrv := mcp.New(panelSvc, faviconSvc)
+	mcpSrv := mcp.New(panelSvc, faviconSvc, systemSvc)
 	mcpHTTP := mcpserver.NewStreamableHTTPServer(mcpSrv.MCPServer())
 
 	r := gin.New()
@@ -122,6 +124,7 @@ func main() {
 			protected.GET("/wallpaper/bing/:date", wallpaperH.GetWallpaperByDate)
 
 			protected.GET("/favicon", faviconH.FetchFavicon)
+			protected.GET("/system/stats", systemH.GetStats)
 
 			admin := protected.Group("")
 			admin.Use(middleware.AdminMiddleware())

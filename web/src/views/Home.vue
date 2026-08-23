@@ -72,6 +72,9 @@
       <!-- System Status -->
       <SystemStatus />
 
+      <!-- System Monitor -->
+      <SystemMonitor />
+
       <!-- Empty State -->
       <div v-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
         <div class="empty-icon">
@@ -206,6 +209,7 @@ import CardEditor from '../components/card/CardEditor.vue'
 import CardItem from '../components/card/CardItem.vue'
 import ClockDisplay from '../components/clock/ClockDisplay.vue'
 import SystemStatus from '../components/status/SystemStatus.vue'
+import SystemMonitor from '../components/status/SystemMonitor.vue'
 import SearchBar from '../components/search/SearchBar.vue'
 import SettingsDrawer from '../components/settings/SettingsDrawer.vue'
 import type { Card } from '../types'
