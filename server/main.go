@@ -62,7 +62,7 @@ func main() {
 	// MCP server: AI agents can list / create / organize bookmarks.
 	// Endpoint: POST /mcp (Streamable HTTP). Auth: Bearer <SUNDASH_MCP_TOKEN>
 	// or a regular sundash JWT; the resolved user is bound to the session.
-	mcpSrv := mcp.New(panelSvc)
+	mcpSrv := mcp.New(panelSvc, faviconSvc)
 	mcpHTTP := mcpserver.NewStreamableHTTPServer(mcpSrv.MCPServer())
 
 	r := gin.New()

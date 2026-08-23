@@ -26,13 +26,14 @@ const UserIDContextKey ctxKey = "sundash_user_id"
 
 // Server wraps the mcp-go server with access to the panel service.
 type Server struct {
-	server *server.MCPServer
-	panels *service.PanelService
+	server  *server.MCPServer
+	panels  *service.PanelService
+	favicon *service.FaviconService
 }
 
 // New creates an MCPServer with all sundash bookmark-management tools.
-func New(panels *service.PanelService) *Server {
-	s := &Server{panels: panels}
+func New(panels *service.PanelService, favicon *service.FaviconService) *Server {
+	s := &Server{panels: panels, favicon: favicon}
 	mcps := server.NewMCPServer(
 		"sundash",
 		"0.1.0",
@@ -41,6 +42,7 @@ func New(panels *service.PanelService) *Server {
 
 	registerGroupTools(mcps, s)
 	registerCardTools(mcps, s)
+	registerIconTools(mcps, s)
 
 	s.server = mcps
 	return s
@@ -414,6 +416,99 @@ func (s *Server) handleSuggestIcons(ctx context.Context, req mcp.CallToolRequest
 		}
 	}
 	return mcp.NewToolResultJSON(suggestions)
+}
+
+// --- icon tools ------------------------------------------------------------
+
+func registerIconTools(mcps *server.MCPServer, s *Server) {
+	// sundash_auto_iconify: auto-detect and apply icons for user's cards
+	mcps.AddTool(mcp.NewTool(
+		"sundash_auto_iconify",
+		mcp.WithDescription("自动为卡片匹配网站图标。对所有尚未设置图标的卡片，根据其 URL 自动检测合适的图标（Iconify 名称或 favicon URL）并应用。返回成功匹配数量和失败数量。"),
+		mcp.WithString("apply", mcp.Description("是否立即应用检测到的图标：\"true\" 立即写入数据库，\"false\" 仅返回检测结果供预览，默认 \"true\"")),
+	), s.handleAutoIconify)
+}
+
+func (s *Server) handleAutoIconify(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	uid, err := s.userID(ctx)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	apply := strArg(req.Params.Arguments, "apply")
+	shouldApply := apply == "" || apply == "true"
+
+	data, err := s.panels.GetPanel(uid)
+	if err != nil {
+		return mcp.NewToolResultError("加载面板失败: " + err.Error()), nil
+	}
+
+	type iconResult struct {
+		CardID    string `json:"card_id"`
+		Title     string `json:"title"`
+		URL       string `json:"url"`
+		Icon      string `json:"icon"`
+		Source    string `json:"source"`
+		Applied   bool   `json:"applied"`
+	}
+	var results []iconResult
+	successCount := 0
+	skipCount := 0
+	errorCount := 0
+
+	for _, g := range data.Groups {
+		for _, c := range g.Cards {
+			if c.Icon != "" {
+				skipCount++
+				continue
+			}
+			favResp, err := s.favicon.FetchFavicon(c.URL)
+			if err != nil {
+				errorCount++
+				continue
+			}
+			iconValue := favResp.IconName
+			if iconValue == "" {
+				iconValue = favResp.FaviconURL
+			}
+			if iconValue == "" {
+				errorCount++
+				continue
+			}
+			result := iconResult{
+				CardID: c.ID,
+				Title:  c.Title,
+				URL:    c.URL,
+				Icon:   iconValue,
+				Source: favResp.Source,
+			}
+			if shouldApply {
+				if err := s.panels.BatchSetIcons(uid, service.BatchSetIconsRequest{
+					Icons: map[string]string{c.ID: iconValue},
+				}); err != nil {
+					result.Applied = false
+					errorCount++
+				} else {
+					result.Applied = true
+					successCount++
+				}
+			} else {
+				result.Applied = false
+				successCount++
+			}
+			results = append(results, result)
+		}
+	}
+
+	summary := map[string]any{
+		"total_processed": len(results),
+		"skipped":         skipCount,
+		"success":         successCount,
+		"errors":          errorCount,
+		"applied":         shouldApply,
+		"results":         results,
+	}
+	return mcp.NewToolResultJSON(summary)
 }
 
 func (s *Server) handleDeleteCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
