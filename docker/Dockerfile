@@ -5,10 +5,14 @@ COPY web/package*.json ./
 RUN npm ci
 COPY web/ .
 RUN npm run build
+# Pre-compress static assets for better performance
+RUN find dist -type f -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.json" | while read f; do \
+    gzip -k -f "$f" && brotli -k -f "$f"; \
+  done
 
 # Build backend (match the Go version required by server/go.mod)
 FROM golang:1.26-alpine AS backend
-# 容器内默认 proxy.golang.org 易超时，改用国内镜像
+# 容器内默后默认 proxy.golang.org 易超时，改用国内镜像
 ENV GOPROXY=https://goproxy.cn,direct
 WORKDIR /app/server
 COPY server/go.* ./

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  sundash:
+    image: sundash:latest
+    container_name: sundash
+    restart: unless-stopped
+    # QNAP / Synology NAS 多数都使用 0.0.0.0:3000 端口映射，若已有占用请自行修改
+    ports:
+      - "3000:3000"
+    # 将 NAS 本地目录映射到容器内 /app/data，支持数据持久化
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SUNDASH_PORT=3000
+      - SUNDASH_DATA_DIR=/app/data
+      - TZ=Asia/Shanghai
+    # 对于部分 NAS（如 QNAP）需要在容器启动前手动创建 data 目录并赋予写权限
+    # 示例（在 NAS 的 Shell 中执行）:
+    #   mkdir -p $(pwd)/data && chmod 775 $(pwd)/data
+
+# NOTE:
+# - 推荐在 NAS 上使用 Docker Compose（v2）或直接 `docker compose up -d` 启动。
+# - 如果 NAS 的 Docker 版本不支持 `docker compose`，可改用 `docker-compose` 命令。
+# - 为了安全，建议在 NAS 防火墙或路由器上限制外网访问 3000 端口，仅在局域网内使用。

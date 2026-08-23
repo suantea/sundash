@@ -27,6 +27,9 @@ export default defineConfig({
             return 'vue-vendor'
           }
         },
+        entryFileNames: `assets/[name].[hash].js`,
+        chunkFileNames: `assets/[name].[hash].js`,
+        assetFileNames: `assets/[name].[hash].[ext]`
       },
     },
   },

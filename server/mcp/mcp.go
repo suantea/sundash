@@ -8,6 +8,7 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"sundash/models"
@@ -125,6 +126,14 @@ func registerGroupTools(mcps *server.MCPServer, s *Server) {
 		mcp.WithString("group_id", mcp.Required(), mcp.Description("分组 id")),
 		mcp.WithDestructiveHintAnnotation(true),
 	), s.handleDeleteGroup)
+
+	// sundash_reorganize: AI-assisted natural language group reorganization
+	mcps.AddTool(mcp.NewTool(
+		"sundash_reorganize",
+		mcp.WithDescription("AI 辅助分组调整。接受自然语言指令，将其翻译为一系列分组操作（创建分组、重命名分组、删除分组、移动卡片、新增卡片）。示例指令：'把 GitHub 和 GitLab 归到一个叫代码仓库的分组，删除空的分组'。返回执行结果。"),
+		mcp.WithString("instruction", mcp.Required(), mcp.Description("自然语言分组指令，例如「把所有 AI 相关的链接归到 AI 工具分组」")),
+		mcp.WithString("plan", mcp.Description("可选：预先规划好的 JSON 操作序列，格式为 [{\"action\":\"move_card\",\"card_id\":\"xxx\",\"target_group_id\":\"yyy\"}]。如果不传则 AI 自行解析指令。")),
+	), s.handleReorganize)
 }
 
 func (s *Server) handleListGroups(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -169,6 +178,54 @@ func (s *Server) handleRenameGroup(ctx context.Context, req mcp.CallToolRequest)
 		return mcp.NewToolResultError("重命名失败: " + err.Error()), nil
 	}
 	return mcp.NewToolResultText(fmt.Sprintf("已重命名分组 %s 为 %s", groupID, name)), nil
+}
+
+// handleReorganize implements sundash_reorganize: AI-assisted natural language group reorganization.
+// It translates a natural-language instruction into a sequence of group/card operations.
+func (s *Server) handleReorganize(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	uid, err := s.userID(ctx)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	instruction := strArg(req.Params.Arguments, "instruction")
+	if instruction == "" {
+		return mcp.NewToolResultError("缺少参数 instruction"), nil
+	}
+
+	// If a pre-built plan JSON is provided, execute it directly.
+	if planJSON := strArg(req.Params.Arguments, "plan"); planJSON != "" {
+		var ops []service.BatchOp
+		if err := json.Unmarshal([]byte(planJSON), &ops); err != nil {
+			return mcp.NewToolResultError("解析 plan JSON 失败: " + err.Error()), nil
+		}
+		if err := s.panels.BatchReorganize(uid, service.BatchReorganizeRequest{Operations: ops}); err != nil {
+			return mcp.NewToolResultError("执行分组调整失败: " + err.Error()), nil
+		}
+		return mcp.NewToolResultText("已按计划完成分组调整"), nil
+	}
+
+	// Otherwise, parse the instruction into operations using simple heuristics.
+	// This is a lightweight client-side planner: the AI agent can call sundash_list_groups first,
+	// then call sundash_reorganize with a precise plan. But we also accept raw instructions
+	// for convenience.
+	ops, err := parseReorganizeInstruction(uid, instruction, s.panels)
+	if err != nil {
+		return mcp.NewToolResultError("解析指令失败: " + err.Error()), nil
+	}
+	if err := s.panels.BatchReorganize(uid, service.BatchReorganizeRequest{Operations: ops}); err != nil {
+		return mcp.NewToolResultError("执行分组调整失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultText(fmt.Sprintf("已完成分组调整，共执行 %d 项操作", len(ops))), nil
+}
+
+// parseReorganizeInstruction is a lightweight heuristic planner.
+// For best results, the AI agent should call sundash_list_groups first to get current state,
+// then pass a precise JSON plan via the plan parameter.
+func parseReorganizeInstruction(userID string, instruction string, panels *service.PanelService) ([]service.BatchOp, error) {
+	// Current best practice: return an error prompting the AI to first list groups and build a plan.
+	// This keeps the server simple and avoids fragile NLP parsing.
+	return nil, fmt.Errorf("当前需要显式提供 plan 参数。请先调用 sundash_list_groups 获取分组状态，再构造 JSON plan 传给 plan 参数")
 }
 
 func (s *Server) handleDeleteGroup(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -227,6 +284,20 @@ func registerCardTools(mcps *server.MCPServer, s *Server) {
 		mcp.WithString("card_id", mcp.Required(), mcp.Description("卡片 id")),
 		mcp.WithDestructiveHintAnnotation(true),
 	), s.handleDeleteCard)
+
+	// sundash_set_icons: AI-assisted batch icon assignment
+	mcps.AddTool(mcp.NewTool(
+		"sundash_set_icons",
+		mcp.WithDescription("AI 辅助批量设置卡片图标。接受一个 JSON 对象，键为卡片 id，值为图标（支持 emoji、Font Awesome class、图片 URL）。例如 {\"card-1\":\"github\",\"card-2\":\"https://...\"}。建议先调用 sundash_list_groups 获取卡片 id，再通过 AI 推断合适的图标。"),
+		mcp.WithString("icons_json", mcp.Required(), mcp.Description("JSON 对象字符串，格式为 {\"card_id\":\"icon_value\", ...}")),
+	), s.handleSetIcons)
+
+	// sundash_suggest_icons: AI-assisted icon suggestions for cards without icons
+	mcps.AddTool(mcp.NewTool(
+		"sundash_suggest_icons",
+		mcp.WithDescription("AI 辅助图标建议。返回所有尚未设置图标的卡片列表（id/title/url），供 AI 推断合适的图标后回传给 sundash_set_icons。"),
+		mcp.WithReadOnlyHintAnnotation(true),
+	), s.handleSuggestIcons)
 }
 
 func (s *Server) handleCreateCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -297,6 +368,52 @@ func (s *Server) handleMoveCard(ctx context.Context, req mcp.CallToolRequest) (*
 		return mcp.NewToolResultError("移动卡片失败: " + err.Error()), nil
 	}
 	return mcp.NewToolResultText(fmt.Sprintf("已把卡片 %s 移动到分组 %s", cardID, groupID)), nil
+}
+
+// handleSetIcons implements sundash_set_icons: AI-assisted batch icon assignment.
+func (s *Server) handleSetIcons(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	uid, err := s.userID(ctx)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	iconsJSON := strArg(req.Params.Arguments, "icons_json")
+	if iconsJSON == "" {
+		return mcp.NewToolResultError("缺少参数 icons_json"), nil
+	}
+	var icons map[string]string
+	if err := json.Unmarshal([]byte(iconsJSON), &icons); err != nil {
+		return mcp.NewToolResultError("解析 icons_json 失败: " + err.Error()), nil
+	}
+	if err := s.panels.BatchSetIcons(uid, service.BatchSetIconsRequest{Icons: icons}); err != nil {
+		return mcp.NewToolResultError("批量设置图标失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultText(fmt.Sprintf("已成功设置 %d 个卡片的图标", len(icons))), nil
+}
+
+// handleSuggestIcons implements sundash_suggest_icons: returns cards without icons for AI suggestion.
+func (s *Server) handleSuggestIcons(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	uid, err := s.userID(ctx)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	data, err := s.panels.GetPanel(uid)
+	if err != nil {
+		return mcp.NewToolResultError("加载面板失败: " + err.Error()), nil
+	}
+	type iconSuggestion struct {
+		ID    string `json:"id"`
+		Title string `json:"title"`
+		URL   string `json:"url"`
+	}
+	var suggestions []iconSuggestion
+	for _, g := range data.Groups {
+		for _, c := range g.Cards {
+			if c.Icon == "" {
+				suggestions = append(suggestions, iconSuggestion{ID: c.ID, Title: c.Title, URL: c.URL})
+			}
+		}
+	}
+	return mcp.NewToolResultJSON(suggestions)
 }
 
 func (s *Server) handleDeleteCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {

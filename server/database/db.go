@@ -20,10 +20,14 @@ func Init(dbPath string) (*sql.DB, error) {
 	}
 
 	// _pragma=foreign_keys(1) enables FK cascades (ON DELETE CASCADE) which the schema relies on.
+// _pragma=synchronous(NORMAL) balances safety and performance.
+// _pragma=cache_size=-20000 sets cache to 20MB.
 	dsn := "file:" + dbPath +
 		"?_journal_mode=WAL" +
 		"&_busy_timeout=5000" +
-		"&_pragma=foreign_keys(1)"
+		"&_pragma=foreign_keys(1)" +
+		"&_pragma=synchronous(NORMAL)" +
+		"&_pragma=cache_size=-20000"
 
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {

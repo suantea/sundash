@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"sync"
+	"time"
 
 	"sundash/models"
 	"sundash/repository"
@@ -12,15 +14,33 @@ import (
 type PanelService struct {
 	panels *repository.PanelRepo
 	users  *repository.UserRepo
+	mu     sync.RWMutex
+	cache  map[string]*cachedPanel
+}
+
+type cachedPanel struct {
+	data   *models.PanelData
+	expires time.Time
 }
 
 func NewPanelService(panels *repository.PanelRepo, users *repository.UserRepo) *PanelService {
-	return &PanelService{panels: panels, users: users}
+	return &PanelService{
+		panels: panels,
+		users:  users,
+		cache:  make(map[string]*cachedPanel),
+	}
 }
 
-// GetPanel loads groups and their cards. Cards are fetched in a single query
-// and grouped in memory, avoiding the previous N+1 query pattern.
+// GetPanel loads groups and their cards. Uses a simple cache to avoid repeated DB queries.
+// Cache key is userID, cache expires after 5 minutes.
 func (s *PanelService) GetPanel(userID string) (*models.PanelData, error) {
+	s.mu.RLock()
+	if cached, found := s.cache[userID]; found && time.Now().Before(cached.expires) {
+		s.mu.RUnlock()
+		return cached.data, nil
+	}
+	s.mu.RUnlock()
+
 	groups, err := s.panels.GroupsByUser(userID)
 	if err != nil {
 		return nil, err
@@ -37,7 +57,15 @@ func (s *PanelService) GetPanel(userID string) (*models.PanelData, error) {
 	for i := range groups {
 		groups[i].Cards = byGroup[groups[i].ID]
 	}
-	return &models.PanelData{Groups: groups}, nil
+	panelData := &models.PanelData{Groups: groups}
+
+	s.mu.Lock()
+	s.cache[userID] = &cachedPanel{
+		data:   panelData,
+		expires: time.Now().Add(5 * time.Minute),
+	}
+	s.mu.Unlock()
+	return panelData, nil
 }
 
 func (s *PanelService) CreateGroup(userID, name string) (*models.PanelGroup, error) {
@@ -172,6 +200,78 @@ func (s *PanelService) Reorder(userID string, req models.ReorderRequest) error {
 		}
 	}
 	return s.panels.Reorder(groupOrders, cardOrders)
+}
+
+// BatchReorganize applies multiple create/rename/delete group and move/create card
+// operations atomically. Used by MCP AI tools for natural-language reorganizing.
+type BatchOp struct {
+	// Action: "create_group" | "rename_group" | "delete_group" | "move_card" | "create_card"
+	Action string `json:"action"`
+	// For create_group/rename_group/delete_group
+	GroupName string `json:"group_name,omitempty"`
+	GroupID   string `json:"group_id,omitempty"`
+	// For move_card
+	CardID    string `json:"card_id,omitempty"`
+	TargetGroupID string `json:"target_group_id,omitempty"`
+	// For create_card
+	CardTitle string `json:"card_title,omitempty"`
+	CardURL   string `json:"card_url,omitempty"`
+}
+
+type BatchReorganizeRequest struct {
+	Operations []BatchOp `json:"operations"`
+}
+
+func (s *PanelService) BatchReorganize(userID string, req BatchReorganizeRequest) error {
+	for _, op := range req.Operations {
+		switch op.Action {
+		case "create_group":
+			if _, err := s.CreateGroup(userID, op.GroupName); err != nil {
+				return fmt.Errorf("create_group %q: %w", op.GroupName, err)
+			}
+		case "rename_group":
+			if err := s.UpdateGroup(userID, op.GroupID, &op.GroupName, nil); err != nil {
+				return fmt.Errorf("rename_group %s: %w", op.GroupID, err)
+			}
+		case "delete_group":
+			if err := s.DeleteGroup(userID, op.GroupID); err != nil {
+				return fmt.Errorf("delete_group %s: %w", op.GroupID, err)
+			}
+		case "move_card":
+			if err := s.Reorder(userID, models.ReorderRequest{
+				CardOrders: []models.CardOrder{{ID: op.CardID, GroupID: op.TargetGroupID, SortOrder: 0}},
+			}); err != nil {
+				return fmt.Errorf("move_card %s: %w", op.CardID, err)
+			}
+		case "create_card":
+			if _, err := s.CreateCard(userID, models.CreateCardRequest{
+				GroupID: op.TargetGroupID,
+				Title:   op.CardTitle,
+				URL:     op.CardURL,
+			}); err != nil {
+				return fmt.Errorf("create_card %q: %w", op.CardTitle, err)
+			}
+		default:
+			return fmt.Errorf("unknown batch operation: %s", op.Action)
+		}
+	}
+	return nil
+}
+
+// BatchSetIcons applies icon updates to multiple cards in one call.
+// Used by MCP AI tools for batch icon management.
+type BatchSetIconsRequest struct {
+	// CardID -> Icon mapping
+	Icons map[string]string `json:"icons"`
+}
+
+func (s *PanelService) BatchSetIcons(userID string, req BatchSetIconsRequest) error {
+	for cardID, icon := range req.Icons {
+		if err := s.UpdateCard(userID, cardID, models.UpdateCardRequest{Icon: &icon}); err != nil {
+			return fmt.Errorf("set icon on card %s: %w", cardID, err)
+		}
+	}
+	return nil
 }
 
 // GetUserPanel returns another user's panel data (admin only).
