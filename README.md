@@ -1,56 +1,66 @@
-# SunDash（原 Asuan）
+<div align="center">
 
-自托管个人导航面板：**多用户书签管理 + 必应壁纸 + 页面监控扩展 + 系统监控 + 天气 Widget + RSS 订阅 + 快捷便签**。适合部署在 NAS、云服务器或个人电脑上，作为浏览器主页 / 新标签页使用。
+<img src="https://img.icons8.com/fluency/128/star.png" alt="SunDash" width="80"/>
 
-- 后端：Go 1.26 + Gin + SQLite（纯 Go 驱动，零 CGO）
-- 前端：Vue 3 + Vite + TypeScript + Pinia + Naive UI
-- 扩展：Chrome Manifest V3（页面内容监控）
-- 部署：Docker / docker-compose / 裸二进制 + systemd / NAS 脚本
+# SunDash
 
-## 功能特性
+**自托管个人导航面板** — 多用户书签管理 · 系统监控 · 天气 · RSS · 便签 · MCP
 
-**面板管理**
-- 多用户系统：注册开关、审批流（pending/approve/reject）、管理员后台、JWT 认证
-- 书签分组与卡片：拖拽排序、折叠/隐藏、批量应用图标色/背景色、内网地址切换
-- 站点配置：标题、图标、CDN 前缀、统计代码、自定义 head/footer 注入
-- 数据管理：JSON 导出 / 导入（追加合并）、内置**常用导航模板**一键导入
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
+[![MCP](https://img.shields.io/badge/MCP-AI%20Ready-000000?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDQgN3YxMGw4IDUgOC01VjdsLTgtNXptMCAyLjE4bDUuNzYgMy40NkwxMiAxMS44MmwtNS43Ni00LjE4TDEyIDQuMTh6Ii8+PC9zdmc+)](https://modelcontextprotocol.io)
 
-**个性化**
-- 多语言：中文 / 英文切换（设置抽屉，基于 vue-i18n）
-- 深浅主题 + 自定义主题色（Naive UI 主题覆盖）
-- 壁纸：必应每日壁纸（服务端缓存）、渐变、自定义图片，支持模糊/透明度/版权标注
+[English](README.md) · [中文](README.zh.md)
 
-**小组件**
-- 系统监控：CPU / 内存 / 磁盘 / 网络实时状态（NAS 场景刚需）
-- 天气 Widget：Open-Meteo 数据（温度 / 风速 / 天气状况），10 分钟缓存
-- RSS 订阅：后台定时抓取、支持多订阅源、文章展开阅读
-- 快捷便签：随手记备忘，支持归档管理
-- 全局搜索：SQLite FTS5 全文索引，搜索书签标题 / 链接 / 描述
+</div>
 
-**性能优化**
+---
+
+**SunDash** 是为 NAS、云服务器和个人电脑设计的开源导航面板。作为浏览器主页 / 新标签页使用，提供书签管理、系统监控、天气、RSS、便签等一站式功能。
+
+## ✨ 功能特性
+
+### 📑 面板管理
+- **多用户系统**：注册开关、审批流（pending/approve/reject）、管理员后台、JWT 认证
+- **书签分组与卡片**：拖拽排序、折叠/隐藏、批量应用图标色/背景色、内网地址切换
+- **站点配置**：标题、图标、CDN 前缀、统计代码、自定义 head/footer 注入
+- **数据管理**：JSON 导出 / 导入（追加合并）、内置**常用导航模板**一键导入
+
+### 🎨 个性化
+- **多语言**：中文 / 英文切换（设置抽屉，基于 vue-i18n）
+- **深浅主题** + 自定义主题色（Naive UI 主题覆盖）
+- **壁纸**：必应每日壁纸（服务端缓存）、渐变、自定义图片，支持模糊/透明度/版权标注
+
+### 📊 小组件
+- **系统监控**：CPU / 内存 / 磁盘 / 网络实时状态（NAS 场景刚需）
+- **天气 Widget**：Open-Meteo 数据（温度 / 风速 / 天气状况），10 分钟缓存
+- **RSS 订阅**：后台定时抓取、支持多订阅源、文章展开阅读
+- **快捷便签**：随手记备忘，支持归档管理
+- **全局搜索**：SQLite FTS5 全文索引，搜索书签标题 / 链接 / 描述
+
+### 🚀 性能优化
 - 前端资源哈希化（Vite）：JS/CSS 文件名包含内容哈希，支持长期浏览器缓存
-- 静态资源预压缩：构建阶段自动生成 `.gz` 和 `.br` 文件，服务器可直接返回压缩内容，减少传输大小
-- 多阶段 Docker 镜像：最终镜像仅含可执行文件、静态资源和必要数据目录，体积更小、启动更快
-- SQLite WAL 模式：启用 Write-Ahead Logging，读写并发更友好，适合读多写少的导航场景
-- 面板服务缓存：首次加载后在内存缓存用户面板数据（默认 5 分钟），显著降低数据库查询频率
+- 静态资源预压缩：构建阶段自动生成 `.gz` 和 `.br` 文件，减少传输大小
+- 多阶段 Docker 镜像：最终镜像仅含可执行文件和静态资源，体积更小、启动更快
+- SQLite WAL 模式：读写并发更友好，适合读多写少的导航场景
+- 面板服务缓存：首次加载后在内存缓存用户面板数据（默认 5 分钟）
 - NAS 友好部署：提供 `docker-compose.nas.yml` 示例，支持本地持久化卷、时区设置、健康检查与自动重启
 
-**部署方式**
-- Docker / docker-compose（含 NAS 专用示例）
-- 裸二进制 + systemd
-- 直接运行 Go 二进制（适用于开发调试）
-- 时钟（12/24 小时制）、Logo（图片/文字）、搜索栏（多引擎）、系统状态显示
-
-**工程化**
+### 🔧 工程化
 - 后端三层分层架构（handler → service → repository）+ 手动依赖注入，可单元测试
 - 版本化数据库迁移（`schema_migrations`）、SQLite WAL 并发读、FTS5 全文索引
-- 性能：`/api/bootstrap` 首屏聚合接口（1 个请求拿齐设置/资料/面板）、gzip 压缩、静态资源 immutable 缓存、站点配置短 TTL 缓存
+- `/api/bootstrap` 首屏聚合接口（1 个请求拿齐设置/资料/面板）、gzip 压缩、静态资源 immutable 缓存
 
-**Chrome 扩展（SunDash Monitor）**
+### 🤖 Chrome 扩展（SunDash Monitor）
 - 页面内容变化监控（哈希比对 + MutationObserver），变更桌面通知
 - 弹窗 / 侧边栏管理监控项，30s 轮询（带超时与大小限制）
 
-## 技术栈
+---
+
+## 🛠 技术栈
 
 | 层 | 技术 |
 |---|---|
@@ -59,7 +69,9 @@
 | 扩展 | Chrome MV3（service worker + popup + sidepanel + content script） |
 | 部署 | Docker · docker-compose · systemd · nginx |
 
-## 架构
+---
+
+## 🏗 架构
 
 ```
 server/
@@ -75,7 +87,9 @@ server/
 
 前端（`web/src/`）：`views/` 页面 · `components/` 组件 · `stores/` Pinia 状态 · `composables/` 组合式逻辑（壁纸、分组可见性）· `api/` axios 封装（baseURL `/api`）。
 
-## 快速开始（本地开发）
+---
+
+## 🚀 快速开始
 
 前置：Go 1.26+、Node.js 20+。
 
@@ -92,7 +106,9 @@ npm run dev
 
 打开 http://localhost:5173 ，默认账号 **admin / admin**（首次部署自动创建，登录后请立即修改）。
 
-## 构建与部署
+---
+
+## 📦 部署
 
 ### 方式 A：Docker（推荐）
 
@@ -126,7 +142,9 @@ export SUNDASH_DATA_DIR=/opt/sundash/data
 
 systemd / nginx 反代示例见 [DEPLOY.md](DEPLOY.md)。
 
-## 环境变量
+---
+
+## 🔧 环境变量
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
@@ -138,7 +156,9 @@ systemd / nginx 反代示例见 [DEPLOY.md](DEPLOY.md)。
 | `SUNDASH_MCP_TOKEN` | 空 | **MCP 端点专用静态 token**（可选）。设置后 AI 客户端以 `Authorization: Bearer <token>` 访问 `/mcp` 管理书签 |
 | `SUNDASH_MCP_USERNAME` | `admin` | MCP 静态 token 绑定的用户（默认管理员） |
 
-## MCP（AI 接入）
+---
+
+## 🤖 MCP（AI 接入）
 
 SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol）服务端，AI 助手（如 Claude Desktop / Cursor / 本地 agent）可直接接入来**录入、整理书签**（分组 = 标签）。
 
@@ -177,7 +197,9 @@ SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol�
 }
 ```
 
-## 主要 API
+---
+
+## 📋 主要 API
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -198,16 +220,32 @@ SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol�
 | GET/POST | `/api/rss` `/api/rss/:id` | RSS 订阅管理 |
 | GET | `/api/rss/:id/items` | RSS 文章列表 |
 
-## 数据导入
+---
+
+## 📥 数据导入
 
 - 设置页 / 设置抽屉 → **导入数据**：从 JSON 备份文件追加导入（`{settings, groups}` 格式）
 - **模板**：内置「常用导航」模板（5 分组 28 书签）一键导入
 - `temp/` 目录含 SunPanel 数据导入脚本（`import-sunpanel.js`，Node 脚本，供迁移参考）
 
-## 浏览器扩展
+---
+
+## 🌐 浏览器扩展
 
 `extension/` 为 Chrome MV3 扩展（SunDash Monitor）：加载方式为浏览器「开发者模式 → 加载已解压的扩展程序」选择该目录。功能：监控任意页面内容变化、变更通知、弹窗与侧边栏管理。
 
-## License
+---
 
-MIT
+## 🤝 贡献
+
+欢迎提交 Issue 和 PR！请遵循以下规范：
+
+- 提交前请确保 `go build ./...` 和 `npm run build` 通过
+- 新功能请附带相应测试
+- 提交信息请遵循 [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+## 📜 License
+
+[MIT](LICENSE) © 2026 SunDash Contributors
