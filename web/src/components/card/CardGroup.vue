@@ -6,7 +6,7 @@
         <span class="group-count">{{ group.cards?.length || 0 }}</span>
       </div>
       <div class="group-actions">
-        <button class="group-action-btn" @click="$emit('addCard', group.id)" title="添加卡片">
+        <button class="group-action-btn" @click="$emit('addCard', group.id)" :title="t('home.addBookmark')">
           <Icon icon="mdi:plus" :size="16" />
         </button>
         <n-dropdown :options="menuOptions" @select="handleMenu" trigger="click" placement="bottom-end">
@@ -40,7 +40,7 @@
     <div class="cards-grid cards-grid-footer" :style="gridStyle">
       <button class="card-add" @click="$emit('addCard', group.id)">
         <Icon icon="mdi:plus" :size="20" color="var(--sd-text-tertiary)" />
-        <span>添加卡片</span>
+        <span>{{ t('home.addBookmark') }}</span>
       </button>
     </div>
   </div>
@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { h, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import draggable from 'vuedraggable'
 import type { PanelGroup, Card } from '../../types'
@@ -55,6 +56,7 @@ import { useAppStore } from '../../stores/app'
 import { usePanelStore } from '../../stores/panel'
 import CardItem from './CardItem.vue'
 
+const { t } = useI18n()
 const props = defineProps<{ group: PanelGroup }>()
 const emit = defineEmits<{
   editGroup: [group: { id: string; name: string }]
@@ -80,8 +82,8 @@ const gridStyle = computed(() => {
 })
 
 const menuOptions = [
-  { label: '编辑分组', key: 'edit', icon: () => h(Icon, { icon: 'mdi:pencil' }) },
-  { label: '删除分组', key: 'delete', icon: () => h(Icon, { icon: 'mdi:delete' }) },
+  { label: t('home.editGroup'), key: 'edit', icon: () => h(Icon, { icon: 'mdi:pencil' }) },
+  { label: t('home.deleteGroup'), key: 'delete', icon: () => h(Icon, { icon: 'mdi:delete' }) },
 ]
 
 function handleMenu(key: string) {

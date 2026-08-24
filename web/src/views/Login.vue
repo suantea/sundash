@@ -25,7 +25,7 @@
           </svg>
         </div>
         <h1>SunDash</h1>
-        <p class="subtitle">自托管导航面板</p>
+        <p class="subtitle">{{ $t('login.subtitle') }}</p>
       </div>
 
       <!-- Login Card -->
@@ -34,14 +34,14 @@
         <template v-if="!appStore.allowRegistration">
           <n-form ref="loginFormRef" :model="loginForm" :rules="loginRules" size="large">
             <n-form-item path="username" :show-label="false">
-              <n-input v-model:value="loginForm.username" placeholder="用户名" round>
+              <n-input v-model:value="loginForm.username" :placeholder="$t('login.username')" round>
                 <template #prefix>
                   <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
                 </template>
               </n-input>
             </n-form-item>
             <n-form-item path="password" :show-label="false">
-              <n-input v-model:value="loginForm.password" type="password" placeholder="密码" round
+              <n-input v-model:value="loginForm.password" type="password" :placeholder="$t('login.password')" round
                 show-password-on="click" @keyup.enter="handleLogin">
                 <template #prefix>
                   <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
@@ -50,24 +50,24 @@
             </n-form-item>
             <n-button type="primary" block size="large" round :loading="loading" @click="handleLogin"
               class="login-btn">
-              登录
+              {{ $t('login.login') }}
             </n-button>
           </n-form>
         </template>
 
         <!-- When registration is enabled, show tabs for login/register -->
         <n-tabs v-else type="segment" v-model:value="activeTab" animated>
-          <n-tab-pane name="login" tab="登录">
+          <n-tab-pane name="login" :tab="$t('login.login')">
             <n-form ref="loginFormRef" :model="loginForm" :rules="loginRules" size="large">
               <n-form-item path="username" :show-label="false">
-                <n-input v-model:value="loginForm.username" placeholder="用户名" round>
+                <n-input v-model:value="loginForm.username" :placeholder="$t('login.username')" round>
                   <template #prefix>
                     <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
               <n-form-item path="password" :show-label="false">
-                <n-input v-model:value="loginForm.password" type="password" placeholder="密码" round
+                <n-input v-model:value="loginForm.password" type="password" :placeholder="$t('login.password')" round
                   show-password-on="click" @keyup.enter="handleLogin">
                   <template #prefix>
                     <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
@@ -76,22 +76,22 @@
               </n-form-item>
               <n-button type="primary" block size="large" round :loading="loading" @click="handleLogin"
                 class="login-btn">
-                登录
+                {{ $t('login.login') }}
               </n-button>
             </n-form>
           </n-tab-pane>
 
-          <n-tab-pane v-if="appStore.allowRegistration" name="register" tab="注册">
+          <n-tab-pane v-if="appStore.allowRegistration" name="register" :tab="$t('login.register')">
             <n-form ref="registerFormRef" :model="registerForm" :rules="registerRules" size="large">
               <n-form-item path="username" :show-label="false">
-                <n-input v-model:value="registerForm.username" placeholder="用户名" round>
+                <n-input v-model:value="registerForm.username" :placeholder="$t('login.username')" round>
                   <template #prefix>
                     <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
               <n-form-item path="password" :show-label="false">
-                <n-input v-model:value="registerForm.password" type="password" placeholder="密码（至少6位）" round
+                <n-input v-model:value="registerForm.password" type="password" :placeholder="$t('login.passwordMinLength')" round
                   show-password-on="click">
                   <template #prefix>
                     <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
@@ -99,7 +99,7 @@
                 </n-input>
               </n-form-item>
               <n-form-item path="displayName" :show-label="false">
-                <n-input v-model:value="registerForm.displayName" placeholder="显示名称（可选）" round>
+                <n-input v-model:value="registerForm.displayName" :placeholder="$t('login.displayName')" round>
                   <template #prefix>
                     <Icon icon="mdi:card-account-details-outline" :size="18" color="#8E8E93" />
                   </template>
@@ -107,7 +107,7 @@
               </n-form-item>
               <n-button type="primary" block size="large" round :loading="loading" @click="handleRegister"
                 class="login-btn">
-                注册
+                {{ $t('login.register') }}
               </n-button>
             </n-form>
           </n-tab-pane>
@@ -116,7 +116,7 @@
 
       <!-- Footer -->
       <div class="login-footer">
-        <button class="theme-toggle" @click="toggleTheme" :title="isDark ? '浅色模式' : '深色模式'">
+        <button class="theme-toggle" @click="toggleTheme" :title="isDark ? $t('login.lightTheme') : $t('login.darkTheme')">
           <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :size="18" />
         </button>
         <div class="copyright-notice">SunDash · Open Source · MIT License</div>
@@ -127,10 +127,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { NForm, NFormItem, useMessage, type FormInst, type FormRules, NInput, NButton, NTabs, NTabPane } from 'naive-ui'
 import { useAppStore } from '../stores/app'
 import { useUserStore } from '../stores/user'
+
+const { t } = useI18n()
 
 const appStore = useAppStore()
 const userStore = useUserStore()
@@ -150,13 +153,13 @@ const loginForm = ref({ username: '', password: '' })
 const registerForm = ref({ username: '', password: '', displayName: '' })
 
 const loginRules: FormRules = {
-  username: { required: true, message: '请输入用户名', trigger: 'blur' },
-  password: { required: true, message: '请输入密码', trigger: 'blur' },
+  username: { required: true, message: t('login.usernameRequired'), trigger: 'blur' },
+  password: { required: true, message: t('login.passwordRequired'), trigger: 'blur' },
 }
 
 const registerRules: FormRules = {
-  username: { required: true, message: '请输入用户名', trigger: 'blur', min: 3, max: 32 },
-  password: { required: true, message: '请输入密码', trigger: 'blur', min: 6 },
+  username: { required: true, message: t('login.usernameRequired'), trigger: 'blur', min: 3, max: 32 },
+  password: { required: true, message: t('login.passwordRequired'), trigger: 'blur', min: 6 },
 }
 
 async function handleLogin() {
@@ -167,9 +170,9 @@ async function handleLogin() {
   loading.value = true
   try {
     await userStore.login(loginForm.value.username, loginForm.value.password)
-    message.success('登录成功')
+    message.success(t('login.loginSuccess'))
   } catch (e: any) {
-    message.error(e.response?.data?.error || '登录失败')
+    message.error(e.response?.data?.error || t('login.loginFailed'))
   } finally {
     loading.value = false
   }
@@ -184,13 +187,13 @@ async function handleRegister() {
   try {
     await userStore.register(registerForm.value.username, registerForm.value.password, registerForm.value.displayName)
     if (appStore.requireApproval) {
-      message.success('注册成功，请等待管理员审批后登录')
+      message.success(t('login.registerSuccessApproval'))
       activeTab.value = 'login'
     } else {
-      message.success('注册成功')
+      message.success(t('login.registerSuccess'))
     }
   } catch (e: any) {
-    message.error(e.response?.data?.error || '注册失败')
+    message.error(e.response?.data?.error || t('login.registerFailed'))
   } finally {
     loading.value = false
   }

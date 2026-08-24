@@ -8,9 +8,9 @@
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
         <Icon icon="mdi:chevron-left" :size="18" />
-        <span>返回</span>
+        <span>{{ $t("common.back") }}</span>
       </button>
-      <h1>管理面板</h1>
+      <h1>{{ $t("admin.title") }}</h1>
       <div style="width: 70px;"></div>
     </header>
 
@@ -18,8 +18,8 @@
       <!-- ===== 1. System Settings ===== -->
       <div class="section-header">
         <div>
-          <h2>系统设置</h2>
-          <p>管理注册策略和默认配置</p>
+          <h2>{{ $t("admin.systemSettings") }}</h2>
+          <p>{{ $t("admin.manageRegistrationDefaults") }}</p>
         </div>
       </div>
 
@@ -30,8 +30,8 @@
               <Icon icon="mdi:account-plus" :size="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">允许用户注册</div>
-              <div class="setting-desc">开启后主页显示注册选项</div>
+              <div class="setting-title">{{ $t("admin.allowRegistration") }}</div>
+              <div class="setting-desc">{{ $t("admin.allowRegistrationDesc") }}</div>
             </div>
           </div>
           <n-switch v-model:value="globalSettings.allow_registration" @update:value="saveGlobalSetting('allow_registration', $event)" />
@@ -43,8 +43,8 @@
               <Icon icon="mdi:shield-check" :size="18" color="#FF9500" />
             </div>
             <div>
-              <div class="setting-title">注册需要审批</div>
-              <div class="setting-desc">开启后新用户需管理员审批</div>
+              <div class="setting-title">{{ $t("admin.requireApproval") }}</div>
+              <div class="setting-desc">{{ $t("admin.requireApprovalDesc") }}</div>
             </div>
           </div>
           <n-switch v-model:value="globalSettings.require_approval" @update:value="saveGlobalSetting('require_approval', $event)" />
@@ -56,30 +56,30 @@
               <Icon icon="mdi:image" :size="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">默认壁纸类型</div>
-              <div class="setting-desc">新用户的默认背景</div>
+              <div class="setting-title">{{ $t("admin.defaultWallpaperType") }}</div>
+              <div class="setting-desc">{{ $t("admin.defaultWallpaperTypeDesc") }}</div>
             </div>
           </div>
           <div class="seg-control">
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === '' }]" @click="saveGlobalSetting('default_wallpaper_type', '')">默认</button>
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'bing' }]" @click="saveGlobalSetting('default_wallpaper_type', 'bing')">必应</button>
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'custom' }]" @click="saveGlobalSetting('default_wallpaper_type', 'custom')">自定义</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === '' }]" @click="saveGlobalSetting('default_wallpaper_type', '')">{{ $t("common.default") }}</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'bing' }]" @click="saveGlobalSetting('default_wallpaper_type', 'bing')">{{ $t("settings.bingWallpaper") }}</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'custom' }]" @click="saveGlobalSetting('default_wallpaper_type', 'custom')">{{ $t("common.custom") }}</button>
           </div>
         </div>
         <div v-if="globalSettings.default_wallpaper_type === 'custom'" class="setting-sub">
-          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" placeholder="输入背景图片 URL" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
+          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" placeholder="{{ $t("admin.enterBackgroundUrl") }}" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
         </div>
       </div>
 
       <!-- ===== 2. Site Configuration ===== -->
       <div class="section-header" style="margin-top: 32px;">
         <div>
-          <h2>站点配置</h2>
-          <p>管理网站标题、图标、CDN、统计代码等</p>
+          <h2>{{ $t("admin.siteConfig") }}</h2>
+          <p>{{ $t("admin.manageWebsiteConfig") }}</p>
         </div>
         <button class="add-btn" @click="saveAllSiteConfig" :disabled="siteSaving">
           <Icon icon="mdi:content-save" :size="16" />
-          {{ siteSaving ? '保存中...' : '保存配置' }}
+          {{ siteSaving ? $t('common.saving') : $t('admin.saveConfig') }}
         </button>
       </div>
 
@@ -90,11 +90,11 @@
               <Icon icon="mdi:text-short" :size="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">网站标题</div>
-              <div class="setting-desc">浏览器标签页显示的标题</div>
+              <div class="setting-title">{{ $t('settings.siteTitle') }}</div>
+              <div class="setting-desc">{{ $t('admin.siteTitleDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_title" class="mini-text-input" placeholder="SunDash" />
+          <input v-model="siteConfig.site_title" class="mini-text-input" placeholder="{{ $t('login.subtitle') }}" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
@@ -103,11 +103,11 @@
               <Icon icon="mdi:icon" :size="18" color="#FF9500" />
             </div>
             <div>
-              <div class="setting-title">网站图标</div>
-              <div class="setting-desc">ICO 或 SVG 图标 URL</div>
+              <div class="setting-title">{{ $t('admin.siteIcon') }}</div>
+              <div class="setting-desc">{{ $t('admin.siteIconDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" placeholder="/favicon.svg 或 https://..." />
+          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" placeholder="{{ $t('admin.siteIconPlaceholder') }}" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
@@ -116,11 +116,11 @@
               <Icon icon="mdi:cloud" :size="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">CDN 地址</div>
-              <div class="setting-desc">静态资源 CDN 基础路径</div>
+              <div class="setting-title">{{ $t('admin.cdnUrl') }}</div>
+              <div class="setting-desc">{{ $t('admin.cdnUrlDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" placeholder="https://cdn.example.com" />
+          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" placeholder="{{ $t('admin.cdnPlaceholder') }}" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -129,11 +129,11 @@
               <Icon icon="mdi:chart-line" :size="18" color="#AF52DE" />
             </div>
             <div>
-              <div class="setting-title">统计代码</div>
-              <div class="setting-desc">百度统计、Google Analytics 等脚本</div>
+              <div class="setting-title">{{ $t('admin.analyticsCode') }}</div>
+              <div class="setting-desc">{{ $t('admin.analyticsCodeDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_analytics_code" class="code-input" placeholder="<script>/* 统计代码 */</script>" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_analytics_code" class="code-input" placeholder="{{ $t('admin.analyticsCodePlaceholder') }}" rows="3"></textarea>
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -142,8 +142,8 @@
               <Icon icon="mdi:code-tags" :size="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">自定义 Head 代码</div>
-              <div class="setting-desc">注入到 &lt;head&gt; 标签中的 CSS/JS</div>
+              <div class="setting-title">{{ $t('admin.customHead') }}</div>
+              <div class="setting-desc">{{ $t('admin.customHeadDesc') }}</div>
             </div>
           </div>
           <textarea v-model="siteConfig.site_custom_head" class="code-input" placeholder="<link rel=&quot;stylesheet&quot; href=&quot;...&quot;>" rows="3"></textarea>
@@ -155,19 +155,19 @@
               <Icon icon="mdi:code-tags" :size="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">自定义页脚代码</div>
-              <div class="setting-desc">注入到 &lt;/body&gt; 前的代码</div>
+              <div class="setting-title">{{ $t('admin.customFooter') }}</div>
+              <div class="setting-desc">{{ $t('admin.customFooterDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_custom_footer" class="code-input" placeholder="<script>/* 页脚代码 */</script>" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_custom_footer" class="code-input" placeholder="{{ $t('admin.customFooterCodePlaceholder') }}" rows="3"></textarea>
         </div>
       </div>
 
       <!-- ===== 3. Pending Users ===== -->
       <div class="section-header" style="margin-top: 32px;">
         <div>
-          <h2>待审批用户</h2>
-          <p>审批新注册的用户账户</p>
+          <h2>{{ $t("admin.pendingUsers") }}</h2>
+          <p>{{ $t("admin.approveNewUsers") }}</p>
         </div>
         <span v-if="pendingUsers.length" class="badge">{{ pendingUsers.length }}</span>
       </div>
@@ -182,36 +182,36 @@
           <div class="td" style="flex: 2; gap: 6px;">
             <button class="row-btn approve" @click="approveUser(user)">
               <Icon icon="mdi:check" :size="14" />
-              批准
+              {{ $t("admin.approve") }}
             </button>
             <button class="row-btn danger" @click="rejectUser(user)">
               <Icon icon="mdi:close" :size="14" />
-              拒绝
+              {{ $t("admin.reject") }}
             </button>
           </div>
         </div>
-        <div v-if="pendingUsers.length === 0" class="table-empty">暂无待审批用户</div>
+        <div v-if="pendingUsers.length === 0" class="table-empty">{{ $t('admin.noPendingUsers') }}</div>
       </div>
 
       <!-- ===== 3. All Users ===== -->
       <div class="section-header" style="margin-top: 32px;">
         <div>
-          <h2>用户管理</h2>
-          <p>管理系统中的所有用户账户</p>
+          <h2>{{ $t("admin.userManagement") }}</h2>
+          <p>{{ $t("admin.manageAllUsers") }}</p>
         </div>
         <button class="add-btn" @click="showAddUser = true">
           <Icon icon="mdi:plus" :size="16" />
-          添加用户
+          {{ $t("admin.addUser") }}
         </button>
       </div>
 
       <div class="table-card">
         <div class="table-head">
-          <div class="th" style="flex: 2.5;">用户</div>
-          <div class="th" style="flex: 2;">显示名</div>
-          <div class="th" style="flex: 1;">角色</div>
-          <div class="th" style="flex: 1;">状态</div>
-          <div class="th" style="flex: 2.5;">操作</div>
+          <div class="th" style="flex: 2.5;">{{ $t('admin.user') }}</div>
+          <div class="th" style="flex: 2;">{{ $t('admin.displayName') }}</div>
+          <div class="th" style="flex: 1;">{{ $t('user.role') }}</div>
+          <div class="th" style="flex: 1;">{{ $t('common.status') }}</div>
+          <div class="th" style="flex: 2.5;">{{ $t('common.actions') }}</div>
         </div>
         <div v-for="user in users" :key="user.id" class="table-row">
           <div class="td" style="flex: 2.5;">
@@ -221,7 +221,7 @@
           <div class="td" style="flex: 2; color: var(--sd-text-secondary);">{{ user.display_name || '-' }}</div>
           <div class="td" style="flex: 1;">
             <span :class="['role-pill', user.role === 'admin' ? 'is-admin' : 'is-user']">
-              {{ user.role === 'admin' ? '管理员' : '用户' }}
+              {{ user.role === 'admin' ? $t('admin.roleAdmin') : $t('admin.roleUser') }}
             </span>
           </div>
           <div class="td" style="flex: 1;">
@@ -231,35 +231,35 @@
           </div>
           <div class="td td-actions">
             <button class="row-btn" @click="toggleRole(user)">
-              {{ user.role === 'admin' ? '设为用户' : '设为管理员' }}
+              {{ user.role === 'admin' ? $t('admin.setAsUser') : $t('admin.setAsAdmin') }}
             </button>
             <button class="row-btn" @click="viewUserPanel(user)">
               <Icon icon="mdi:view-grid" :size="14" />
-              书签
+              {{ $t("admin.bookmarks") }}
             </button>
-            <button class="row-btn danger" @click="deleteUser(user)">删除</button>
+            <button class="row-btn danger" @click="deleteUser(user)"> {{ $t('common.delete') }}</button>
             <button class="row-btn" @click="openEditDisplayName(user)">
               <Icon icon="mdi:rename-box" :size="14" />
-              改名
+              {{ $t("admin.rename") }}
             </button>
             <button class="row-btn" @click="openResetPassword(user)" style="color: #FF9500; border-color: rgba(255,149,0,0.3);">
               <Icon icon="mdi:key-variant" :size="14" />
-              重置密码
+              {{ $t("admin.resetPassword") }}
             </button>
           </div>
         </div>
-        <div v-if="users.length === 0" class="table-empty">暂无用户数据</div>
+        <div v-if="users.length === 0" class="table-empty">{{ $t('admin.noUsers') }}</div>
       </div>
     </div>
 
     <!-- ===== User Bookmarks Modal ===== -->
-    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} 的书签`" style="max-width: 700px;" :bordered="false">
-      <div v-if="viewingGroups.length === 0" class="table-empty">该用户暂无书签</div>
+    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} {{ $t('admin.sBookmarks') }}`" style="max-width: 700px;" :bordered="false">
+      <div v-if="viewingGroups.length === 0" class="table-empty">{{ $t('admin.noBookmarksForUser') }}</div>
       <div v-for="group in viewingGroups" :key="group.id" class="view-group">
         <div class="view-group-name">
           <Icon icon="mdi:folder" :size="16" color="#007AFF" />
           {{ group.name }}
-          <span class="view-card-count">{{ group.cards?.length || 0 }} 个书签</span>
+          <span class="view-card-count">{{ group.cards?.length || 0 }} {{ $t('admin.bookmarkCount') }}</span>
         </div>
         <div v-if="group.cards && group.cards.length" class="view-cards">
           <div v-for="card in group.cards" :key="card.id" class="view-card">
@@ -271,47 +271,50 @@
     </n-modal>
 
     <!-- ===== Add User Modal ===== -->
-    <n-modal v-model:show="showAddUser" preset="dialog" title="添加用户" positive-text="创建" negative-text="取消"
+    <n-modal v-model:show="showAddUser" preset="dialog" title="{{ $t('admin.addUser') }}" positive-text="{{ $t('admin.create') }}" negative-text="{{ $t('common.cancel') }}"
       :loading="modalLoading" @positive-click="handleCreateUser">
       <n-form label-placement="top">
-        <n-form-item label="用户名">
-          <n-input v-model:value="newUser.username" placeholder="请输入用户名" />
+        <n-form-item :label="$t('login.username')">
+          <n-input v-model:value="newUser.username" placeholder="{{ $t('admin.enterUsername') }}" />
         </n-form-item>
-        <n-form-item label="密码">
-          <n-input v-model:value="newUser.password" type="password" placeholder="请输入密码" show-password-on="click" />
+        <n-form-item :label="$t('login.password')">
+          <n-input v-model:value="newUser.password" type="password" placeholder="{{ $t('admin.enterPassword') }}" show-password-on="click" />
         </n-form-item>
-        <n-form-item label="显示名称">
-          <n-input v-model:value="newUser.displayName" placeholder="请输入显示名称（可选）" />
+        <n-form-item :label="$t('admin.displayName')">
+          <n-input v-model:value="newUser.displayName" placeholder="{{ $t('admin.enterDisplayName') }}" />
         </n-form-item>
       </n-form>
     </n-modal>
 
     <!-- ===== Reset Password Modal ===== -->
-    <n-modal v-model:show="showResetPassword" preset="dialog" title="重置用户密码" positive-text="重置" negative-text="取消"
+    <n-modal v-model:show="showResetPassword" preset="dialog" title="{{ $t('admin.resetUserPassword') }}" positive-text="{{ $t('admin.reset') }}" negative-text="{{ $t('common.cancel') }}"
       :loading="resetPasswordLoading" @positive-click="handleResetPassword">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
-        为用户 <strong>{{ resettingUser?.username }}</strong> 设置新密码
+        {{ $t("admin.setPasswordForUser") }} <strong>{{ resettingUser?.username }}</strong> {{ $t('admin.setNewPassword') }}
       </div>
-      <n-input v-model:value="newResetPassword" type="password" placeholder="输入新密码（至少6位）" show-password-on="click" @keyup.enter="handleResetPassword" />
+      <n-input v-model:value="newResetPassword" type="password" placeholder="{{ $t('admin.enterNewPassword') }}" show-password-on="click" @keyup.enter="handleResetPassword" />
     </n-modal>
 
     <!-- ===== Edit Display Name Modal ===== -->
-    <n-modal v-model:show="showEditDisplayName" preset="dialog" title="修改显示名" positive-text="保存" negative-text="取消"
+    <n-modal v-model:show="showEditDisplayName" preset="dialog" title="{{ $t('admin.editDisplayName') }}" positive-text="{{ $t('common.save') }}" negative-text="{{ $t('common.cancel') }}"
       :loading="editDisplayNameLoading" @positive-click="handleEditDisplayName">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
-        修改用户 <strong>{{ editingDisplayNameUser?.username }}</strong> 的显示名称
+        {{ $t('admin.editUser') }} <strong>{{ editingDisplayNameUser?.username }}</strong> {{ $t('admin.sDisplayName') }}
       </div>
-      <n-input v-model:value="newDisplayName" placeholder="输入新的显示名称" @keyup.enter="handleEditDisplayName" />
+      <n-input v-model:value="newDisplayName" placeholder="{{ $t('admin.enterNewDisplayName') }}" @keyup.enter="handleEditDisplayName" />
     </n-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, NSwitch, NModal, NForm, NFormItem, NInput } from 'naive-ui'
 import { api } from '../api'
 import type { User, PanelGroup } from '../types'
+
+const { t } = useI18n()
 
 const message = useMessage()
 const users = ref<User[]>([])
@@ -354,9 +357,9 @@ onMounted(() => {
 })
 
 function statusLabel(status?: string) {
-  if (status === 'pending') return '待审批'
-  if (status === 'rejected') return '已拒绝'
-  return '正常'
+  if (status === 'pending') return $t('admin.statusPending')
+  if (status === 'rejected') return $t('admin.statusRejected')
+  return $t('admin.statusApproved')
 }
 
 async function fetchUsers() {
@@ -367,7 +370,7 @@ async function fetchUsers() {
     users.value = (Array.isArray(allUsers) ? allUsers : []).filter((u: User) => u.status !== 'pending')
     pendingUsers.value = (Array.isArray(allUsers) ? allUsers : []).filter((u: User) => u.status === 'pending')
   } catch {
-    message.error('获取用户列表失败')
+    message.error($t('admin.failedToLoadUsers'))
   } finally {
     loading.value = false
   }
@@ -402,9 +405,9 @@ async function saveGlobalSetting(key: string, value: any) {
   const strValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : String(value)
   try {
     await api.put('admin/settings', { settings: { [key]: strValue } })
-    message.success('设置已保存')
+    message.success($t('common.settingsSaved'))
   } catch {
-    message.error('保存失败')
+    message.error($t('common.saveFailed'))
   }
 }
 
@@ -421,9 +424,9 @@ async function saveAllSiteConfig() {
         site_custom_footer: siteConfig.site_custom_footer,
       }
     })
-    message.success('站点配置已保存，刷新页面后生效')
+    message.success($t('admin.siteConfigSaved'))
   } catch {
-    message.error('保存失败')
+    message.error($t('common.saveFailed'))
   } finally {
     siteSaving.value = false
   }
@@ -438,12 +441,12 @@ async function handleCreateUser() {
       password: newUser.value.password,
       display_name: newUser.value.displayName,
     })
-    message.success('用户已创建')
+    message.success($t('admin.userCreated'))
     showAddUser.value = false
     newUser.value = { username: '', password: '', displayName: '' }
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || '创建失败')
+    message.error(e.response?.data?.error || $t('admin.createFailed'))
   } finally {
     modalLoading.value = false
   }
@@ -455,40 +458,40 @@ async function toggleRole(user: User) {
   try {
     await api.put(`/api/users/${user.id}`, { role: newRole })
     user.role = newRole
-    message.success('角色已更新')
+    message.success($t('admin.roleUpdated'))
   } catch {
-    message.error('更新失败')
+    message.error($t('admin.updateFailed'))
   }
 }
 
 async function deleteUser(user: User) {
   try {
     await api.delete(`/api/users/${user.id}`)
-    message.success('用户已删除')
+    message.success($t('admin.userDeleted'))
     await fetchUsers()
   } catch {
-    message.error('删除失败')
+    message.error($t('admin.deleteFailed'))
   }
 }
 
 async function approveUser(user: User) {
   try {
     await api.post(`/api/users/${user.id}/approve`)
-    message.success(`${user.username} 已批准`)
+    message.success(`${user.username} {{ $t('admin.approved') }}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || '审批失败')
+    message.error(e.response?.data?.error || $t('admin.approvalFailed'))
   }
 }
 
 async function rejectUser(user: User) {
   try {
     await api.post(`/api/users/${user.id}/reject`)
-    message.success(`${user.username} 已拒绝`)
+    message.success(`${user.username} {{ $t('admin.rejected') }}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
   } catch (e: any) {
-    message.error(e.response?.data?.error || '操作失败')
+    message.error(e.response?.data?.error || $t('admin.operationFailed'))
   }
 }
 
@@ -499,7 +502,7 @@ async function viewUserPanel(user: User) {
     viewingGroups.value = res.data.groups || []
     showUserPanel.value = true
   } catch {
-    message.error('获取用户书签失败')
+    message.error($t('admin.failedToLoadBookmarks'))
   }
 }
 
@@ -518,7 +521,7 @@ function openEditDisplayName(user: User) {
 async function handleEditDisplayName() {
   if (!editingDisplayNameUser.value) return false
   if (!newDisplayName.value.trim()) {
-    message.warning('显示名称不能为空')
+    message.warning($t('admin.displayNameCannotBeEmpty'))
     return false
   }
   editDisplayNameLoading.value = true
@@ -526,11 +529,11 @@ async function handleEditDisplayName() {
     await api.put(`/api/users/${editingDisplayNameUser.value.id}`, {
       display_name: newDisplayName.value.trim(),
     })
-    message.success(`${editingDisplayNameUser.value.username} 的显示名已更新`)
+    message.success(`${editingDisplayNameUser.value.username} {{ $t('admin.sDisplayNameUpdated') }}`)
     showEditDisplayName.value = false
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || '更新失败')
+    message.error(e.response?.data?.error || $t('admin.updateFailed'))
     return false
   } finally {
     editDisplayNameLoading.value = false
@@ -553,7 +556,7 @@ function openResetPassword(user: User) {
 async function handleResetPassword() {
   if (!resettingUser.value) return false
   if (!newResetPassword.value || newResetPassword.value.length < 6) {
-    message.warning('密码至少需要6位')
+    message.warning($t('admin.passwordMin6Chars'))
     return false
   }
   resetPasswordLoading.value = true
@@ -561,10 +564,10 @@ async function handleResetPassword() {
     await api.post(`/api/users/${resettingUser.value.id}/reset-password`, {
       new_password: newResetPassword.value,
     })
-    message.success(`${resettingUser.value.username} 的密码已重置`)
+    message.success(`${resettingUser.value.username} {{ $t('admin.sPasswordReset') }}`)
     showResetPassword.value = false
   } catch (e: any) {
-    message.error(e.response?.data?.error || '重置失败')
+    message.error(e.response?.data?.error || $t('admin.resetFailed'))
     return false
   } finally {
     resetPasswordLoading.value = false

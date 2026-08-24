@@ -16,7 +16,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../../stores/app'
+
+const { t } = useI18n()
 
 const props = defineProps<{ compact?: boolean }>()
 const appStore = useAppStore()
@@ -48,9 +51,9 @@ const seconds = computed(() => String(now.value.getSeconds()).padStart(2, '0'))
 const period = computed(() => now.value.getHours() >= 12 ? 'PM' : 'AM')
 
 const dateStr = computed(() => {
-  const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  const days = [t('clock.sunday'), t('clock.monday'), t('clock.tuesday'), t('clock.wednesday'), t('clock.thursday'), t('clock.friday'), t('clock.saturday')]
   const d = now.value
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${days[d.getDay()]}`
+  return `${d.getMonth() + 1}/${d.getDate()} ${days[d.getDay()]}`
 })
 </script>
 
@@ -106,7 +109,7 @@ const dateStr = computed(() => {
   font-weight: 400;
 }
 
-/* 响应式 */
+/* Responsive */
 @media (max-width: 640px) {
   .clock-time {
     font-size: 48px;

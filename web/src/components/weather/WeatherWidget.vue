@@ -2,11 +2,11 @@
   <div v-if="appStore.showWeatherWidget" class="weather-widget" :class="{ 'expanded': isExpanded }">
     <!-- Compact bar -->
     <div class="weather-bar" @click="isExpanded = !isExpanded">
-      <div class="weather-item temp" :title="'温度: ' + weather?.temperature.toFixed(1) + '°C'">
+      <div class="weather-item temp" :title="t('weather.temperature') + ': ' + weather?.temperature.toFixed(1) + '°C'">
         <Icon icon="mdi:thermometer" :size="13" />
         <span>{{ weather?.temperature.toFixed(0) }}°C</span>
       </div>
-      <div class="weather-item wind" :title="'风速: ' + (weather?.windspeed || 0).toFixed(1) + ' km/h'">
+      <div class="weather-item wind" :title="t('weather.wind') + ': ' + (weather?.windspeed || 0).toFixed(1) + ' km/h'">
         <Icon icon="mdi:weather-windy" :size="13" />
         <span>{{ (weather?.windspeed || 0).toFixed(0) }} km/h</span>
       </div>
@@ -27,7 +27,7 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:thermometer" :size="16" />
-              <span>温度</span>
+              <span>{{ t('weather.temperature') }}</span>
             </div>
             <div class="detail-value">{{ weather?.temperature.toFixed(1) }}°C</div>
             <div class="detail-meta">{{ weatherCondition }}</div>
@@ -37,17 +37,17 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:weather-windy" :size="16" />
-              <span>风速</span>
+              <span>{{ t('weather.wind') }}</span>
             </div>
             <div class="detail-value">{{ (weather?.windspeed || 0).toFixed(1) }} km/h</div>
-            <div class="detail-meta">风向: {{ weather?.winddirection?.toFixed(0) }}°</div>
+            <div class="detail-meta">{{ t('weather.windDirection') }}: {{ weather?.winddirection?.toFixed(0) }}°</div>
           </div>
 
           <!-- Location -->
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:map-marker" :size="16" />
-              <span>位置</span>
+              <span>{{ t('weather.location') }}</span>
             </div>
             <div class="detail-value">{{ weather?.latitude.toFixed(2) }}, {{ weather?.longitude.toFixed(2) }}</div>
             <div class="detail-meta">{{ weather?.timezone }}</div>
@@ -57,16 +57,16 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:clock-outline" :size="16" />
-              <span>更新时间</span>
+              <span>{{ t('weather.updated') }}</span>
             </div>
             <div class="detail-value update-time">{{ formatTime(weather?.time) }}</div>
-            <div class="detail-meta">数据来源: Open-Meteo</div>
+            <div class="detail-meta">{{ t('weather.dataSource') }}: Open-Meteo</div>
           </div>
         </div>
 
         <!-- Weather description -->
         <div v-if="weather" class="weather-description">
-          <div class="description-title">天气状况</div>
+          <div class="description-title">{{ t('weather.condition') }}</div>
           <div class="description-text">{{ getWeatherDescription(weather?.weathercode) }}</div>
         </div>
       </div>
@@ -78,9 +78,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
+import { useI18n } from 'vue-i18n'
 import axios from '@/api'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 const weather = ref<any>(null)
 const isExpanded = ref(false)
 let timer: ReturnType<typeof setInterval> | null = null
@@ -111,39 +113,39 @@ function formatTime(timeString: string | undefined): string {
 }
 
 function getWeatherDescription(code: number | undefined): string {
-  if (code === undefined) return '未知'
+  if (code === undefined) return t('weather.unknown')
   // WMO Weather interpretation codes (https://open-meteo.com/en/docs)
   const weatherCodes: Record<number, string> = {
-    0: '晴朗',
-    1: '主要晴朗',
-    2: '部分多云',
-    3: '多云',
-    45: '雾',
-    48: '沉雾',
-    51: '轻度毛毛雨',
-    53: '中度毛毛雨',
-    55: '密集毛毛雨',
-    56: '轻度冻毛毛雨',
-    57: '密集冻毛毛雨',
-    61: '轻度雨',
-    63: '中度雨',
-    65: '大雨',
-    66: '轻度冻雨',
-    67: '大冻雨',
-    71: '轻度雪',
-    73: '中度雪',
-    75: '大雪',
-    77: '雪粒',
-    80: '轻度阵雨',
-    81: '中度阵雨',
-    82: '猛烈阵雨',
-    85: '轻度雪阵雨',
-    86: '重度雪阵雨',
-    95: '雷暴',
-    96: '雷暴伴有轻度冰雹',
-    99: '雷暴伴有重度冰雹'
+    0: t('weather.sunny'),
+    1: t('weather.mainlyClear'),
+    2: t('weather.partlyCloudy'),
+    3: t('weather.cloudy'),
+    45: t('weather.fog'),
+    48: t('weather.freezingFog'),
+    51: t('weather.drizzleLight'),
+    53: t('weather.drizzleModerate'),
+    55: t('weather.drizzleDense'),
+    56: t('weather.freezingDrizzleLight'),
+    57: t('weather.freezingDrizzleDense'),
+    61: t('weather.rainLight'),
+    63: t('weather.rainModerate'),
+    65: t('weather.rainHeavy'),
+    66: t('weather.freezingRainLight'),
+    67: t('weather.freezingRainHeavy'),
+    71: t('weather.snowLight'),
+    73: t('weather.snowModerate'),
+    75: t('weather.snowHeavy'),
+    77: t('weather.snowGrains'),
+    80: t('weather.showersLight'),
+    81: t('weather.showersModerate'),
+    82: t('weather.showersViolent'),
+    85: t('weather.snowShowersLight'),
+    86: t('weather.snowShowersHeavy'),
+    95: t('weather.thunderstorm'),
+    96: t('weather.thunderstormHailLight'),
+    99: t('weather.thunderstormHailHeavy')
   }
-  return weatherCodes[code] || '未知'
+  return weatherCodes[code] || t('weather.unknown')
 }
 
 function getWeatherIcon(code: number | undefined): string {

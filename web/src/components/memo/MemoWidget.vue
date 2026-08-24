@@ -2,11 +2,11 @@
   <div v-if="appStore.showMemo" class="memo-widget" :class="{ 'expanded': isExpanded }">
     <!-- Compact bar -->
     <div class="memo-bar" @click="isExpanded = !isExpanded">
-      <div class="memo-item count" :title="'便签数量: ' + memos.length">
+      <div class="memo-item count" :title="t('memo.count', { count: memos.length })">
         <Icon icon="mdi:note-text" :size="13" />
         <span>{{ memos.length }}</span>
       </div>
-      <div class="memo-item add" @click="showAddMemo = true" title="新增便签">
+      <div class="memo-item add" @click="showAddMemo = true" :title="t('memo.add')">
         <Icon icon="mdi:plus" :size="13" />
       </div>
       <div class="memo-expand">
@@ -18,13 +18,13 @@
     <Transition name="slide">
       <div v-if="isExpanded" class="memo-detail">
         <div class="memo-header">
-          <div class="memo-title">我的便签</div>
+          <div class="memo-title">{{ t('memo.title') }}</div>
           <div class="memo-actions">
             <button class="memo-action-btn" @click="showAddMemo = true">
-              <Icon icon="mdi:plus" /> 新建
+              <Icon icon="mdi:plus" /> {{ t('memo.add') }}
             </button>
             <button class="memo-action-btn" @click="archiveAll" :disabled="memos.length === 0">
-              <Icon icon="mdi:archive" /> 归档全部
+              <Icon icon="mdi:archive" /> {{ t('memo.archiveAll') }}
             </button>
           </div>
         </div>
@@ -34,7 +34,7 @@
             <div class="memo-footer">
               <span class="memo-time">{{ formatTime(memo.updated_at) }}</span>
               <div class="memo-actions">
-                <button class="memo-action-btn" @click="toggleArchive(memo)" :title="memo.is_archived ? '取消归档' : '归档'">
+                <button class="memo-action-btn" @click="toggleArchive(memo)" :title="memo.is_archived ? t('memo.unarchive') : t('memo.archive')">
                   <Icon :icon="memo.is_archived ? 'mdi:folder-outline' : 'mdi:folder'" />
                 </button>
                 <button class="memo-action-btn" @click="deleteMemo(memo.id)">
@@ -44,7 +44,7 @@
             </div>
           </div>
           <div v-if="memos.length === 0" class="empty-state">
-            暂无便签，点击「新建」添加第一条便签吧！
+            {{ t('memo.empty') }}
           </div>
         </div>
       </div>
@@ -55,17 +55,17 @@
       <div v-if="showAddMemo" class="modal-backdrop" @click.self="showAddMemo = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3>新建便签</h3>
+            <h3>{{ t('memo.add') }}</h3>
             <button class="modal-close" @click="showAddMemo = false">
               <Icon icon="mdi:close" />
             </button>
           </div>
           <div class="modal-body">
-            <textarea v-model="newMemoContent" placeholder="输入便签内容..." rows="4" class="memo-input" @keyup.enter="saveMemo" />
+            <textarea v-model="newMemoContent" :placeholder="t('memo.placeholder')" rows="4" class="memo-input" @keyup.enter="saveMemo" />
           </div>
           <div class="modal-footer">
-            <button class="modal-btn" @click="showAddMemo = false">取消</button>
-            <button class="modal-btn primary" @click="saveMemo">保存</button>
+            <button class="modal-btn" @click="showAddMemo = false">{{ t('common.cancel') }}</button>
+            <button class="modal-btn primary" @click="saveMemo">{{ t('common.save') }}</button>
           </div>
         </div>
       </div>
@@ -77,9 +77,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
+import { useI18n } from 'vue-i18n'
 import axios from '@/api'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 const memos = ref<any[]>([])
 const isExpanded = ref(false)
 const showAddMemo = ref(false)
@@ -129,7 +131,7 @@ async function toggleArchive(memo: any) {
 }
 
 async function deleteMemo(id: string) {
-  if (!confirm('确定要删除此便签吗？')) return
+  if (!confirm(t('memo.confirmDelete'))) return
   try {
     const token = localStorage.getItem('sundash-token')
     await axios.delete(`/api/memo/${id}`, {
@@ -142,7 +144,7 @@ async function deleteMemo(id: string) {
 }
 
 async function archiveAll() {
-  if (!confirm('确定要归档所有便签吗？')) return
+  if (!confirm(t('memo.confirmArchiveAll'))) return
   try {
     const token = localStorage.getItem('sundash-token')
     // We'll archive each memo individually for simplicity

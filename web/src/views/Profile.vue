@@ -8,9 +8,9 @@
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
         <Icon icon="mdi:chevron-left" :size="18" />
-        <span>返回</span>
+        <span>{{ $t("common.back") }}</span>
       </button>
-      <h1>个人设置</h1>
+      <h1>{{ $t("user.profile") }}</h1>
       <div style="width: 70px;"></div>
     </header>
 
@@ -18,8 +18,8 @@
       <!-- Profile Info -->
       <div class="section-header">
         <div>
-          <h2>个人资料</h2>
-          <p>管理你的显示名称和头像</p>
+          <h2>{{ $t("user.profileInfo") }}</h2>
+          <p>{{ $t("user.manageDisplayNameAndAvatar") }}</p>
         </div>
       </div>
 
@@ -33,7 +33,7 @@
               <div class="user-name">{{ userStore.user?.username }}</div>
               <div class="user-role">
                 <span :class="['role-pill', userStore.user?.role === 'admin' ? 'is-admin' : 'is-user']">
-                  {{ userStore.user?.role === 'admin' ? '管理员' : '用户' }}
+                  {{ userStore.user?.role === 'admin' ? $t('admin.roleAdmin') : $t('admin.roleUser') }}
                 </span>
               </div>
             </div>
@@ -46,14 +46,14 @@
               <Icon icon="mdi:card-account-details-outline" :size="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">显示名称</div>
-              <div class="setting-desc">其他用户看到的名称</div>
+              <div class="setting-title">{{ $t("user.displayName") }}</div>
+              <div class="setting-desc">{{ $t("user.displayNameDesc") }}</div>
             </div>
           </div>
           <div class="inline-edit">
-            <input v-model="displayName" class="mini-text-input" placeholder="输入显示名称" />
+            <input v-model="displayName" class="mini-text-input" placeholder="{{ $t("user.enterDisplayName") }}" />
             <button class="save-inline-btn" @click="saveDisplayName" :disabled="displayNameSaving">
-              {{ displayNameSaving ? '保存中...' : '保存' }}
+              {{ displayNameSaving ? $t('common.saving') : $t('common.save') }}
             </button>
           </div>
         </div>
@@ -62,28 +62,28 @@
       <!-- Change Password -->
       <div class="section-header" style="margin-top: 32px;">
         <div>
-          <h2>修改密码</h2>
-          <p>定期修改密码以保障账户安全</p>
+          <h2>{{ $t("user.changePassword") }}</h2>
+          <p>{{ $t("user.changePasswordDesc") }}</p>
         </div>
       </div>
 
       <div class="settings-card">
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
           <div class="form-field">
-            <label>当前密码</label>
-            <n-input v-model:value="passwordForm.oldPassword" type="password" placeholder="请输入当前密码" show-password-on="click" />
+            <label>{{ $t("user.currentPassword") }}</label>
+            <n-input v-model:value="passwordForm.oldPassword" type="password" placeholder="{{ $t("user.enterCurrentPassword") }}" show-password-on="click" />
           </div>
           <div class="form-field">
-            <label>新密码</label>
-            <n-input v-model:value="passwordForm.newPassword" type="password" placeholder="请输入新密码（至少6位）" show-password-on="click" />
+            <label>{{ $t("user.newPassword") }}</label>
+            <n-input v-model:value="passwordForm.newPassword" type="password" placeholder="{{ $t("user.enterNewPasswordAtLeast6") }}" show-password-on="click" />
           </div>
           <div class="form-field">
-            <label>确认新密码</label>
-            <n-input v-model:value="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password-on="click" @keyup.enter="handleChangePassword" />
+            <label>{{ $t("user.confirmPassword") }}</label>
+            <n-input v-model:value="passwordForm.confirmPassword" type="password" placeholder="{{ $t("user.enterNewPasswordAgain") }}" show-password-on="click" @keyup.enter="handleChangePassword" />
           </div>
           <div style="display: flex; justify-content: flex-end;">
             <n-button type="primary" :loading="passwordSaving" @click="handleChangePassword">
-              修改密码
+              {{ $t("user.changePassword") }}
             </n-button>
           </div>
         </div>
@@ -94,10 +94,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, NInput, NButton } from 'naive-ui'
 import { useUserStore } from '../stores/user'
 import { api } from '../api'
+
+const { t } = useI18n()
 
 const userStore = useUserStore()
 const message = useMessage()
@@ -118,7 +121,7 @@ onMounted(() => {
 
 async function saveDisplayName() {
   if (!displayName.value.trim()) {
-    message.warning('显示名称不能为空')
+    message.warning($t('user.displayNameCannotBeEmpty'))
     return
   }
   displayNameSaving.value = true
@@ -127,9 +130,9 @@ async function saveDisplayName() {
     if (userStore.user) {
       userStore.user.display_name = displayName.value.trim()
     }
-    message.success('显示名称已更新')
+    message.success($t('user.displayNameUpdated'))
   } catch {
-    message.error('更新失败')
+    message.error($t('user.updateFailed'))
   } finally {
     displayNameSaving.value = false
   }
@@ -137,15 +140,15 @@ async function saveDisplayName() {
 
 async function handleChangePassword() {
   if (!passwordForm.value.oldPassword) {
-    message.warning('请输入当前密码')
+    message.warning($t('user.pleaseEnterCurrentPassword'))
     return
   }
   if (!passwordForm.value.newPassword || passwordForm.value.newPassword.length < 6) {
-    message.warning('新密码至少需要6位')
+    message.warning($t('user.newPasswordAtLeast6'))
     return
   }
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    message.warning('两次输入的密码不一致')
+    message.warning($t('user.passwordsDoNotMatch'))
     return
   }
   passwordSaving.value = true
@@ -154,10 +157,10 @@ async function handleChangePassword() {
       old_password: passwordForm.value.oldPassword,
       new_password: passwordForm.value.newPassword,
     })
-    message.success('密码修改成功')
+    message.success($t('user.passwordChanged'))
     passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
   } catch (e: any) {
-    message.error(e.response?.data?.error || '密码修改失败')
+    message.error(e.response?.data?.error || $t('user.changePasswordFailed'))
   } finally {
     passwordSaving.value = false
   }

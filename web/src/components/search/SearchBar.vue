@@ -6,7 +6,7 @@
         v-model="query"
         class="search-input"
         :style="searchInputStyle"
-        :placeholder="currentEngine.name + ' 搜索...'"
+        :placeholder="currentEngine.name + ' ' + t('search.placeholder')"
         @keydown.enter="handleSearch"
         @input="onSearchInput">
       <kbd v-if="!query" class="search-kbd">Enter</kbd>
@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { NDropdown } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
@@ -44,6 +45,7 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import axios from '@/api'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const panelStore = usePanelStore()
 const toast = useToast()

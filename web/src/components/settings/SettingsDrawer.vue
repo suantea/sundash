@@ -1,10 +1,32 @@
 <template>
   <n-drawer :show="show" @update:show="$emit('update:show', $event)" :width="drawerWidth" placement="right">
-    <n-drawer-content title="设置" :native-scrollbar="false">
+    <n-drawer-content :title="$t('settings.title')" :native-scrollbar="false">
       <div class="drawer-settings">
-        <!-- ===== 1. 页面 ===== -->
+        <!-- ===== 1. 语言 ===== -->
         <section class="settings-section">
-          <div class="section-label">页面</div>
+          <div class="section-label">{{ $t('settings.language') }}</div>
+          <div class="settings-card">
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
+                  <Icon icon="mdi:translate" :size="18" color="#007AFF" />
+                </div>
+                <div>
+                  <div class="setting-title">{{ $t('settings.language') }}</div>
+                  <div class="setting-desc">{{ $t('settings.languageDesc') }}</div>
+                </div>
+              </div>
+              <div class="seg-control">
+                <button :class="['seg-btn', { active: locale === 'zh-CN' }]" @click="setLocale('zh-CN')">中文</button>
+                <button :class="['seg-btn', { active: locale === 'en' }]" @click="setLocale('en')">English</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== 2. 页面 ===== -->
+        <section class="settings-section">
+          <div class="section-label">{{ $t('settings.site') }}</div>
           <div class="settings-card">
             <div class="setting-row">
               <div class="setting-left">
@@ -12,13 +34,13 @@
                   <Icon icon="mdi:lan" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">网络模式</div>
-                  <div class="setting-desc">切换内网或外网链接</div>
+                  <div class="setting-title">{{ $t('settings.networkMode') }}</div>
+                  <div class="setting-desc">{{ $t('settings.networkModeDesc') }}</div>
                 </div>
               </div>
               <div class="seg-control">
-                <button :class="['seg-btn', { active: appStore.networkMode === 'internal' }]" @click="setNetwork('internal')">内网</button>
-                <button :class="['seg-btn', { active: appStore.networkMode === 'external' }]" @click="setNetwork('external')">外网</button>
+                <button :class="['seg-btn', { active: appStore.networkMode === 'internal' }]" @click="setNetwork('internal')">{{ $t('settings.networkInternal') }}</button>
+                <button :class="['seg-btn', { active: appStore.networkMode === 'external' }]" @click="setNetwork('external')">{{ $t('settings.networkExternal') }}</button>
               </div>
             </div>
             <div class="setting-divider"></div>
@@ -28,20 +50,20 @@
                   <Icon icon="mdi:image" :size="18" color="#FF9500" />
                 </div>
                 <div>
-                  <div class="setting-title">Logo 类型</div>
-                  <div class="setting-desc">图片或文字显示</div>
+                  <div class="setting-title">{{ $t('settings.logoType') }}</div>
+                  <div class="setting-desc">{{ $t('settings.logoTypeDesc') }}</div>
                 </div>
               </div>
               <div class="seg-control">
-                <button :class="['seg-btn', { active: appStore.logoType === 'text' }]" @click="appStore.setLogoType('text')">文字</button>
-                <button :class="['seg-btn', { active: appStore.logoType === 'image' }]" @click="appStore.setLogoType('image')">图片</button>
+                <button :class="['seg-btn', { active: appStore.logoType === 'text' }]" @click="appStore.setLogoType('text')">{{ $t('settings.logoText') }}</button>
+                <button :class="['seg-btn', { active: appStore.logoType === 'image' }]" @click="appStore.setLogoType('image')">{{ $t('settings.logoImage') }}</button>
               </div>
             </div>
             <div v-if="appStore.logoType === 'image'" class="setting-sub">
-              <input v-model="logoImageInput" class="bg-url-input" placeholder="输入 Logo 图片 URL" @change="appStore.setLogoImageUrl(logoImageInput)" />
+              <input v-model="logoImageInput" class="bg-url-input" :placeholder="$t('settings.logoImageUrl')" @change="appStore.setLogoImageUrl(logoImageInput)" />
             </div>
             <div v-if="appStore.logoType === 'text'" class="setting-sub">
-              <input v-model="logoTextInput" class="bg-url-input" placeholder="输入 Logo 文字" @change="appStore.setLogoText(logoTextInput)" />
+              <input v-model="logoTextInput" class="bg-url-input" :placeholder="$t('settings.logoTextValue')" @change="appStore.setLogoText(logoTextInput)" />
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row">
@@ -50,11 +72,11 @@
                   <Icon icon="mdi:text-short" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">站点标题</div>
-                  <div class="setting-desc">浏览器标签页标题</div>
+                  <div class="setting-title">{{ $t('settings.siteTitle') }}</div>
+                  <div class="setting-desc">{{ $t('settings.siteTitleDesc') }}</div>
                 </div>
               </div>
-              <input v-model="siteTitleInput" class="mini-text-input" placeholder="SunDash" @change="updateSiteTitle" />
+              <input v-model="siteTitleInput" class="mini-text-input" :placeholder="$t('settings.siteTitlePlaceholder')" @change="updateSiteTitle" />
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -63,18 +85,18 @@
                   <Icon icon="mdi:code-tags" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">自定义页脚</div>
-                  <div class="setting-desc">支持 HTML 代码</div>
+                  <div class="setting-title">{{ $t('settings.footerHtml') }}</div>
+                  <div class="setting-desc">{{ $t('settings.footerHtmlDesc') }}</div>
                 </div>
               </div>
-              <textarea v-model="footerInput" class="footer-input" placeholder="<p>Powered by SunDash</p>" rows="2" @change="appStore.setFooterHtml(footerInput)"></textarea>
+              <textarea v-model="footerInput" class="footer-input" :placeholder="$t('settings.footerHtmlPlaceholder')" rows="2" @change="appStore.setFooterHtml(footerInput)"></textarea>
             </div>
           </div>
         </section>
 
         <!-- ===== 2. 外观 ===== -->
         <section class="settings-section">
-          <div class="section-label">外观</div>
+          <div class="section-label">{{ $t('settings.appearance') }}</div>
           <div class="settings-card">
             <div class="setting-row">
               <div class="setting-left">
@@ -82,14 +104,14 @@
                   <Icon icon="mdi:theme-light-dark" :size="18" color="#FF9500" />
                 </div>
                 <div>
-                  <div class="setting-title">主题模式</div>
-                  <div class="setting-desc">选择外观风格</div>
+                  <div class="setting-title">{{ $t('settings.theme') }}</div>
+                  <div class="setting-desc">{{ $t('settings.themeDesc') }}</div>
                 </div>
               </div>
               <div class="seg-control">
-                <button :class="['seg-btn', { active: appStore.themeMode === 'light' }]" @click="appStore.setTheme('light')">浅色</button>
-                <button :class="['seg-btn', { active: appStore.themeMode === 'dark' }]" @click="appStore.setTheme('dark')">深色</button>
-                <button :class="['seg-btn', { active: appStore.themeMode === 'system' }]" @click="appStore.setTheme('system')">自动</button>
+                <button :class="['seg-btn', { active: appStore.themeMode === 'light' }]" @click="appStore.setTheme('light')">{{ $t('settings.themeLight') }}</button>
+                <button :class="['seg-btn', { active: appStore.themeMode === 'dark' }]" @click="appStore.setTheme('dark')">{{ $t('settings.themeDark') }}</button>
+                <button :class="['seg-btn', { active: appStore.themeMode === 'system' }]" @click="appStore.setTheme('system')">{{ $t('settings.themeSystem') }}</button>
               </div>
             </div>
             <div class="setting-divider"></div>
@@ -99,26 +121,26 @@
                   <Icon icon="mdi:image-outline" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">背景</div>
-                  <div class="setting-desc">选择页面背景样式</div>
+                  <div class="setting-title">{{ $t('settings.wallpaper') }}</div>
+                  <div class="setting-desc">{{ $t('settings.wallpaperDesc') }}</div>
                 </div>
               </div>
               <div class="seg-control">
-                <button :class="['seg-btn', { active: appStore.wallpaperType === 'default' }]" @click="setWallpaperTypeWithSync('default')">默认</button>
-                <button :class="['seg-btn', { active: appStore.wallpaperType === 'gradient' }]" @click="setWallpaperTypeWithSync('gradient')">渐变</button>
-                <button :class="['seg-btn', { active: appStore.wallpaperType === 'bing' }]" @click="setWallpaperTypeWithSync('bing')">必应</button>
-                <button :class="['seg-btn', { active: appStore.wallpaperType === 'custom' }]" @click="setWallpaperTypeWithSync('custom')">自定义</button>
+                <button :class="['seg-btn', { active: appStore.wallpaperType === 'default' }]" @click="setWallpaperTypeWithSync('default')">{{ $t('settings.wallpaperDefault') }}</button>
+                <button :class="['seg-btn', { active: appStore.wallpaperType === 'gradient' }]" @click="setWallpaperTypeWithSync('gradient')">{{ $t('settings.wallpaperGradient') }}</button>
+                <button :class="['seg-btn', { active: appStore.wallpaperType === 'bing' }]" @click="setWallpaperTypeWithSync('bing')">{{ $t('settings.wallpaperBing') }}</button>
+                <button :class="['seg-btn', { active: appStore.wallpaperType === 'custom' }]" @click="setWallpaperTypeWithSync('custom')">{{ $t('settings.wallpaperCustom') }}</button>
               </div>
             </div>
             <div v-if="appStore.wallpaperType === 'bing'" class="setting-sub">
-              <button class="apply-btn" @click="fetchBingWallpaper">刷新必应壁纸</button>
+              <button class="apply-btn" @click="fetchBingWallpaper">{{ $t('settings.refreshBingWallpaper') }}</button>
               <span v-if="appStore.wallpaperUrl" class="bing-preview">
-                <img :src="appStore.wallpaperUrl" alt="预览" class="bing-preview-img" />
+                <img :src="appStore.wallpaperUrl" :alt="$t('settings.preview')" class="bing-preview-img" />
               </span>
             </div>
             <div v-if="appStore.wallpaperType === 'custom'" class="setting-sub">
-              <input v-model="customUrl" class="bg-url-input" placeholder="输入背景图片 URL" />
-              <button class="apply-btn" @click="applyCustomBackground">应用</button>
+              <input v-model="customUrl" class="bg-url-input" :placeholder="$t('settings.wallpaperUrlPlaceholder')" />
+              <button class="apply-btn" @click="applyCustomBackground">{{ $t('settings.apply') }}</button>
             </div>
             <template v-if="appStore.wallpaperType !== 'default'">
               <div class="setting-divider"></div>
@@ -128,7 +150,7 @@
                     <Icon icon="mdi:blur" :size="18" color="#FF9500" />
                   </div>
                   <div>
-                    <div class="setting-title">模糊</div>
+                    <div class="setting-title">{{ $t('settings.wallpaperBlur') }}</div>
                     <div class="setting-desc">{{ appStore.wallpaperBlur }}px</div>
                   </div>
                 </div>
@@ -143,7 +165,7 @@
                     <Icon icon="mdi:opacity" :size="18" color="#007AFF" />
                   </div>
                   <div>
-                    <div class="setting-title">透明度</div>
+                    <div class="setting-title">{{ $t('settings.wallpaperOpacity') }}</div>
                     <div class="setting-desc">{{ appStore.wallpaperOpacity }}%</div>
                   </div>
                 </div>
@@ -159,13 +181,13 @@
                   <Icon icon="mdi:palette" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">主题色</div>
-                  <div class="setting-desc">自定义强调色</div>
+                  <div class="setting-title">{{ $t('settings.primaryColor') }}</div>
+                  <div class="setting-desc">{{ $t('settings.primaryColorDesc') }}</div>
                 </div>
               </div>
               <div class="color-picker-wrap">
                 <input type="color" :value="appStore.primaryColor || '#007AFF'" @input="appStore.setPrimaryColor(($event.target as HTMLInputElement).value)" class="color-input" />
-                <button v-if="appStore.primaryColor" class="reset-btn" @click="appStore.setPrimaryColor('')">重置</button>
+                <button v-if="appStore.primaryColor" class="reset-btn" @click="appStore.setPrimaryColor('')">{{ $t('settings.reset') }}</button>
               </div>
             </div>
             <div class="setting-divider"></div>
@@ -175,13 +197,13 @@
                   <Icon icon="mdi:format-color-fill" :size="18" color="#FF9500" />
                 </div>
                 <div>
-                  <div class="setting-title">边框颜色</div>
-                  <div class="setting-desc">自定义边框色</div>
+                  <div class="setting-title">{{ $t('settings.borderColor') }}</div>
+                  <div class="setting-desc">{{ $t('settings.borderColorDesc') }}</div>
                 </div>
               </div>
               <div class="color-picker-wrap">
                 <input type="color" :value="appStore.borderColor || '#000000'" @input="appStore.setBorderColor(($event.target as HTMLInputElement).value)" class="color-input" />
-                <button v-if="appStore.borderColor" class="reset-btn" @click="appStore.setBorderColor('')">重置</button>
+                <button v-if="appStore.borderColor" class="reset-btn" @click="appStore.setBorderColor('')">{{ $t('settings.reset') }}</button>
               </div>
             </div>
           </div>
@@ -189,7 +211,7 @@
 
         <!-- ===== 3. 布局 ===== -->
         <section class="settings-section">
-          <div class="section-label">布局</div>
+          <div class="section-label">{{ $t('settings.layout') }}</div>
           <div class="settings-card">
             <div class="setting-row">
               <div class="setting-left">
@@ -197,7 +219,7 @@
                   <Icon icon="mdi:arrow-expand-horizontal" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">内容宽度</div>
+                  <div class="setting-title">{{ $t('settings.maxWidth') }}</div>
                   <div class="setting-desc">{{ appStore.contentMaxWidth }}</div>
                 </div>
               </div>
@@ -212,7 +234,7 @@
                   <Icon icon="mdi:format-horizontal-align-left" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">两侧边距</div>
+                  <div class="setting-title">{{ $t('settings.paddingX') }}</div>
                   <div class="setting-desc">{{ appStore.contentPaddingX }}</div>
                 </div>
               </div>
@@ -227,7 +249,7 @@
                   <Icon icon="mdi:format-vertical-align-top" :size="18" color="#AF52DE" />
                 </div>
                 <div>
-                  <div class="setting-title">顶部边距</div>
+                  <div class="setting-title">{{ $t('settings.paddingTop') }}</div>
                   <div class="setting-desc">{{ appStore.contentPaddingTop }}</div>
                 </div>
               </div>
@@ -242,7 +264,7 @@
                   <Icon icon="mdi:format-vertical-align-bottom" :size="18" color="#FF9500" />
                 </div>
                 <div>
-                  <div class="setting-title">底部边距</div>
+                  <div class="setting-title">{{ $t('settings.paddingBottom') }}</div>
                   <div class="setting-desc">{{ appStore.contentPaddingBottom }}</div>
                 </div>
               </div>
@@ -255,7 +277,7 @@
 
         <!-- ===== 4. 组件 ===== -->
         <section class="settings-section">
-          <div class="section-label">组件</div>
+          <div class="section-label">{{ $t('settings.widgets') }}</div>
           <div class="settings-card">
             <div class="setting-row">
               <div class="setting-left">
@@ -263,22 +285,22 @@
                   <Icon icon="mdi:clock-outline" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">时钟</div>
-                  <div class="setting-desc">显示当前时间</div>
+                  <div class="setting-title">{{ $t('settings.clock') }}</div>
+                  <div class="setting-desc">{{ $t('settings.clockDesc') }}</div>
                 </div>
               </div>
               <n-switch v-model:value="appStore.clockShow" @update:value="appStore.setClockShow" />
             </div>
             <div v-if="appStore.clockShow" class="setting-sub" style="flex-direction: column; align-items: stretch; gap: 4px;">
               <div class="setting-row" style="padding: 6px 0;">
-                <span class="mini-label">显示秒数</span>
+                <span class="mini-label">{{ $t('settings.showSeconds') }}</span>
                 <n-switch v-model:value="appStore.clockShowSeconds" @update:value="appStore.setClockShowSeconds" size="small" />
               </div>
               <div class="setting-row" style="padding: 6px 0;">
-                <span class="mini-label">时间格式</span>
+                <span class="mini-label">{{ $t('settings.clockFormat') }}</span>
                 <div class="seg-control">
-                  <button :class="['seg-btn', { active: appStore.clockFormat === '24' }]" @click="appStore.setClockFormat('24')">24小时</button>
-                  <button :class="['seg-btn', { active: appStore.clockFormat === '12' }]" @click="appStore.setClockFormat('12')">12小时</button>
+                  <button :class="['seg-btn', { active: appStore.clockFormat === '24' }]" @click="appStore.setClockFormat('24')">{{ $t('settings.hours24') }}</button>
+                  <button :class="['seg-btn', { active: appStore.clockFormat === '12' }]" @click="appStore.setClockFormat('12')">{{ $t('settings.hours12') }}</button>
                 </div>
               </div>
             </div>
@@ -289,8 +311,8 @@
                   <Icon icon="mdi:server-network" :size="18" color="#AF52DE" />
                 </div>
                 <div>
-                  <div class="setting-title">系统状态</div>
-                  <div class="setting-desc">显示系统信息</div>
+                  <div class="setting-title">{{ $t('settings.systemStatus') }}</div>
+                  <div class="setting-desc">{{ $t('settings.systemStatusDesc') }}</div>
                 </div>
               </div>
               <n-switch v-model:value="appStore.showSystemStatus" @update:value="appStore.setShowSystemStatus" />
@@ -302,8 +324,8 @@
                   <Icon icon="mdi:monitor-dashboard" :size="18" color="#5856D6" />
                 </div>
                 <div>
-                  <div class="setting-title">系统监控</div>
-                  <div class="setting-desc">显示 CPU/内存/磁盘/网络实时状态</div>
+                  <div class="setting-title">{{ $t('settings.systemMonitor') }}</div>
+                  <div class="setting-desc">{{ $t('settings.systemMonitorDesc') }}</div>
                 </div>
               </div>
               <n-switch v-model:value="appStore.showSystemMonitor" @update:value="appStore.setShowSystemMonitor" />
@@ -315,7 +337,7 @@
                   <Icon icon="mdi:format-size" :size="18" color="#FF9500" />
                 </div>
                 <div>
-                  <div class="setting-title">标签大小</div>
+                  <div class="setting-title">{{ $t('settings.cardLabelSize') }}</div>
                   <div class="setting-desc">{{ appStore.cardLabelSize }}px</div>
                 </div>
               </div>
@@ -330,8 +352,8 @@
                   <Icon icon="mdi:resize" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">卡片大小</div>
-                  <div class="setting-desc">{{ parseInt(appStore.cardItemSize) || 0 > 0 ? '+' + appStore.cardItemSize + 'px' : '默认' }}</div>
+                  <div class="setting-title">{{ $t('settings.cardItemSize') }}</div>
+                  <div class="setting-desc">{{ parseInt(appStore.cardItemSize) || 0 > 0 ? '+' + appStore.cardItemSize + 'px' : $t('settings.cardDefault') }}</div>
                 </div>
               </div>
               <div class="slider-control">
@@ -345,8 +367,8 @@
                   <Icon icon="mdi:view-grid" :size="18" color="#AF52DE" />
                 </div>
                 <div>
-                  <div class="setting-title">每行书签数</div>
-                  <div class="setting-desc">{{ parseInt(appStore.cardsPerRow) || 5 }} 个</div>
+                  <div class="setting-title">{{ $t('settings.cardsPerRow') }}</div>
+                  <div class="setting-desc">{{ parseInt(appStore.cardsPerRow) || 5 }} {{ $t('settings.cardsPerRowUnit') }}</div>
                 </div>
               </div>
               <div class="seg-control">
@@ -363,8 +385,8 @@
                   <Icon icon="mdi:eye-off" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">分组背景透明</div>
-                  <div class="setting-desc">隐藏分组卡片背景</div>
+                  <div class="setting-title">{{ $t('settings.groupCardTransparent') }}</div>
+                  <div class="setting-desc">{{ $t('settings.groupCardTransparentDesc') }}</div>
                 </div>
               </div>
               <n-switch v-model:value="appStore.groupCardTransparent" @update:value="appStore.setGroupCardTransparent" />
@@ -374,7 +396,7 @@
 
         <!-- ===== 5. 数据 ===== -->
         <section class="settings-section">
-          <div class="section-label">数据</div>
+          <div class="section-label">{{ $t('settings.data') }}</div>
           <div class="settings-card">
             <div class="setting-row">
               <div class="setting-left">
@@ -382,11 +404,11 @@
                   <Icon icon="mdi:export" :size="18" color="#007AFF" />
                 </div>
                 <div>
-                  <div class="setting-title">导出数据</div>
-                  <div class="setting-desc">备份所有分组和卡片</div>
+                  <div class="setting-title">{{ $t('settings.exportData') }}</div>
+                  <div class="setting-desc">{{ $t('settings.exportDataDesc') }}</div>
                 </div>
               </div>
-              <button class="action-btn" @click="handleExport">导出</button>
+              <button class="action-btn" @click="handleExport">{{ $t('settings.export') }}</button>
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row">
@@ -395,13 +417,13 @@
                   <Icon icon="mdi:import" :size="18" color="#34C759" />
                 </div>
                 <div>
-                  <div class="setting-title">导入数据</div>
-                  <div class="setting-desc">从备份文件恢复</div>
+                  <div class="setting-title">{{ $t('settings.importData') }}</div>
+                  <div class="setting-desc">{{ $t('settings.importDataDesc') }}</div>
                 </div>
               </div>
               <div style="display: flex; gap: 8px;">
-                <button class="action-btn" @click="importTemplate">模板</button>
-                <button class="action-btn" @click="triggerImport">导入</button>
+                <button class="action-btn" @click="importTemplate">{{ $t('settings.importTemplate') }}</button>
+                <button class="action-btn" @click="triggerImport">{{ $t('settings.import') }}</button>
               </div>
             </div>
           </div>
@@ -410,7 +432,7 @@
 
       <template #footer>
         <div class="drawer-footer">
-          <span class="footer-text">设置会自动保存</span>
+          <span class="footer-text">{{ $t('settings.autoSave') }}</span>
         </div>
       </template>
     </n-drawer-content>
@@ -420,6 +442,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, NDrawer, NDrawerContent, NSwitch } from 'naive-ui'
 import { useAppStore } from '../../stores/app'
@@ -429,6 +452,12 @@ import { importTemplates } from '../../data/importTemplates'
 defineProps<{ show: boolean }>()
 const emit = defineEmits<{ 'update:show': [val: boolean] }>()
 
+const { t, locale } = useI18n()
+
+function setLocale(lang: string) {
+  locale.value = lang
+  localStorage.setItem('sundash-locale', lang)
+}
 const appStore = useAppStore()
 const panelStore = usePanelStore()
 
@@ -492,20 +521,20 @@ async function fetchBingWallpaper() {
     const res = await api.get('wallpaper/bing')
     if (res.data && res.data.images && res.data.images[0]) {
       appStore.setWallpaperUrl(res.data.images[0].url)
-      message.success('壁纸已更新')
+      message.success(t('settings.wallpaperUpdated'))
     }
   } catch (e) {
-    message.error('获取壁纸失败')
+    message.error(t('settings.wallpaperFailed'))
   }
 }
 
 function applyCustomBackground() {
   if (!customUrl.value.trim()) {
-    message.error('请输入图片 URL')
+    message.error(t('settings.enterImageUrl'))
     return
   }
   appStore.setWallpaperUrl(customUrl.value.trim())
-  message.success('自定义背景已应用')
+  message.success(t('settings.customBgApplied'))
 }
 
 function updateSiteTitle() {
@@ -535,7 +564,7 @@ function handleExport() {
   a.download = `sundash-backup-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
-  message.success('数据已导出')
+  message.success(t('settings.exportSuccess'))
 }
 
 function triggerImport() {
@@ -552,7 +581,7 @@ async function doImport(data: any) {
       }
     }
     await appStore.loadSettingsFromServer()
-    message.success('设置已恢复')
+    message.success(t('settings.settingsRestored'))
   }
   if (data.groups && Array.isArray(data.groups)) {
     for (const group of data.groups) {
@@ -574,7 +603,7 @@ async function doImport(data: any) {
       }
     }
     await panelStore.fetchPanel()
-    message.success(`导入成功：${data.groups.length} 个分组`)
+    message.success(t('settings.importSuccess', { n: data.groups.length }))
   }
 }
 
@@ -586,17 +615,17 @@ async function handleImport(e: Event) {
     const text = await file.text()
     await doImport(JSON.parse(text))
   } catch {
-    message.error('导入失败：文件格式错误')
+    message.error(t('settings.importFailed'))
   } finally {
     input.value = ''
   }
 }
 
 function importTemplate() {
-  const t = importTemplates[0]
-  const cardCount = t.groups.reduce((sum, g) => sum + (g.cards?.length || 0), 0)
-  message.info(`导入模板「${t.name}」：${t.groups.length} 个分组、${cardCount} 个书签`)
-  doImport({ groups: t.groups }).catch(() => message.error('模板导入失败'))
+  const tmpl = importTemplates[0]
+  const cardCount = tmpl.groups.reduce((sum, g) => sum + (g.cards?.length || 0), 0)
+  message.info(t('settings.importTemplateInfo', { name: tmpl.name, groups: tmpl.groups.length, cards: cardCount }))
+  doImport({ groups: tmpl.groups }).catch(() => message.error(t('settings.templateImportFailed')))
 }
 </script>
 

@@ -2,11 +2,11 @@
   <div v-if="appStore.showRSSWidget" class="rss-widget" :class="{ 'expanded': isExpanded }">
     <!-- Compact bar -->
     <div class="rss-bar" @click="isExpanded = !isExpanded">
-      <div class="rss-item count" :title="'订阅数量: ' + feeds.length">
+      <div class="rss-item count" :title="t('rss.count', { count: feeds.length })">
         <Icon icon="mdi:rss" :size="13" />
         <span>{{ feeds.length }}</span>
       </div>
-      <div class="rss-item add" @click="showAddFeed = true" title="新增订阅">
+      <div class="rss-item add" @click="showAddFeed = true" :title="t('rss.add')">
         <Icon icon="mdi:plus" :size="13" />
       </div>
       <div class="rss-expand">
@@ -18,13 +18,13 @@
     <Transition name="slide">
       <div v-if="isExpanded" class="rss-detail">
         <div class="rss-header">
-          <div class="rss-title">我的订阅</div>
+          <div class="rss-title">{{ t('rss.title') }}</div>
           <div class="rss-actions">
             <button class="rss-action-btn" @click="showAddFeed = true">
-              <Icon icon="mdi:plus" /> 新建
+              <Icon icon="mdi:plus" /> {{ t('rss.add') }}
             </button>
             <button class="rss-action-btn" @click="refreshAll" :disabled="feeds.length === 0">
-              <Icon icon="mdi:refresh" /> 刷新全部
+              <Icon icon="mdi:refresh" /> {{ t('rss.refreshAll') }}
             </button>
           </div>
         </div>
@@ -33,7 +33,7 @@
             <div class="rss-header">
               <div class="rss-title">{{ feed.title }}</div>
               <div class="rss-actions">
-                <button class="rss-action-btn" @click="toggleFeed(feed)" :title="feed.isExpanded ? '收起' : '展开'">
+                <button class="rss-action-btn" @click="toggleFeed(feed)" :title="feed.isExpanded ? t('common.collapse') : t('common.expand')">
                   <Icon :icon="feed.isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
                 </button>
                 <button class="rss-action-btn" @click="editFeed(feed.id)">
@@ -47,7 +47,7 @@
             <!-- Feed content (expanded) -->
             <div v-if="feed.isExpanded" class="rss-content">
               <div v-if="feed.items.length === 0" class="empty-state">
-                暂无文章，点击刷新获取最新内容。
+                {{ t('rss.noArticles') }}
               </div>
               <div v-else class="rss-feed-items">
                 <div v-for="item in feed.items" :key="item.id" class="rss-item">
@@ -64,7 +64,7 @@
             </div>
           </div>
           <div v-if="feeds.length === 0" class="empty-state">
-            您还没有添加任何 RSS 订阅，点击「新建」添加第一个订阅吧！
+            {{ t('rss.empty') }}
           </div>
         </div>
       </div>
@@ -75,17 +75,17 @@
       <div v-if="showAddFeed" class="modal-backdrop" @click.self="showAddFeed = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3>添加 RSS 订阅</h3>
+            <h3>{{ t('rss.add') }}</h3>
             <button class="modal-close" @click="showAddFeed = false">
               <Icon icon="mdi:close" />
             </button>
           </div>
           <div class="modal-body">
-            <input v-model="newFeedUrl" placeholder="输入 RSS Feed URL..." type="text" class="rss-input" @keyup.enter="addFeed" />
+            <input v-model="newFeedUrl" :placeholder="t('rss.feedUrl')" type="text" class="rss-input" @keyup.enter="addFeed" />
           </div>
           <div class="modal-footer">
-            <button class="modal-btn" @click="showAddFeed = false">取消</button>
-            <button class="modal-btn primary" @click="addFeed">保存</button>
+            <button class="modal-btn" @click="showAddFeed = false">{{ t('common.cancel') }}</button>
+            <button class="modal-btn primary" @click="addFeed">{{ t('common.save') }}</button>
           </div>
         </div>
       </div>
@@ -96,17 +96,17 @@
       <div v-if="showEditFeed" class="modal-backdrop" @click.self="showEditFeed = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3>编辑 RSS 订阅</h3>
+            <h3>{{ t('rss.edit') }}</h3>
             <button class="modal-close" @click="showEditFeed = false">
               <Icon icon="mdi:close" />
             </button>
           </div>
           <div class="modal-body">
-            <input v-model="editFeedUrl" placeholder="输入 RSS Feed URL..." type="text" class="rss-input" @keyup.enter="updateFeed" />
+            <input v-model="editFeedUrl" :placeholder="t('rss.feedUrl')" type="text" class="rss-input" @keyup.enter="updateFeed" />
           </div>
           <div class="modal-footer">
-            <button class="modal-btn" @click="showEditFeed = false">取消</button>
-            <button class="modal-btn primary" @click="updateFeed">保存</button>
+            <button class="modal-btn" @click="showEditFeed = false">{{ t('common.cancel') }}</button>
+            <button class="modal-btn primary" @click="updateFeed">{{ t('common.save') }}</button>
           </div>
         </div>
       </div>
@@ -117,14 +117,14 @@
       <div v-if="showDeleteConfirm" class="modal-backdrop" @click.self="showDeleteConfirm = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3>确认删除</h3>
+            <h3>{{ t('common.confirm') }}</h3>
           </div>
           <div class="modal-body">
-            确定要删除此 RSS 订阅吗？此操作将同时删除所有已获取的文章。
+            {{ t('rss.confirmDelete') }}
           </div>
           <div class="modal-footer">
-            <button class="modal-btn" @click="showDeleteConfirm = false">取消</button>
-            <button class="modal-btn danger" @click="confirmDeleteFeed">删除</button>
+            <button class="modal-btn" @click="showDeleteConfirm = false">{{ t('common.cancel') }}</button>
+            <button class="modal-btn danger" @click="confirmDeleteFeed">{{ t('common.delete') }}</button>
           </div>
         </div>
       </div>
@@ -136,9 +136,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
+import { useI18n } from 'vue-i18n'
 import axios from '@/api'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 const feeds = ref<any[]>([])
 const isExpanded = ref(false)
 const showAddFeed = ref(false)

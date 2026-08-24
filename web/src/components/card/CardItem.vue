@@ -8,39 +8,39 @@
       <div class="card-title" :style="cardTitleStyle">{{ card.title }}</div>
       <div v-if="card.description" class="card-desc">{{ card.description }}</div>
     </div>
-    <div v-if="card.url_internal" class="card-net-dot" title="支持内网访问"></div>
+    <div v-if="card.url_internal" class="card-net-dot" :title="t('home.internalAccess')"></div>
     
     <!-- Context Menu -->
     <teleport to="body">
       <div v-if="showContextMenu" class="card-context-menu" :style="contextMenuStyle" @click.stop>
         <div class="ctx-menu-item" @click="handleAction('open')">
           <Icon icon="mdi:open-in-new" :size="16" />
-          <span>访问链接</span>
+          <span>{{ t('home.visitLink') }}</span>
         </div>
         <div v-if="card.url_internal" class="ctx-menu-item" @click="handleAction('open-internal')">
           <Icon icon="mdi:lan" :size="16" />
-          <span>访问内网地址</span>
+          <span>{{ t('home.visitInternal') }}</span>
         </div>
         <div class="ctx-menu-item" @click="handleAction('copy')">
           <Icon icon="mdi:content-copy" :size="16" />
-          <span>复制外网链接</span>
+          <span>{{ t('home.copyExternalLink') }}</span>
         </div>
         <div v-if="card.url_internal" class="ctx-menu-item" @click="handleAction('copy-internal')">
           <Icon icon="mdi:content-copy" :size="16" />
-          <span>复制内网链接</span>
+          <span>{{ t('home.copyInternalLink') }}</span>
         </div>
         <div class="ctx-menu-divider"></div>
         <div class="ctx-menu-item" @click="handleAction('hide')">
           <Icon icon="mdi:eye-off" :size="16" />
-          <span>隐藏书签</span>
+          <span>{{ t('common.hide') }}</span>
         </div>
         <div class="ctx-menu-item" @click="handleAction('edit')">
           <Icon icon="mdi:pencil-outline" :size="16" />
-          <span>编辑卡片</span>
+          <span>{{ t('home.editBookmark') }}</span>
         </div>
         <div class="ctx-menu-item danger" @click="handleAction('delete')">
           <Icon icon="mdi:delete-outline" :size="16" />
-          <span>删除卡片</span>
+          <span>{{ t('home.deleteBookmark') }}</span>
         </div>
       </div>
     </teleport>
@@ -49,10 +49,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import type { Card } from '../../types'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const props = defineProps<{ card: Card }>()
 

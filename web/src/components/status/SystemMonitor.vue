@@ -2,19 +2,19 @@
   <div v-if="appStore.showSystemMonitor" class="system-monitor" :class="{ 'expanded': isExpanded }">
     <!-- Compact bar -->
     <div class="monitor-bar" @click="isExpanded = !isExpanded">
-      <div class="monitor-item cpu" :title="'CPU: ' + stats?.cpu.usage_percent.toFixed(1) + '%'">
+      <div class="monitor-item cpu" :title="t('system.cpu') + ': ' + stats?.cpu.usage_percent.toFixed(1) + '%'">
         <Icon icon="mdi:cpu-64-bit" :size="13" />
         <span>{{ stats?.cpu.usage_percent.toFixed(0) }}%</span>
       </div>
-      <div class="monitor-item memory" :title="'内存: ' + stats?.memory.used_percent.toFixed(1) + '%'">
+      <div class="monitor-item memory" :title="t('system.memory') + ': ' + stats?.memory.used_percent.toFixed(1) + '%'">
         <Icon icon="mdi:memory" :size="13" />
         <span>{{ stats?.memory.used_percent.toFixed(0) }}%</span>
       </div>
-      <div class="monitor-item disk" :title="'磁盘: ' + stats?.disk.used_percent.toFixed(1) + '%'">
+      <div class="monitor-item disk" :title="t('system.disk') + ': ' + stats?.disk.used_percent.toFixed(1) + '%'">
         <Icon icon="mdi:harddisk" :size="13" />
         <span>{{ stats?.disk.used_percent.toFixed(0) }}%</span>
       </div>
-      <div class="monitor-item net" :title="'网络 ↑' + formatBytes(stats?.network.bytes_sent || 0) + ' ↓' + formatBytes(stats?.network.bytes_recv || 0)">
+      <div class="monitor-item net" :title="t('system.netSent') + ': ' + formatBytes(stats?.network.bytes_sent || 0) + ' / ' + t('system.netRecv') + ': ' + formatBytes(stats?.network.bytes_recv || 0)">
         <Icon icon="mdi:swap-vertical" :size="13" />
         <span class="net-speed">
           <Icon icon="mdi:arrow-up" :size="10" class="net-up" />
@@ -34,20 +34,20 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:cpu-64-bit" :size="16" />
-              <span>CPU</span>
+              <span>{{ t('system.cpu') }}</span>
             </div>
             <div class="detail-value">{{ stats?.cpu.usage_percent.toFixed(1) }}%</div>
             <div class="detail-bar">
               <div class="detail-bar-fill" :style="{ width: Math.min(stats?.cpu.usage_percent || 0, 100) + '%' }" :class="getUsageClass(stats?.cpu.usage_percent || 0)"></div>
             </div>
-            <div class="detail-meta">{{ stats?.cpu.coreCount }} 核 · {{ stats?.cpu.model_name }}</div>
+            <div class="detail-meta">{{ t('system.cores', { count: stats?.cpu.coreCount }) }} · {{ stats?.cpu.model_name }}</div>
           </div>
 
           <!-- Memory Detail -->
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:memory" :size="16" />
-              <span>内存</span>
+              <span>{{ t('system.memory') }}</span>
             </div>
             <div class="detail-value">{{ stats?.memory.used_percent.toFixed(1) }}%</div>
             <div class="detail-bar">
@@ -60,7 +60,7 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:harddisk" :size="16" />
-              <span>磁盘</span>
+              <span>{{ t('system.disk') }}</span>
             </div>
             <div class="detail-value">{{ stats?.disk.used_percent.toFixed(1) }}%</div>
             <div class="detail-bar">
@@ -73,7 +73,7 @@
           <div class="detail-card">
             <div class="detail-header">
               <Icon icon="mdi:clock-outline" :size="16" />
-              <span>运行时间</span>
+              <span>{{ t('system.uptime') }}</span>
             </div>
             <div class="detail-value uptime">{{ formatUptime(stats?.host.uptime_seconds || 0) }}</div>
             <div class="detail-meta">{{ stats?.host.hostname }} · {{ stats?.host.os }}</div>
@@ -82,7 +82,7 @@
 
         <!-- Partitions -->
         <div v-if="stats?.disk.partitions?.length" class="partitions">
-          <div class="partition-label">分区详情</div>
+          <div class="partition-label">{{ t('system.partitions') }}</div>
           <div class="partition-list">
             <div v-for="p in stats.disk.partitions" :key="p.mount_point" class="partition-item">
               <span class="partition-mount">{{ p.mount_point }}</span>
@@ -102,9 +102,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
+import { useI18n } from 'vue-i18n'
 import type { SystemStats } from '../../types/system'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 const stats = ref<SystemStats | null>(null)
 const isExpanded = ref(false)
 let timer: ReturnType<typeof setInterval> | null = null
@@ -139,9 +141,9 @@ function formatUptime(seconds: number): string {
   const days = Math.floor(seconds / 86400)
   const hours = Math.floor((seconds % 86400) / 3600)
   const mins = Math.floor((seconds % 3600) / 60)
-  if (days > 0) return `${days}天${hours}小时`
-  if (hours > 0) return `${hours}小时${mins}分`
-  return `${mins}分钟`
+  if (days > 0) return t('system.days', { count: days }) + t('system.hours', { count: hours })
+  if (hours > 0) return t('system.hours', { count: hours }) + t('system.minutes', { count: mins })
+  return t('system.minutes', { count: mins })
 }
 
 function getUsageClass(percent: number): string {

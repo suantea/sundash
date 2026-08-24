@@ -1,6 +1,6 @@
 <template>
   <n-modal :show="show" @update:show="$emit('update:show', $event)" preset="dialog"
-    :title="card ? '编辑卡片' : '添加卡片'" positive-text="保存" negative-text="取消"
+    :title="card ? t('home.editBookmark') : t('home.addBookmark')" :positive-text="t('common.save')" :negative-text="t('common.cancel')"
     :loading="saving" class="card-editor-modal" @positive-click="handleSave">
 
     <div class="editor-body">
@@ -9,8 +9,8 @@
         <!-- Preview -->
         <div class="preview-section">
           <div class="preview-header">
-            <n-checkbox v-model:checked="showPreview">效果预览</n-checkbox>
-            <n-checkbox v-model:checked="canvasTransparent">透明画布</n-checkbox>
+            <n-checkbox v-model:checked="showPreview">{{ t('home.preview') }}</n-checkbox>
+            <n-checkbox v-model:checked="canvasTransparent">{{ t('home.transparentCanvas') }}</n-checkbox>
           </div>
           <div v-if="showPreview" class="preview-box" :class="{ 'canvas-transparent': canvasTransparent }">
             <div class="preview-card preview-card-h" :style="{ background: form.bg_color || 'rgba(42,42,42,0.42)' }">
@@ -19,7 +19,7 @@
                 <Icon v-else icon="mdi:compass" :size="38" color="#999" />
               </div>
               <div class="preview-info">
-                <div class="preview-title">{{ form.title || '卡片标题' }}</div>
+                <div class="preview-title">{{ form.title || t('home.cardTitle') }}</div>
                 <div v-if="form.description" class="preview-desc">{{ form.description }}</div>
               </div>
             </div>
@@ -29,30 +29,30 @@
         <!-- Form Fields -->
         <n-form label-placement="left" :show-feedback="false" class="editor-form">
           <div class="form-grid">
-            <n-form-item label="分组">
-              <n-select v-model:value="form.group_id" :options="groupOptions" placeholder="选择分组" />
+            <n-form-item :label="t('home.group')">
+              <n-select v-model:value="form.group_id" :options="groupOptions" :placeholder="t('home.selectGroup')" />
             </n-form-item>
-            <n-form-item label="标题">
-              <n-input v-model:value="form.title" placeholder="卡片标题" />
-            </n-form-item>
-          </div>
-          <div class="form-grid">
-            <n-form-item label="链接">
-              <n-input v-model:value="form.url" placeholder="https://example.com" />
-            </n-form-item>
-            <n-form-item label="内网链接">
-              <n-input v-model:value="form.url_internal" placeholder="http://192.168.1.x (可选)" />
+            <n-form-item :label="t('common.title')">
+              <n-input v-model:value="form.title" :placeholder="t('home.cardTitle')" />
             </n-form-item>
           </div>
           <div class="form-grid">
-            <n-form-item label="描述">
-              <n-input v-model:value="form.description" placeholder="简短描述 (可选)" />
+            <n-form-item :label="t('common.url')">
+              <n-input v-model:value="form.url" :placeholder="t('home.exampleUrl')" />
             </n-form-item>
-            <n-form-item label="打开方式">
+            <n-form-item :label="t('home.internalLink')">
+              <n-input v-model:value="form.url_internal" :placeholder="t('home.internalLinkPlaceholder')" />
+            </n-form-item>
+          </div>
+          <div class="form-grid">
+            <n-form-item :label="t('common.description')">
+              <n-input v-model:value="form.description" :placeholder="t('home.descriptionPlaceholder')" />
+            </n-form-item>
+            <n-form-item :label="t('home.openType')">
               <div class="open-type-row">
                 <n-radio-group v-model:value="form.open_type">
-                  <n-radio value="new_tab">新标签页</n-radio>
-                  <n-radio value="iframe">弹窗</n-radio>
+                  <n-radio value="new_tab">{{ t('home.newTab') }}</n-radio>
+                  <n-radio value="iframe">{{ t('home.popup') }}</n-radio>
                 </n-radio-group>
               </div>
             </n-form-item>
@@ -63,16 +63,16 @@
       <!-- ====== Right Column: Icon + Colors ====== -->
       <div class="editor-right">
         <div class="right-header">
-          <span class="right-label">图标设置</span>
+          <span class="right-label">{{ t('home.iconSettings') }}</span>
           <a class="iconify-link" href="https://icon-sets.iconify.design/" target="blank" rel="noopener">
             <Icon icon="mdi:open-in-new" :size="11" />
-            <span>Iconify 图库</span>
+            <span>{{ t('home.iconifyGallery') }}</span>
           </a>
         </div>
 
         <!-- Icon Input + Picker Trigger -->
         <div class="icon-input-row">
-          <n-input v-model:value="form.icon" placeholder="mdi:web 或粘贴 URL" size="small" clearable
+          <n-input v-model:value="form.icon" :placeholder="t('home.iconPlaceholder')" size="small" clearable
             @update:value="onIconInput" style="flex:1;" />
           <button type="button" class="fetch-btn" @click="fetchFavicon" :disabled="!form.url || fetchingIcon">
             <Icon :icon="fetchingIcon ? 'mdi:loading' : 'mdi:image-sync-outline'" :size="14" :class="{ 'spin-icon': fetchingIcon }" />
@@ -86,7 +86,7 @@
             <Icon v-if="form.icon" :icon="parsedIconName" :size="20" :color="form.icon_color || '#2080f0'" />
             <Icon v-else icon="mdi:compass" :size="20" color="#999" />
           </div>
-          <span class="trigger-label">选择图标</span>
+          <span class="trigger-label">{{ t('home.selectIcon') }}</span>
           <Icon :icon="showIconPicker ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" class="trigger-arrow" />
         </button>
         <div v-if="showIconPicker" class="icon-popover-content">
@@ -107,7 +107,7 @@
 
         <!-- Colors -->
         <div class="color-group">
-          <div class="color-label">图标颜色</div>
+          <div class="color-label">{{ t('home.iconColor') }}</div>
           <div class="color-row">
             <button v-for="c in colorPresets" :key="c" type="button"
               class="color-dot" :class="{ active: form.icon_color === c }"
@@ -115,12 +115,12 @@
             <n-color-picker v-model:value="form.icon_color" :show-alpha="true" format="hex" size="small" style="width: 56px;" />
           </div>
           <button type="button" class="apply-btn" @click="applyColorToAll">
-            <Icon icon="mdi:apply-edit" :size="12" /> 统一应用到全部
+            <Icon icon="mdi:apply-edit" :size="12" /> {{ t('home.applyToAll') }}
           </button>
         </div>
 
         <div class="color-group">
-          <div class="color-label">背景颜色</div>
+          <div class="color-label">{{ t('home.bgColor') }}</div>
           <div class="color-row">
             <button v-for="c in bgColorPresets" :key="c" type="button"
               class="color-dot" :class="{ active: form.bg_color === c }"
@@ -128,7 +128,7 @@
             <n-color-picker v-model:value="form.bg_color" :show-alpha="true" format="hex" size="small" style="width: 56px;" />
           </div>
           <button type="button" class="apply-btn" @click="applyBgColorToAll">
-            <Icon icon="mdi:apply-edit" :size="12" /> 统一应用到全部
+            <Icon icon="mdi:apply-edit" :size="12" /> {{ t('home.applyToAll') }}
           </button>
         </div>
       </div>
@@ -139,11 +139,13 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { NModal, NCheckbox, NForm, NFormItem, NSelect, NInput, NRadioGroup, NRadioButton, NColorPicker, NButton, NCollapse, NCollapseItem } from 'naive-ui'
 import { useAppStore } from '../../stores/app'
 import type { Card, PanelGroup } from '../../types'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const showPreview = ref(true)
 const canvasTransparent = ref(false)
@@ -256,42 +258,42 @@ const bgColorPresets = [
 
 const iconCategories = [
   {
-    name: '常用',
+    name: t('home.iconCatCommon'),
     icons: [
       'mdi:web', 'mdi:earth', 'mdi:compass', 'mdi:star', 'mdi:heart',
       'mdi:bookmark', 'mdi:home', 'mdi:magnify', 'mdi:cog', 'mdi:bell',
     ],
   },
   {
-    name: '工具',
+    name: t('home.iconCatTools'),
     icons: [
       'mdi:wrench', 'mdi:hammer', 'mdi:screwdriver', 'mdi:settings', 'mdi:tune',
       'mdi:console', 'mdi:database', 'mdi:server', 'mdi:cloud', 'mdi:shield',
     ],
   },
   {
-    name: '媒体',
+    name: t('home.iconCatMedia'),
     icons: [
       'mdi:play', 'mdi:music', 'mdi:image', 'mdi:video', 'mdi:camera',
       'mdi:film', 'mdi:microphone', 'mdi:headphones', 'mdi:radio', 'mdi:podcast',
     ],
   },
   {
-    name: '社交',
+    name: t('home.iconCatSocial'),
     icons: [
       'mdi:account-group', 'mdi:chat', 'mdi:email', 'mdi:bell-ring', 'mdi:share',
       'mdi:message-text', 'mdi:forum', 'mdi:at', 'mdi:rss', 'mdi:link-variant',
     ],
   },
   {
-    name: '文件',
+    name: t('home.iconCatFiles'),
     icons: [
       'mdi:folder', 'mdi:file-document', 'mdi:download', 'mdi:upload', 'mdi:archive',
       'mdi:notebook', 'mdi:clipboard-text', 'mdi:file-code', 'mdi:file-pdf', 'mdi:file-image',
     ],
   },
   {
-    name: '设备',
+    name: t('home.iconCatDevices'),
     icons: [
       'mdi:monitor', 'mdi:laptop', 'mdi:cellphone', 'mdi:tablet', 'mdi:printer',
       'mdi:router-wireless', 'mdi:lan', 'mdi:usb', 'mdi:harddisk', 'mdi:memory',

@@ -116,10 +116,10 @@
                 <button class="tool-btn" @click="toggleHideGroup(group.id)" :title="hiddenGroupIds.has(group.id) ? '显示分组' : '隐藏分组'">
                   <Icon :icon="hiddenGroupIds.has(group.id) ? 'mdi:eye-off' : 'mdi:eye-outline'" :size="15" />
                 </button>
-                <button class="tool-btn" @click="openEditGroup({ id: group.id, name: group.name })" title="编辑分组">
+                <button class="tool-btn" @click="openEditGroup({ id: group.id, name: group.name })" title="$t('home.editGroup')">
                   <Icon icon="mdi:pencil-outline" :size="15" />
                 </button>
-                <button class="tool-btn danger" @click="confirmDeleteGroup(group.id)" title="删除分组">
+                <button class="tool-btn danger" @click="confirmDeleteGroup(group.id)" title="$t('home.deleteGroup')">
                   <Icon icon="mdi:delete-outline" :size="15" />
                 </button>
               </div>
@@ -173,12 +173,12 @@
     <!-- Modals -->
     <n-modal v-model:show="showAddGroup" preset="dialog" title="新建分组" positive-text="创建" negative-text="取消"
       :loading="modalLoading" @positive-click="handleCreateGroup">
-      <n-input v-model:value="newGroupName" placeholder="输入分组名称" autofocus />
+      <n-input v-model:value="newGroupName" placeholder="$t('home.groupName')" autofocus />
     </n-modal>
 
-    <n-modal v-model:show="showEditGroup" preset="dialog" title="编辑分组" positive-text="保存" negative-text="取消"
+    <n-modal v-model:show="showEditGroup" preset="dialog" title="$t('home.editGroup')" positive-text="保存" negative-text="取消"
       :loading="modalLoading" @positive-click="handleUpdateGroup">
-      <n-input v-model:value="editGroupName" placeholder="分组名称" />
+      <n-input v-model:value="editGroupName" placeholder="$t('home.groupName')" />
     </n-modal>
 
     <CardEditor
@@ -192,7 +192,7 @@
     />
 
     <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning"
-      :title="deleteTarget.type === 'group' ? '删除分组' : '删除卡片'"
+      :title="deleteTarget.type === 'group' ? $t('home.deleteGroup') : $t('home.deleteCard')"
       :content="deleteTarget.type === 'group' ? '确定要删除该分组及其所有卡片吗？此操作无法撤销。' : '确定要删除该卡片吗？此操作无法撤销。'"
       positive-text="删除" negative-text="取消" :loading="modalLoading"
       @positive-click="handleDelete" />
@@ -203,6 +203,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, h } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, type DropdownOption, NDropdown, NModal, NInput } from 'naive-ui'
 import { useAppStore } from '../stores/app'
@@ -224,6 +225,7 @@ const appStore = useAppStore()
 const userStore = useUserStore()
 const panelStore = usePanelStore()
 const message = useMessage()
+const { t } = useI18n()
 
 // Grid style based on cardsPerRow setting
 const gridStyle = computed(() => {
