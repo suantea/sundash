@@ -121,6 +121,74 @@ var migrations = []migration{
 	{9, `CREATE INDEX IF NOT EXISTS idx_cards_user ON cards(user_id)`, "", ""},
 	{10, `CREATE INDEX IF NOT EXISTS idx_settings_user ON settings(user_id)`, "", ""},
 	{11, `CREATE UNIQUE INDEX IF NOT EXISTS idx_settings_key_user ON settings(key, user_id) WHERE user_id IS NOT NULL`, "", ""},
+	// FTS5 full-text search index on cards (title, url, description)
+	{12, `CREATE VIRTUAL TABLE IF NOT EXISTS cards_fts USING fts5(
+		card_id UNINDEXED,
+		title,
+		url,
+		description,
+		user_id UNINDEXED,
+		content='',
+		contentless_delete=1
+	)`, "", ""},
+	// Triggers to keep FTS index in sync with cards table
+	{13, `CREATE TRIGGER IF NOT EXISTS cards_ai AFTER INSERT ON cards BEGIN
+		INSERT INTO cards_fts(card_id, title, url, description, user_id)
+		VALUES (new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+	END`, "", ""},
+	{14, `CREATE TRIGGER IF NOT EXISTS cards_ad AFTER DELETE ON cards BEGIN
+		INSERT INTO cards_fts(cards_fts, rowid, card_id, title, url, description, user_id)
+		VALUES ('delete', old.rowid, old.id, old.title, old.url, COALESCE(old.description,''), old.user_id);
+	END`, "", ""},
+	{15, `CREATE TRIGGER IF NOT EXISTS cards_au AFTER UPDATE ON cards BEGIN
+		INSERT INTO cards_fts(cards_fts, rowid, card_id, title, url, description, user_id)
+		VALUES ('delete', old.rowid, old.id, old.title, old.url, COALESCE(old.description,''), old.user_id);
+		INSERT INTO cards_fts(card_id, title, url, description, user_id)
+		VALUES (new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+	END`, "", ""},
+	// Memo table for quick notes
+	{16, `CREATE TABLE IF NOT EXISTS memos (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		content TEXT NOT NULL,
+		is_archived INTEGER DEFAULT 0,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+	)`, "", ""},
+	{17, `CREATE INDEX IF NOT EXISTS idx_memos_user ON memos(user_id)`, "", ""},
+	{18, `CREATE INDEX IF NOT EXISTS idx_memos_updated_at ON memos(updated_at)`, "", ""},
+	// RSS feeds table
+	{19, `CREATE TABLE IF NOT EXISTS rss_feeds (
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		title TEXT,
+		url TEXT NOT NULL,
+		description TEXT,
+		image_url TEXT,
+		last_fetched DATETIME,
+		update_interval INTEGER DEFAULT 60,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+	)`, "", ""},
+	{20, `CREATE INDEX IF NOT EXISTS idx_rss_feeds_user ON rss_feeds(user_id)`, "", ""},
+	// RSS items table
+	{21, `CREATE TABLE IF NOT EXISTS rss_items (
+		id TEXT PRIMARY KEY,
+		feed_id TEXT NOT NULL,
+		title TEXT,
+		link TEXT,
+		description TEXT,
+		pub_date DATETIME,
+		author TEXT,
+		guid TEXT,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (feed_id) REFERENCES rss_feeds(id) ON DELETE CASCADE
+	)`, "", ""},
+	{22, `CREATE INDEX IF NOT EXISTS idx_rss_items_feed ON rss_items(feed_id)`, "", ""},
+	{23, `CREATE INDEX IF NOT EXISTS idx_rss_items_pub_date ON rss_items(pub_date)`, "", ""},
 }
 
 func runMigrations(db *sql.DB) error {

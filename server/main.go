@@ -53,12 +53,19 @@ func main() {
 	wallpaperSvc := service.NewWallpaperService()
 	faviconSvc := service.NewFaviconService()
 	systemSvc := service.NewSystemService()
+	searchSvc := service.NewSearchService(db)
+	weatherSvc := service.NewWeatherService()
+	memoSvc := service.NewMemoService(repository.NewMemoRepo(db))
+	rssSvc := service.NewRSSService(repository.NewRSSFeedRepo(db), repository.NewRSSItemRepo(db))
 
 	authH := handlers.NewAuthHandler(userSvc, panelSvc, settingsSvc)
 	panelH := handlers.NewPanelHandler(panelSvc, settingsSvc)
 	wallpaperH := handlers.NewWallpaperHandler(wallpaperSvc)
 	faviconH := handlers.NewFaviconHandler(faviconSvc)
 	systemH := handlers.NewSystemHandler(systemSvc)
+	searchH := handlers.NewSearchHandler(searchSvc)
+	weatherH := handlers.NewWeatherHandler(weatherSvc)
+	memoH := handlers.NewMemoHandler(memoSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
 
 	// MCP server: AI agents can list / create / organize bookmarks.
@@ -125,6 +132,20 @@ func main() {
 
 			protected.GET("/favicon", faviconH.FetchFavicon)
 			protected.GET("/system/stats", systemH.GetStats)
+
+			// Search API
+			protected.GET("/search", searchH.Search)
+			protected.GET("/search/suggestions", searchH.Suggestions)
+
+			// Weather API
+			protected.GET("/weather", weatherH.GetWeather)
+
+			// Memo API
+			protected.GET("/memo", memoH.ListMemos)
+			protected.POST("/memo", memoH.CreateMemo)
+			protected.PUT("/memo/:id/archive", memoH.ArchiveMemo)
+			protected.DELETE("/memo/:id", memoH.DeleteMemo)
+			protected.PUT("/memo/:id", memoH.UpdateMemo)
 
 			admin := protected.Group("")
 			admin.Use(middleware.AdminMiddleware())

@@ -135,3 +135,53 @@ const (
 	SettingShowSystemStatus  = "show_system_status"
 	SettingNetworkModeAuto   = "network_mode_auto"
 )
+
+// Weather represents simplified weather data for frontend display.
+type Weather struct {
+	Temperature     float64 `json:"temperature"` // Celsius
+	Windspeed       float64 `json:"windspeed"`   // km/h
+	Winddirection   float64 `json:"winddirection"` // degrees
+	Weathercode     int     `json:"weathercode"` // WMO weather code
+	Time            string  `json:"time"`        // ISO time string
+	Timezone        string  `json:"timezone"`    // IANA timezone
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
+}
+
+// Memo represents a quick note/memo.
+type Memo struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Content   string    `json:"content"`
+	IsArchived bool     `json:"is_archived"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// RSSFeed represents an RSS feed subscription.
+type RSSFeed struct {
+	ID          string    `json:"id"`
+	UserID      string    `json:"user_id"`
+	Title       string    `json:"title"`
+	URL         string    `json:"url"`
+	Description string    `json:"description,omitempty"`
+	ImageURL    string    `json:"image_url,omitempty"`
+	LastFetched time.Time `json:"last_fetched,omitempty"`
+	UpdateInterval int    `json:"update_interval_minutes"` // How often to fetch (in minutes)
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// RSSItem represents a single item in an RSS feed.
+type RSSItem struct {
+	ID        string    `json:"id"`
+	FeedID    string    `json:"feed_id"`
+	Title     string    `json:"title"`
+	Link      string    `json:"link"`
+	Description string    `json:"description,omitempty"`
+	PubDate   time.Time `json:"pub_date,omitempty"`
+	Author    string    `json:"author,omitempty"`
+	Guid      string    `json:"guid,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

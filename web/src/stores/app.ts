@@ -126,6 +126,8 @@ export const useAppStore = defineStore('app', () => {
   // Component settings
   const showSystemStatus = ref(localStorage.getItem(L('show-system-status')) === 'true')
   const showSystemMonitor = ref(localStorage.getItem(L('show-system-monitor')) !== 'false')
+  const showWeatherWidget = ref(localStorage.getItem(L('show-weather-widget')) !== 'false')
+  const showMemo = ref(localStorage.getItem(L('show-memo')) !== 'false')
   const networkModeAuto = ref(localStorage.getItem(L('network-auto')) === 'true')
   const groupCardTransparent = ref(localStorage.getItem(L('group-card-transparent')) === 'true')
   const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Google')
@@ -170,6 +172,7 @@ export const useAppStore = defineStore('app', () => {
   function setEnableCaptcha(enable: boolean) { enableCaptcha.value = enable; setLocal(L('enable-captcha'), enable.toString()) }
   function setShowSystemStatus(show: boolean) { showSystemStatus.value = show; setLocal(L('show-system-status'), show.toString()) }
   function setShowSystemMonitor(show: boolean) { showSystemMonitor.value = show; setLocal(L('show-system-monitor'), show.toString()) }
+  function setShowWeatherWidget(show: boolean) { showWeatherWidget.value = show; setLocal(L('show-weather-widget'), show.toString()) }
   function setNetworkModeAuto(auto: boolean) { networkModeAuto.value = auto; setLocal(L('network-auto'), auto.toString()) }
   function setGroupCardTransparent(transparent: boolean) { groupCardTransparent.value = transparent; setLocal(L('group-card-transparent'), transparent.toString()) }
   function setSearchEngine(engine: string) { searchEngine.value = engine; setLocal(L('search-engine'), engine) }
@@ -222,6 +225,8 @@ export const useAppStore = defineStore('app', () => {
     apply('sundash-login-bg', loginBgUrl, L('login-bg'))
     apply('sundash-enable-captcha', enableCaptcha, L('enable-captcha'), (v) => v === 'true')
     apply('sundash-show-system-status', showSystemStatus, L('show-system-status'), (v) => v === 'true')
+    apply('sundash-show-system-monitor', showSystemMonitor, L('show-system-monitor'), (v) => v === 'true')
+    apply('sundash-show-weather-widget', showWeatherWidget, L('show-weather-widget'), (v) => v === 'true')
     apply('sundash-network-auto', networkModeAuto, L('network-auto'), (v) => v === 'true')
     apply('sundash-group-card-transparent', groupCardTransparent, L('group-card-transparent'), (v) => v === 'true')
     apply('sundash-search-engine', searchEngine, L('search-engine'))

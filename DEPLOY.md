@@ -115,11 +115,11 @@ systemctl status sundash
 
 ---
 
-## 方式 C：NAS 部署
+## 方式 C：NAS 部署（QNAP / 群晖 / TrueNAS）
 
 `nas-deploy/` 目录提供 NAS 场景脚本：
 
-- `docker-compose.yml`：NAS Docker 部署编排（卷挂载到 NAS 存储路径）
+- `docker-compose.nas.yml`：NAS Docker 部署编排（卷挂载到 NAS 存储路径）
 - `start.sh` / `start.bat`：一键启动脚本（自动检查 JWT 密钥并生成 `.env`）
 
 ```bash
@@ -127,6 +127,28 @@ cd nas-deploy
 ./start.sh        # Linux/NAS（群晖等）
 # 或 start.bat（Windows）
 ```
+
+### NAS 部署注意事项
+
+1. **数据持久化**：确保 `docker-compose.nas.yml` 中配置的宿主机路径（如 `/share/Container/sundash/data`）指向 NAS 存储卷，避免容器重建时数据丢失。
+
+2. **权限**：NAS Docker 通常以特定 UID/GUID 运行，请确保容器对数据目录有读写权限。如遇权限问题，可在 `docker-compose.nas.yml` 中配置 `user: "UID:GID"`。
+
+3. **网络**：
+   - 默认端口 `3000`，如被占用可修改 `SUNDASH_PORT` 环境变量。
+   - 如需通过 80/443 端口访问，建议在前端加 nginx 反代（示例见下方）。
+
+4. **RSS 订阅后台抓取**：默认每 1 分钟检查所有订阅源是否需要更新（基于 `update_interval` 字段）。首次添加订阅时会立即抓取一次，后续按间隔自动更新。抓取的文章保留最新 50 条。
+
+5. **系统监控**：基于 `gopsutil` 读取系统指标，在容器内运行时依赖 `/proc` 和 `/sys` 文件系统。如容器未挂载这些目录，监控数据可能为空。建议在 `docker-compose` 中添加：
+   ```yaml
+   volumes:
+     - /proc:/host/proc:ro
+     - /sys:/host/sys:ro
+   ```
+   并相应调整服务代码读取 `host.proc` 与 `host.sys`。
+
+6. **天气 Widget**：默认使用固定坐标（北京）。如需自动定位，需在前端实现 IP 地理定位，并通过 `lat` / `lon` 参数调用 `/api/weather`。
 
 ---
 
@@ -181,7 +203,7 @@ server {
 }
 ```
 
-3. 可用工具：`sundash_list_groups` / `sundash_create_group` / `sundash_rename_group` / `sundash_delete_group` / `sundash_create_card` / `sundash_update_card` / `sundash_move_card` / `sundash_delete_card`（详见 README「MCP」章节）
+3. 可用工具：`sundash_list_groups` / `sundash_create_group` / `sundash_rename_group` / `sundash_delete_group` / `sundash_create_card` / `sundash_update_card` / `sundash_move_card` / `sundash_delete_card` / `sundash_system_status` / `sundash_search` / `sundash_list_memo` / `sundash_add_memo` / `sundash_archive_memo` / `sundash_delete_memo`（详见 README「MCP」章节）
 
 ## 验收清单
 
@@ -191,6 +213,11 @@ server {
 - [ ] `data/sundash.db` 持久化且可备份
 - [ ] `SUNDASH_JWT_SECRET` 已设置且非默认值
 - [ ] Docker 方式下 healthcheck 状态为 healthy
+- [ ] 系统监控数据正常显示（CPU/内存/磁盘/网络）
+- [ ] 天气 Widget 正常获取数据（默认北京坐标）
+- [ ] 搜索功能返回匹配书签（FTS5 全文索引）
+- [ ] RSS 订阅后台抓取正常（首次添加后等待 1-2 分钟）
+- [ ] 便签创建/归档/删除功能正常
 - [ ] （可选）`SUNDASH_MCP_TOKEN` 已设置，AI 客户端可调用 `/mcp` 管理书签
 
 ## 故障排查
@@ -202,3 +229,7 @@ server {
 | 登录后接口返回 401 | 更换过 `SUNDASH_JWT_SECRET` 导致旧 token 失效，重新登录即可 |
 | 端口被占用 | 检查 `SUNDASH_PORT` 是否被其他进程占用（`ss -lntp` / `netstat -ano`） |
 | 数据库文件被锁 | 确保只有一个实例在运行；SQLite 使用 WAL 模式，勿直接拷贝运行中的 db 文件（应使用备份或 `VACUUM INTO`） |
+| 系统监控无数据 | 容器内缺少 `/proc`、`/sys` 挂载；NAS 部署时建议只读挂载这两个目录 |
+| 天气 Widget 显示异常 | 检查网络是否能访问 `api.open-meteo.com`；NAS 需确保容器有外网访问权限 |
+| 搜索无结果 | FTS5 索引在数据库迁移时自动创建；如数据是旧版本导入，需手动执行 `INSERT INTO cards_fts(cards_fts) VALUES('rebuild')` 重建索引 |
+| RSS 订阅无文章 | 检查订阅 URL 是否有效（需支持 RSS/Atom）；首次添加后等待后台抓取（约 1 分钟）；查看容器日志确认抓取是否报错 |

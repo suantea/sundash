@@ -75,6 +75,12 @@
       <!-- System Monitor -->
       <SystemMonitor />
 
+      <!-- Weather Widget -->
+      <WeatherWidget />
+
+      <!-- Memo Widget -->
+      <MemoWidget />
+
       <!-- Empty State -->
       <div v-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
         <div class="empty-icon">

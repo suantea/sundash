@@ -40,9 +40,15 @@ import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import { usePanelStore } from '../../stores/panel'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toast-notification'
+import axios from '@/api'
 
 const appStore = useAppStore()
 const panelStore = usePanelStore()
+const toast = useToast()
+const router = useRouter()
+
 const query = ref('')
 const isDarkBg = ref(false)
 
@@ -91,8 +97,11 @@ const engineOptions = engines.map((e, i) => ({
   icon: () => h(Icon, { icon: e.icon, width: 16 }),
 }))
 
-// Search results for bookmarks
-const searchResults = ref<{ id: string; title: string; url: string; icon?: string }[]>([])
+// Search results for bookmarks from backend
+const searchResults = ref<Array<{ id: string; title: string; url: string; icon?: string }>>([])
+
+// Debounce timer for suggestions
+let suggestionTimer: NodeJS.Timeout | null = null
 
 function selectEngine(index: number) {
   currentEngineIndex.value = index
@@ -107,15 +116,46 @@ function handleSearch() {
   }
 }
 
-// Search bookmarks
-function onSearchInput() {
-  const q = query.value.trim().toLowerCase()
+// Search bookmarks via backend API
+async function onSearchInput() {
+  const q = query.value.trim()
   if (!q) {
     searchResults.value = []
     return
   }
-  // Get all cards from panelStore
-  const results: typeof searchResults.value = []
+
+  // Clear previous timer
+  if (suggestionTimer) clearTimeout(suggestionTimer)
+
+  // Debounce to avoid too many requests
+  suggestionTimer = setTimeout(async () => {
+    try {
+      const token = localStorage.getItem('sundash-token')
+      const res = await axios.get('/api/search', {
+        params: { q, limit: 8 },
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      })
+      if (res.status === 200) {
+        const data = res.data
+        // Transform backend results to frontend format
+        searchResults.value = data.results.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          url: r.url,
+          icon: r.icon
+        }))
+      }
+    } catch (err: any) {
+      console.error('Search error:', err)
+      // Fallback to local search if backend fails
+      fallbackLocalSearch(q)
+    }
+  }, 300)
+}
+
+// Fallback to local search (original implementation)
+function fallbackLocalSearch(q: string) {
+  const results: Array<{ id: string; title: string; url: string; icon?: string }> = []
   for (const group of panelStore.groups) {
     if (group.cards) {
       for (const card of group.cards) {
@@ -134,13 +174,25 @@ function onSearchInput() {
       }
     }
   }
-  searchResults.value = results.slice(0, 8) // Limit to 8 results
+  searchResults.value = results.slice(0, 8)
 }
 
-function openBookmark(url: string) {
-  window.open(url, '_blank')
-  query.value = ''
-  searchResults.value = []
+// Get search suggestions from backend
+async function getSuggestions(prefix: string) {
+  if (!prefix) return []
+  try {
+    const token = localStorage.getItem('sundash-token')
+    const res = await axios.get('/api/search/suggestions', {
+      params: { q: prefix, limit: 5 },
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+    if (res.status === 200) {
+      return res.data.suggestions || []
+    }
+  } catch (err) {
+    console.error('Suggestions error:', err)
+  }
+  return []
 }
 
 // Detect wallpaper background luminance
@@ -200,6 +252,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   observer?.disconnect()
+  if (suggestionTimer) clearTimeout(suggestionTimer)
 })
 
 // Re-detect when theme changes
@@ -299,146 +352,97 @@ watch(() => appStore.isDark, () => {
 
 .search-input {
   flex: 1;
+  height: 100%;
   border: none;
-  background: transparent;
   outline: none;
+  background: transparent;
   font-size: 14px;
-  font-family: var(--sd-font);
   color: var(--sd-text-primary);
-  min-width: 0;
+  padding: 0 8px;
 }
 
 .search-input::placeholder {
   color: var(--sd-text-tertiary);
-  font-size: 14px;
 }
 
 .search-kbd {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 6px;
-  background: rgba(0,0,0,0.06);
-  border-radius: 4px;
-  font-size: 11px;
-  font-family: -apple-system, 'SF Mono', monospace;
-  color: var(--sd-text-tertiary);
-  flex-shrink: 0;
-  margin-right: 4px;
-}
-
-:root[data-theme="dark"] .search-kbd {
-  background: rgba(255,255,255,0.08);
+  display: inline-block;
+  width: 32px;
+  height: 20px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 20px;
+  text-align: center;
+  margin-left: 8px;
+  font-family: monospace;
 }
 
 .search-clear {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: none;
-  background: rgba(0,0,0,0.06);
-  border-radius: 50%;
-  color: var(--sd-text-secondary);
   cursor: pointer;
-  flex-shrink: 0;
-  margin-right: 4px;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  padding: 0;
 }
 
 .search-clear:hover {
-  background: rgba(0,0,0,0.12);
-  color: var(--sd-text-primary);
+  background: rgba(0,0,0,0.1);
 }
 
 .search-divider {
   width: 1px;
-  height: 16px;
-  background: rgba(0,0,0,0.08);
-  margin: 0 4px;
-  flex-shrink: 0;
-}
-
-:root[data-theme="dark"] .search-divider {
-  background: rgba(255,255,255,0.1);
+  height: 20px;
+  background: var(--sd-border);
+  margin: 0 8px;
 }
 
 .engine-select {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px 8px;
-  background: transparent;
-  border: none;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--sd-text-tertiary);
+  padding: 4px 8px;
   border-radius: 6px;
-  color: var(--sd-text-secondary);
-  font-size: 12px;
-  font-family: var(--sd-font);
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .engine-select:hover {
-  background: rgba(0,0,0,0.05);
-  color: var(--sd-text-primary);
+  background: rgba(0,0,0,0.04);
 }
 
-/* Search results dropdown */
 .search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 4px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  border: 1px solid rgba(0,0,0,0.06);
-  max-height: 320px;
+  margin-top: 8px;
+  max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;
-}
-
-:root[data-theme="dark"] .search-results {
-  background: #2c2c2e;
-  border-color: rgba(255,255,255,0.1);
-}
-
-.search-dark-bg .search-results {
-  background: rgba(40,40,42,0.95);
-  border-color: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  border: 1px solid var(--sd-border);
+  background: var(--sd-bg-elevated);
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.2s ease;
 }
 
 .search-result-item:hover {
-  background: rgba(0,0,0,0.04);
-}
-
-:root[data-theme="dark"] .search-result-item:hover {
-  background: rgba(255,255,255,0.06);
-}
-
-.search-result-item:not(:last-child) {
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-:root[data-theme="dark"] .search-result-item:not(:last-child) {
-  border-bottom-color: rgba(255,255,255,0.06);
+  background: var(--sd-bg-base);
 }
 
 .result-icon {
   flex-shrink: 0;
+  margin-right: 10px;
   color: var(--sd-text-tertiary);
 }
 
@@ -449,48 +453,38 @@ watch(() => appStore.isDark, () => {
 
 .result-title {
   font-size: 13px;
-  font-weight: 500;
   color: var(--sd-text-primary);
+  line-height: 1.4;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .result-url {
   font-size: 11px;
   color: var(--sd-text-tertiary);
+  line-height: 1.4;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-top: 2px;
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .search-bar {
-    width: 95%;
-  }
+/* Scrollbar styling */
+.search-results::-webkit-scrollbar {
+  width: 6px;
+}
 
-  .search-input-wrap {
-    height: 38px;
-    border-radius: 10px;
-    padding: 0 2px 0 10px;
-  }
+.search-results::-webkit-scrollbar-track {
+  background: var(--sd-bg-base);
+}
 
-  .search-input {
-    font-size: 13px;
-  }
+.search-results::-webkit-scrollbar-thumb {
+  background: var(--sd-border);
+  border-radius: 3px;
+}
 
-  .search-input::placeholder {
-    font-size: 13px;
-  }
-
-  .search-kbd {
-    display: none;
-  }
-
-  .engine-select {
-    padding: 2px 6px;
-    font-size: 11px;
-  }
+.search-results::-webkit-scrollbar-thumb:hover {
+  background: var(--sd-text-tertiary);
 }
 </style>

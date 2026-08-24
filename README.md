@@ -1,6 +1,6 @@
 # SunDash（原 Asuan）
 
-自托管个人导航面板：**多用户书签管理 + 必应壁纸 + 页面监控扩展**。适合部署在 NAS、云服务器或个人电脑上，作为浏览器主页 / 新标签页使用。
+自托管个人导航面板：**多用户书签管理 + 必应壁纸 + 页面监控扩展 + 系统监控 + 天气 Widget + RSS 订阅 + 快捷便签**。适合部署在 NAS、云服务器或个人电脑上，作为浏览器主页 / 新标签页使用。
 
 - 后端：Go 1.26 + Gin + SQLite（纯 Go 驱动，零 CGO）
 - 前端：Vue 3 + Vite + TypeScript + Pinia + Naive UI
@@ -19,6 +19,13 @@
 - 深浅主题 + 自定义主题色（Naive UI 主题覆盖）
 - 壁纸：必应每日壁纸（服务端缓存）、渐变、自定义图片，支持模糊/透明度/版权标注
 
+**小组件**
+- 系统监控：CPU / 内存 / 磁盘 / 网络实时状态（NAS 场景刚需）
+- 天气 Widget：Open-Meteo 数据（温度 / 风速 / 天气状况），10 分钟缓存
+- RSS 订阅：后台定时抓取、支持多订阅源、文章展开阅读
+- 快捷便签：随手记备忘，支持归档管理
+- 全局搜索：SQLite FTS5 全文索引，搜索书签标题 / 链接 / 描述
+
 **性能优化**
 - 前端资源哈希化（Vite）：JS/CSS 文件名包含内容哈希，支持长期浏览器缓存
 - 静态资源预压缩：构建阶段自动生成 `.gz` 和 `.br` 文件，服务器可直接返回压缩内容，减少传输大小
@@ -35,7 +42,7 @@
 
 **工程化**
 - 后端三层分层架构（handler → service → repository）+ 手动依赖注入，可单元测试
-- 版本化数据库迁移（`schema_migrations`）、SQLite WAL 并发读
+- 版本化数据库迁移（`schema_migrations`）、SQLite WAL 并发读、FTS5 全文索引
 - 性能：`/api/bootstrap` 首屏聚合接口（1 个请求拿齐设置/资料/面板）、gzip 压缩、静态资源 immutable 缓存、站点配置短 TTL 缓存
 
 **Chrome 扩展（SunDash Monitor）**
@@ -148,6 +155,12 @@ SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol�
 | `sundash_update_card` | 更新卡片标题/链接/描述 |
 | `sundash_move_card` | 把卡片移动到其他分组（整理归类） |
 | `sundash_delete_card` | 删除卡片 |
+| `sundash_system_status` | 获取系统监控状态（CPU/内存/磁盘/网络/主机信息） |
+| `sundash_search` | 全局搜索书签（FTS5 全文索引） |
+| `sundash_list_memo` | 获取便签列表 |
+| `sundash_add_memo` | 新增便签 |
+| `sundash_archive_memo` | 归档/取消归档便签 |
+| `sundash_delete_memo` | 删除便签 |
 
 ### 配置示例（Claude Desktop）
 
@@ -177,6 +190,12 @@ SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol�
 | GET | `/api/favicon?url=` | favicon 识别（含 SSRF 防护） |
 | GET/PUT | `/api/admin/settings` | 全局站点设置（管理员） |
 | GET/PUT/DELETE | `/api/users` `/api/users/:id` | 用户管理（管理员） |
+| GET | `/api/system/stats` | 系统监控（CPU/内存/磁盘/网络） |
+| GET | `/api/weather` | 天气数据（Open-Meteo） |
+| GET/POST | `/api/search` `/api/search/suggestions` | 全局搜索 / 搜索建议 |
+| GET/POST | `/api/memo` `/api/memo/:id` | 便签列表 / 新建 / 更新 / 删除 |
+| GET/POST | `/api/rss` `/api/rss/:id` | RSS 订阅管理 |
+| GET | `/api/rss/:id/items` | RSS 文章列表 |
 
 ## 数据导入
 
