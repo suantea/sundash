@@ -31,33 +31,33 @@ export interface RSSItem {
  * Get all RSS feeds for the current user
  */
 export const getRSSFeeds = () => {
-  return axios.get<RSSFeed[]>('/api/rss')
+  return axios.get<RSSFeed[]>('rss')
 }
 
 /**
  * Add a new RSS feed
  */
 export const addRSSFeed = (url: string) => {
-  return axios.post<RSSFeed>('/api/rss', { url })
+  return axios.post<RSSFeed>('rss', { url })
 }
 
 /**
  * Update an RSS feed (e.g., change URL)
  */
 export const updateRSSFeed = (feedId: string, url: string) => {
-  return axios.put<RSSFeed>(`/api/rss/${feedId}`, { url })
+  return axios.put<RSSFeed>(`rss/${feedId}`, { url })
 }
 
 /**
  * Delete an RSS feed
  */
 export const deleteRSSFeed = (feedId: string) => {
-  return axios.delete(`/api/rss/${feedId}`)
+  return axios.delete(`rss/${feedId}`)
 }
 
 /**
  * Get items for a specific feed
  */
 export const getRSSFeedItems = (feedId: string, limit = 10) => {
-  return axios.get<RSSItem[]>(`/api/rss/${feedId}/items`, { params: { limit } })
+  return axios.get<RSSItem[]>(`rss/${feedId}/items`, { params: { limit } })
 }

@@ -128,6 +128,7 @@ export const useAppStore = defineStore('app', () => {
   const showSystemMonitor = ref(localStorage.getItem(L('show-system-monitor')) !== 'false')
   const showWeatherWidget = ref(localStorage.getItem(L('show-weather-widget')) !== 'false')
   const showMemo = ref(localStorage.getItem(L('show-memo')) !== 'false')
+  const showRSSWidget = ref(localStorage.getItem(L('show-rss-widget')) !== 'false')
   const networkModeAuto = ref(localStorage.getItem(L('network-auto')) === 'true')
   const groupCardTransparent = ref(localStorage.getItem(L('group-card-transparent')) === 'true')
   const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Google')
@@ -173,6 +174,8 @@ export const useAppStore = defineStore('app', () => {
   function setShowSystemStatus(show: boolean) { showSystemStatus.value = show; setLocal(L('show-system-status'), show.toString()) }
   function setShowSystemMonitor(show: boolean) { showSystemMonitor.value = show; setLocal(L('show-system-monitor'), show.toString()) }
   function setShowWeatherWidget(show: boolean) { showWeatherWidget.value = show; setLocal(L('show-weather-widget'), show.toString()) }
+  function setShowMemo(show: boolean) { showMemo.value = show; setLocal(L('show-memo'), show.toString()) }
+  function setShowRSSWidget(show: boolean) { showRSSWidget.value = show; setLocal(L('show-rss-widget'), show.toString()) }
   function setNetworkModeAuto(auto: boolean) { networkModeAuto.value = auto; setLocal(L('network-auto'), auto.toString()) }
   function setGroupCardTransparent(transparent: boolean) { groupCardTransparent.value = transparent; setLocal(L('group-card-transparent'), transparent.toString()) }
   function setSearchEngine(engine: string) { searchEngine.value = engine; setLocal(L('search-engine'), engine) }
@@ -227,6 +230,8 @@ export const useAppStore = defineStore('app', () => {
     apply('sundash-show-system-status', showSystemStatus, L('show-system-status'), (v) => v === 'true')
     apply('sundash-show-system-monitor', showSystemMonitor, L('show-system-monitor'), (v) => v === 'true')
     apply('sundash-show-weather-widget', showWeatherWidget, L('show-weather-widget'), (v) => v === 'true')
+    apply('sundash-show-memo', showMemo, L('show-memo'), (v) => v === 'true')
+    apply('sundash-show-rss-widget', showRSSWidget, L('show-rss-widget'), (v) => v === 'true')
     apply('sundash-network-auto', networkModeAuto, L('network-auto'), (v) => v === 'true')
     apply('sundash-group-card-transparent', groupCardTransparent, L('group-card-transparent'), (v) => v === 'true')
     apply('sundash-search-engine', searchEngine, L('search-engine'))
@@ -302,8 +307,8 @@ export const useAppStore = defineStore('app', () => {
     siteTitle, siteIconUrl, loginBgUrl, enableCaptcha,
     setSiteTitle, setSiteIconUrl, setLoginBgUrl, setEnableCaptcha,
     // Components
-    showSystemStatus, networkModeAuto, groupCardTransparent, searchEngine, cardStyle,
-    setShowSystemStatus, setNetworkModeAuto, setGroupCardTransparent, setSearchEngine, setCardStyle,
+    showSystemStatus, showWeatherWidget, showMemo, showRSSWidget, networkModeAuto, groupCardTransparent, searchEngine, cardStyle,
+    setShowSystemStatus, setShowWeatherWidget, setShowMemo, setShowRSSWidget, setNetworkModeAuto, setGroupCardTransparent, setSearchEngine, setCardStyle,
     // Server sync
     loadSettingsFromServer, applyServerSettings,
     // Auth settings

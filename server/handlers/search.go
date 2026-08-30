@@ -23,7 +23,7 @@ func NewSearchHandler(search *service.SearchService) *SearchHandler {
 // GET /api/search?q=query&limit=10
 func (h *SearchHandler) Search(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -55,9 +55,9 @@ func (h *SearchHandler) Search(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"query": query,
+		"query":   query,
 		"results": results,
-		"count": len(results),
+		"count":   len(results),
 	})
 }
 
@@ -65,7 +65,7 @@ func (h *SearchHandler) Search(c *gin.Context) {
 // GET /api/search/suggestions?q=prefix&limit=5
 func (h *SearchHandler) Suggestions(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -97,7 +97,7 @@ func (h *SearchHandler) Suggestions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"query": query,
+		"query":       query,
 		"suggestions": suggestions,
 	})
 }

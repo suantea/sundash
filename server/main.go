@@ -66,12 +66,14 @@ func main() {
 	searchH := handlers.NewSearchHandler(searchSvc)
 	weatherH := handlers.NewWeatherHandler(weatherSvc)
 	memoH := handlers.NewMemoHandler(memoSvc)
+	rssH := handlers.NewRSSHandler(rssSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
 
-	// MCP server: AI agents can list / create / organize bookmarks.
+	// MCP server: AI agents can list / create / organize bookmarks, search
+	// cards and manage memos.
 	// Endpoint: POST /mcp (Streamable HTTP). Auth: Bearer <SUNDASH_MCP_TOKEN>
 	// or a regular sundash JWT; the resolved user is bound to the session.
-	mcpSrv := mcp.New(panelSvc, faviconSvc, systemSvc)
+	mcpSrv := mcp.New(panelSvc, faviconSvc, systemSvc, searchSvc, memoSvc)
 	mcpHTTP := mcpserver.NewStreamableHTTPServer(mcpSrv.MCPServer())
 
 	r := gin.New()
@@ -91,6 +93,11 @@ func main() {
 	if _, err := os.Stat(staticPath); err == nil {
 		r.Static("/assets", filepath.Join(staticPath, "assets"))
 		r.StaticFile("/vite.svg", filepath.Join(staticPath, "vite.svg"))
+		// web/public/favicon.svg ships with the build; without this route it
+		// falls through to the SPA handler and the tab icon gets HTML.
+		if _, err := os.Stat(filepath.Join(staticPath, "favicon.svg")); err == nil {
+			r.StaticFile("/favicon.svg", filepath.Join(staticPath, "favicon.svg"))
+		}
 	}
 
 	api := r.Group("/api")
@@ -146,6 +153,13 @@ func main() {
 			protected.PUT("/memo/:id/archive", memoH.ArchiveMemo)
 			protected.DELETE("/memo/:id", memoH.DeleteMemo)
 			protected.PUT("/memo/:id", memoH.UpdateMemo)
+
+			// RSS API
+			protected.GET("/rss", rssH.ListFeeds)
+			protected.POST("/rss", rssH.AddFeed)
+			protected.PUT("/rss/:id", rssH.UpdateFeed)
+			protected.DELETE("/rss/:id", rssH.DeleteFeed)
+			protected.GET("/rss/:id/items", rssH.GetFeedItems)
 
 			admin := protected.Group("")
 			admin.Use(middleware.AdminMiddleware())
@@ -205,6 +219,8 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
+	// Stop background workers after the HTTP server drained.
+	rssSvc.Stop()
 	slog.Info("Server exited")
 }
 

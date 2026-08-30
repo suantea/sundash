@@ -203,7 +203,7 @@ server {
 }
 ```
 
-3. 可用工具：`sundash_list_groups` / `sundash_create_group` / `sundash_rename_group` / `sundash_delete_group` / `sundash_create_card` / `sundash_update_card` / `sundash_move_card` / `sundash_delete_card` / `sundash_system_status` / `sundash_search` / `sundash_list_memo` / `sundash_add_memo` / `sundash_archive_memo` / `sundash_delete_memo`（详见 README「MCP」章节）
+3. 可用工具（共 18 个，详见 README「MCP」章节）：书签/分组增删改查与排序（`sundash_list_groups` / `sundash_create_group` / `sundash_rename_group` / `sundash_delete_group` / `sundash_reorganize` / `sundash_create_card` / `sundash_update_card` / `sundash_move_card` / `sundash_delete_card`）、图标批量管理（`sundash_set_icons` / `sundash_suggest_icons` / `sundash_auto_iconify`）、系统状态（`sundash_system_status`）、全局搜索（`sundash_search`）、便签（`sundash_list_memo` / `sundash_add_memo` / `sundash_archive_memo` / `sundash_delete_memo`）
 
 ## 验收清单
 

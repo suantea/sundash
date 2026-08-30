@@ -43,7 +43,7 @@ import { useAppStore } from '../../stores/app'
 import { usePanelStore } from '../../stores/panel'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
-import axios from '@/api'
+import { api as axios } from '@/api'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -133,7 +133,7 @@ async function onSearchInput() {
   suggestionTimer = setTimeout(async () => {
     try {
       const token = localStorage.getItem('sundash-token')
-      const res = await axios.get('/api/search', {
+      const res = await axios.get('search', {
         params: { q, limit: 8 },
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
@@ -184,7 +184,7 @@ async function getSuggestions(prefix: string) {
   if (!prefix) return []
   try {
     const token = localStorage.getItem('sundash-token')
-    const res = await axios.get('/api/search/suggestions', {
+    const res = await axios.get('search/suggestions', {
       params: { q: prefix, limit: 5 },
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })

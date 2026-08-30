@@ -32,7 +32,7 @@ export const usePanelStore = defineStore('panel', () => {
   }
 
   async function updateGroup(id: string, data: { name?: string; sort_order?: number }) {
-    await api.put(`/api/panels/groups/${id}`, data)
+    await api.put(`panels/groups/${id}`, data)
     const group = groups.value.find(g => g.id === id)
     if (group) {
       if (data.name !== undefined) group.name = data.name
@@ -41,7 +41,7 @@ export const usePanelStore = defineStore('panel', () => {
   }
 
   async function deleteGroup(id: string) {
-    await api.delete(`/api/panels/groups/${id}`)
+    await api.delete(`panels/groups/${id}`)
     groups.value = groups.value.filter(g => g.id !== id)
   }
 
@@ -60,7 +60,7 @@ export const usePanelStore = defineStore('panel', () => {
   }
 
   async function updateCard(id: string, data: Partial<Card>) {
-    await api.put(`/api/panels/cards/${id}`, data)
+    await api.put(`panels/cards/${id}`, data)
     for (const group of groups.value) {
       if (group.cards) {
         const card = group.cards.find(c => c.id === id)
@@ -73,7 +73,7 @@ export const usePanelStore = defineStore('panel', () => {
   }
 
   async function deleteCard(id: string) {
-    await api.delete(`/api/panels/cards/${id}`)
+    await api.delete(`panels/cards/${id}`)
     for (const group of groups.value) {
       if (group.cards) {
         group.cards = group.cards.filter(c => c.id !== id)
@@ -117,7 +117,7 @@ export const usePanelStore = defineStore('panel', () => {
       const updateData: Partial<Card> = {}
       if (icon_color !== undefined) updateData.icon_color = icon_color
       if (bg_color !== undefined) updateData.bg_color = bg_color
-      await api.put(`/api/panels/cards/${cardId}`, updateData)
+      await api.put(`panels/cards/${cardId}`, updateData)
       
       // Update local state
       for (const group of groups.value) {

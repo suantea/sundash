@@ -67,7 +67,7 @@
           </div>
         </div>
         <div v-if="globalSettings.default_wallpaper_type === 'custom'" class="setting-sub">
-          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" placeholder="{{ $t("admin.enterBackgroundUrl") }}" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
+          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" :placeholder="$t('admin.enterBackgroundUrl')" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
         </div>
       </div>
 
@@ -456,7 +456,7 @@ async function handleCreateUser() {
 async function toggleRole(user: User) {
   const newRole = user.role === 'admin' ? 'user' : 'admin'
   try {
-    await api.put(`/api/users/${user.id}`, { role: newRole })
+    await api.put(`users/${user.id}`, { role: newRole })
     user.role = newRole
     message.success($t('admin.roleUpdated'))
   } catch {
@@ -466,7 +466,7 @@ async function toggleRole(user: User) {
 
 async function deleteUser(user: User) {
   try {
-    await api.delete(`/api/users/${user.id}`)
+    await api.delete(`users/${user.id}`)
     message.success($t('admin.userDeleted'))
     await fetchUsers()
   } catch {
@@ -476,7 +476,7 @@ async function deleteUser(user: User) {
 
 async function approveUser(user: User) {
   try {
-    await api.post(`/api/users/${user.id}/approve`)
+    await api.post(`users/${user.id}/approve`)
     message.success(`${user.username} {{ $t('admin.approved') }}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
     await fetchUsers()
@@ -487,7 +487,7 @@ async function approveUser(user: User) {
 
 async function rejectUser(user: User) {
   try {
-    await api.post(`/api/users/${user.id}/reject`)
+    await api.post(`users/${user.id}/reject`)
     message.success(`${user.username} {{ $t('admin.rejected') }}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
   } catch (e: any) {
@@ -498,7 +498,7 @@ async function rejectUser(user: User) {
 async function viewUserPanel(user: User) {
   viewingUser.value = user
   try {
-    const res = await api.get(`/api/users/${user.id}/panel`)
+    const res = await api.get(`users/${user.id}/panel`)
     viewingGroups.value = res.data.groups || []
     showUserPanel.value = true
   } catch {
@@ -526,7 +526,7 @@ async function handleEditDisplayName() {
   }
   editDisplayNameLoading.value = true
   try {
-    await api.put(`/api/users/${editingDisplayNameUser.value.id}`, {
+    await api.put(`users/${editingDisplayNameUser.value.id}`, {
       display_name: newDisplayName.value.trim(),
     })
     message.success(`${editingDisplayNameUser.value.username} {{ $t('admin.sDisplayNameUpdated') }}`)
@@ -561,7 +561,7 @@ async function handleResetPassword() {
   }
   resetPasswordLoading.value = true
   try {
-    await api.post(`/api/users/${resettingUser.value.id}/reset-password`, {
+    await api.post(`users/${resettingUser.value.id}/reset-password`, {
       new_password: newResetPassword.value,
     })
     message.success(`${resettingUser.value.username} {{ $t('admin.sPasswordReset') }}`)

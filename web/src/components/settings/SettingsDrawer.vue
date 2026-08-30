@@ -334,6 +334,42 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
+                  <Icon icon="mdi:weather-partly-cloudy" :size="18" color="#FF9500" />
+                </div>
+                <div>
+                  <div class="setting-title">{{ $t('settings.weatherWidget') }}</div>
+                </div>
+              </div>
+              <n-switch v-model:value="appStore.showWeatherWidget" @update:value="appStore.setShowWeatherWidget" />
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
+                  <Icon icon="mdi:note-text-outline" :size="18" color="#34C759" />
+                </div>
+                <div>
+                  <div class="setting-title">{{ $t('settings.memoWidget') }}</div>
+                </div>
+              </div>
+              <n-switch v-model:value="appStore.showMemo" @update:value="appStore.setShowMemo" />
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-icon" style="background: rgba(255,69,58,0.1);">
+                  <Icon icon="mdi:rss" :size="18" color="#FF453A" />
+                </div>
+                <div>
+                  <div class="setting-title">{{ $t('settings.rssWidget') }}</div>
+                </div>
+              </div>
+              <n-switch v-model:value="appStore.showRSSWidget" @update:value="appStore.setShowRSSWidget" />
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
                   <Icon icon="mdi:format-size" :size="18" color="#FF9500" />
                 </div>
                 <div>

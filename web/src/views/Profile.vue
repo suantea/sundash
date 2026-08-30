@@ -51,7 +51,7 @@
             </div>
           </div>
           <div class="inline-edit">
-            <input v-model="displayName" class="mini-text-input" placeholder="{{ $t("user.enterDisplayName") }}" />
+            <input v-model="displayName" class="mini-text-input" :placeholder="$t('user.enterDisplayName')" />
             <button class="save-inline-btn" @click="saveDisplayName" :disabled="displayNameSaving">
               {{ displayNameSaving ? $t('common.saving') : $t('common.save') }}
             </button>
@@ -71,15 +71,15 @@
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
           <div class="form-field">
             <label>{{ $t("user.currentPassword") }}</label>
-            <n-input v-model:value="passwordForm.oldPassword" type="password" placeholder="{{ $t("user.enterCurrentPassword") }}" show-password-on="click" />
+            <n-input v-model:value="passwordForm.oldPassword" type="password" :placeholder="$t('user.enterCurrentPassword')" show-password-on="click" />
           </div>
           <div class="form-field">
             <label>{{ $t("user.newPassword") }}</label>
-            <n-input v-model:value="passwordForm.newPassword" type="password" placeholder="{{ $t("user.enterNewPasswordAtLeast6") }}" show-password-on="click" />
+            <n-input v-model:value="passwordForm.newPassword" type="password" :placeholder="$t('user.enterNewPasswordAtLeast6')" show-password-on="click" />
           </div>
           <div class="form-field">
             <label>{{ $t("user.confirmPassword") }}</label>
-            <n-input v-model:value="passwordForm.confirmPassword" type="password" placeholder="{{ $t("user.enterNewPasswordAgain") }}" show-password-on="click" @keyup.enter="handleChangePassword" />
+            <n-input v-model:value="passwordForm.confirmPassword" type="password" :placeholder="$t('user.enterNewPasswordAgain')" show-password-on="click" @keyup.enter="handleChangePassword" />
           </div>
           <div style="display: flex; justify-content: flex-end;">
             <n-button type="primary" :loading="passwordSaving" @click="handleChangePassword">

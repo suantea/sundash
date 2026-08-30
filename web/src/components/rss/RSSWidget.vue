@@ -137,7 +137,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import { useI18n } from 'vue-i18n'
-import axios from '@/api'
+import { api as axios } from '@/api'
 
 const appStore = useAppStore()
 const { t } = useI18n()

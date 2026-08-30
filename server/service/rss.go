@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"encoding/xml"
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
@@ -15,15 +13,15 @@ import (
 
 // RSSFeed represents an RSS feed subscription.
 type RSSFeed struct {
-	ID          string    `json:"id"`
-	UserID      string    `json:"user_id"`
-	Title       string    `json:"title"`
-	URL         string    `json:"url"`
-	Description string    `json:"description,omitempty"`
-	ImageURL    string    `json:"image_url,omitempty"`
-	LastFetched time.Time `json:"last_fetched,omitempty"`
-	UpdateInterval int    `json:"update_interval_minutes"` // How often to fetch (in minutes)
-	Items       []RSSItem `json:"items,omitempty"`
+	ID             string    `json:"id"`
+	UserID         string    `json:"user_id"`
+	Title          string    `json:"title"`
+	URL            string    `json:"url"`
+	Description    string    `json:"description,omitempty"`
+	ImageURL       string    `json:"image_url,omitempty"`
+	LastFetched    time.Time `json:"last_fetched,omitempty"`
+	UpdateInterval int       `json:"update_interval"` // How often to fetch (in minutes)
+	Items          []RSSItem `json:"items,omitempty"`
 }
 
 // RSSItem represents a single item in an RSS feed.
@@ -38,21 +36,21 @@ type RSSItem struct {
 
 // RSSService provides RSS feed fetching and management.
 type RSSService struct {
-	feedRepo  *repository.RSSFeedRepo
-	itemRepo  *repository.RSSItemRepo
-	mu        sync.RWMutex
-	feeds     map[string]*RSSFeed // cache of feeds by ID
-	stopCh    chan struct{}
-	wg        sync.WaitGroup
+	feedRepo *repository.RSSFeedRepo
+	itemRepo *repository.RSSItemRepo
+	mu       sync.RWMutex
+	feeds    map[string]*RSSFeed // cache of feeds by ID
+	stopCh   chan struct{}
+	wg       sync.WaitGroup
 }
 
 // NewRSSService creates a new RSSService.
 func NewRSSService(feedRepo *repository.RSSFeedRepo, itemRepo *repository.RSSItemRepo) *RSSService {
 	s := &RSSService{
-		feedRepo:  feedRepo,
-		itemRepo:  itemRepo,
-		feeds:     make(map[string]*RSSFeed),
-		stopCh:    make(chan struct{}),
+		feedRepo: feedRepo,
+		itemRepo: itemRepo,
+		feeds:    make(map[string]*RSSFeed),
+		stopCh:   make(chan struct{}),
 	}
 	// Start background fetcher
 	s.wg.Add(1)
@@ -77,15 +75,15 @@ func (s *RSSService) AddFeed(ctx context.Context, userID, url string) (*RSSFeed,
 
 	// Create feed record
 	rssFeed := &models.RSSFeed{
-		ID:          generateID(),
-		UserID:      userID,
-		Title:       feed.Title,
-		URL:         url,
-		Description: feed.Description,
-		ImageURL:    extractImageURL(feed),
+		ID:             generateID(),
+		UserID:         userID,
+		Title:          feed.Title,
+		URL:            url,
+		Description:    feed.Description,
+		ImageURL:       extractImageURL(feed),
 		UpdateInterval: 60, // default 60 minutes
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
 	}
 
 	// Save to database
@@ -102,27 +100,27 @@ func (s *RSSService) AddFeed(ctx context.Context, userID, url string) (*RSSFeed,
 	// Add to cache
 	s.mu.Lock()
 	s.feeds[rssFeed.ID] = &RSSFeed{
-		ID:          rssFeed.ID,
-		UserID:      rssFeed.UserID,
-		Title:       rssFeed.Title,
-		URL:         rssFeed.URL,
-		Description: rssFeed.Description,
-		ImageURL:    rssFeed.ImageURL,
-		LastFetched: rssFeed.CreatedAt,
+		ID:             rssFeed.ID,
+		UserID:         rssFeed.UserID,
+		Title:          rssFeed.Title,
+		URL:            rssFeed.URL,
+		Description:    rssFeed.Description,
+		ImageURL:       rssFeed.ImageURL,
+		LastFetched:    rssFeed.CreatedAt,
 		UpdateInterval: rssFeed.UpdateInterval,
 	}
 	s.mu.Unlock()
 
 	return &RSSFeed{
-		ID:          rssFeed.ID,
-		UserID:      rssFeed.UserID,
-		Title:       rssFeed.Title,
-		URL:         rssFeed.URL,
-		Description: rssFeed.Description,
-		ImageURL:    rssFeed.ImageURL,
-		LastFetched: rssFeed.CreatedAt,
+		ID:             rssFeed.ID,
+		UserID:         rssFeed.UserID,
+		Title:          rssFeed.Title,
+		URL:            rssFeed.URL,
+		Description:    rssFeed.Description,
+		ImageURL:       rssFeed.ImageURL,
+		LastFetched:    rssFeed.CreatedAt,
 		UpdateInterval: rssFeed.UpdateInterval,
-		Items:       []RSSItem{}, // Will be populated by background fetcher
+		Items:          []RSSItem{}, // Will be populated by background fetcher
 	}, nil
 }
 
@@ -156,18 +154,27 @@ func (s *RSSService) GetFeeds(ctx context.Context, userID string) ([]*RSSFeed, e
 		}
 
 		feeds = append(feeds, &RSSFeed{
-			ID:          dbFeed.ID,
-			UserID:      dbFeed.UserID,
-			Title:       dbFeed.Title,
-			URL:         dbFeed.URL,
-			Description: dbFeed.Description,
-			ImageURL:    dbFeed.ImageURL,
-			LastFetched: dbFeed.LastFetched,
+			ID:             dbFeed.ID,
+			UserID:         dbFeed.UserID,
+			Title:          dbFeed.Title,
+			URL:            dbFeed.URL,
+			Description:    dbFeed.Description,
+			ImageURL:       dbFeed.ImageURL,
+			LastFetched:    dbFeed.LastFetched,
 			UpdateInterval: dbFeed.UpdateInterval,
-			Items:       rssItems,
+			Items:          rssItems,
 		})
 	}
 	return feeds, nil
+}
+
+// GetFeedItems returns recent items of one feed, after checking the feed
+// belongs to the requesting user.
+func (s *RSSService) GetFeedItems(ctx context.Context, userID, feedID string, limit int) ([]*models.RSSItem, error) {
+	if _, err := s.feedRepo.GetByIDAndUser(ctx, feedID, userID); err != nil {
+		return nil, fmt.Errorf("feed not found or unauthorized: %w", err)
+	}
+	return s.itemRepo.ListByFeed(ctx, feedID, limit)
 }
 
 // RemoveFeed deletes an RSS feed subscription.
@@ -235,15 +242,15 @@ func (s *RSSService) UpdateFeed(ctx context.Context, userID, feedID, url string)
 	s.mu.Unlock()
 
 	return &RSSFeed{
-		ID:          existing.ID,
-		UserID:      existing.UserID,
-		Title:       existing.Title,
-		URL:         existing.URL,
-		Description: existing.Description,
-		ImageURL:    existing.ImageURL,
-		LastFetched: existing.LastFetched,
+		ID:             existing.ID,
+		UserID:         existing.UserID,
+		Title:          existing.Title,
+		URL:            existing.URL,
+		Description:    existing.Description,
+		ImageURL:       existing.ImageURL,
+		LastFetched:    existing.LastFetched,
 		UpdateInterval: existing.UpdateInterval,
-		Items:       []RSSItem{},
+		Items:          []RSSItem{},
 	}, nil
 }
 
@@ -282,8 +289,8 @@ func (s *RSSService) fetchAllFeeds() {
 	now := time.Now()
 	for _, dbFeed := range feeds {
 		// Check if it's time to fetch
-		if dbFeed.LastFetched.IsZero() || 
-		   now.Sub(dbFeed.LastFetched) >= time.Duration(dbFeed.UpdateInterval)*time.Minute {
+		if dbFeed.LastFetched.IsZero() ||
+			now.Sub(dbFeed.LastFetched) >= time.Duration(dbFeed.UpdateInterval)*time.Minute {
 			// Fetch in background to avoid blocking the ticker
 			go func(f *models.RSSFeed) {
 				_ = s.fetchAndStoreItems(ctx, f)
@@ -324,17 +331,25 @@ func (s *RSSService) fetchAndStoreItems(ctx context.Context, feed *models.RSSFee
 	}
 	for i := 0; i < maxItems; i++ {
 		item := parsedFeed.Items[i]
+		// Not every entry carries a publish date; gofeed leaves
+		// PublishedParsed nil then, and dereferencing it would panic.
+		pubDate := time.Now()
+		if item.PublishedParsed != nil {
+			pubDate = *item.PublishedParsed
+		} else if item.UpdatedParsed != nil {
+			pubDate = *item.UpdatedParsed
+		}
 		rssItem := &models.RSSItem{
-			ID:        generateID(),
-			FeedID:    feed.ID,
-			Title:     item.Title,
-			Link:      item.Link,
+			ID:          generateID(),
+			FeedID:      feed.ID,
+			Title:       item.Title,
+			Link:        item.Link,
 			Description: item.Description,
-			PubDate:   *item.PublishedParsed, // gofeed returns *time.Time
-			Author:    extractAuthor(item),
-			Guid:      item.GUID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			PubDate:     pubDate,
+			Author:      extractAuthor(item),
+			Guid:        item.GUID,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		}
 		if err := s.itemRepo.Create(ctx, rssItem); err != nil {
 			// Continue with other items if one fails
@@ -374,10 +389,11 @@ func extractAuthor(item *gofeed.Item) string {
 			return item.Author.Email
 		}
 	}
-	// Sometimes author is in a custom field
-	if item.Author == nil && len(item.Author) > 0 {
-		// This is a simplification; gofeed's Author is a struct
-		// Actually, item.Author is *gofeed.Person
+	// Feeds often carry the author only in the item's authors list (Atom).
+	for _, a := range item.Authors {
+		if a != nil && a.Name != "" {
+			return a.Name
+		}
 	}
 	return ""
 }

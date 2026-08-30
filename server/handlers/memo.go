@@ -20,7 +20,7 @@ func NewMemoHandler(memo *service.MemoService) *MemoHandler {
 // CreateMemo handles POST /api/memo
 func (h *MemoHandler) CreateMemo(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -50,7 +50,7 @@ func (h *MemoHandler) CreateMemo(c *gin.Context) {
 // ListMemos handles GET /api/memo
 func (h *MemoHandler) ListMemos(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -72,7 +72,7 @@ func (h *MemoHandler) ListMemos(c *gin.Context) {
 // ArchiveMemo handles PUT /api/memo/:id/archive
 func (h *MemoHandler) ArchiveMemo(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -112,7 +112,7 @@ func (h *MemoHandler) ArchiveMemo(c *gin.Context) {
 // DeleteMemo handles DELETE /api/memo/:id
 func (h *MemoHandler) DeleteMemo(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -144,7 +144,7 @@ func (h *MemoHandler) DeleteMemo(c *gin.Context) {
 // UpdateMemo handles PUT /api/memo/:id
 func (h *MemoHandler) UpdateMemo(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return

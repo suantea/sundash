@@ -19,7 +19,7 @@ type PanelService struct {
 }
 
 type cachedPanel struct {
-	data   *models.PanelData
+	data    *models.PanelData
 	expires time.Time
 }
 
@@ -61,11 +61,20 @@ func (s *PanelService) GetPanel(userID string) (*models.PanelData, error) {
 
 	s.mu.Lock()
 	s.cache[userID] = &cachedPanel{
-		data:   panelData,
+		data:    panelData,
 		expires: time.Now().Add(5 * time.Minute),
 	}
 	s.mu.Unlock()
 	return panelData, nil
+}
+
+// invalidate drops the cached panel for a user. Every mutation calls it —
+// otherwise a change stays invisible to the home page (and MCP list tools)
+// until the 5-minute read cache expires.
+func (s *PanelService) invalidate(userID string) {
+	s.mu.Lock()
+	delete(s.cache, userID)
+	s.mu.Unlock()
 }
 
 func (s *PanelService) CreateGroup(userID, name string) (*models.PanelGroup, error) {
@@ -82,6 +91,7 @@ func (s *PanelService) CreateGroup(userID, name string) (*models.PanelGroup, err
 	if err := s.panels.CreateGroup(group.ID, userID, name, group.SortOrder); err != nil {
 		return nil, err
 	}
+	s.invalidate(userID)
 	return &group, nil
 }
 
@@ -93,7 +103,11 @@ func (s *PanelService) UpdateGroup(userID, groupID string, name *string, sortOrd
 	if owner == "" || owner != userID {
 		return NewError(ErrNotFound, "Group not found")
 	}
-	return s.panels.UpdateGroup(groupID, name, sortOrder)
+	if err := s.panels.UpdateGroup(groupID, name, sortOrder); err != nil {
+		return err
+	}
+	s.invalidate(userID)
+	return nil
 }
 
 func (s *PanelService) DeleteGroup(userID, groupID string) error {
@@ -104,7 +118,11 @@ func (s *PanelService) DeleteGroup(userID, groupID string) error {
 	if owner == "" || owner != userID {
 		return NewError(ErrNotFound, "Group not found")
 	}
-	return s.panels.DeleteGroup(groupID)
+	if err := s.panels.DeleteGroup(groupID); err != nil {
+		return err
+	}
+	s.invalidate(userID)
+	return nil
 }
 
 func (s *PanelService) CreateCard(userID string, req models.CreateCardRequest) (*models.Card, error) {
@@ -142,6 +160,7 @@ func (s *PanelService) CreateCard(userID string, req models.CreateCardRequest) (
 	if err := s.panels.CreateCard(card); err != nil {
 		return nil, err
 	}
+	s.invalidate(userID)
 	return &card, nil
 }
 
@@ -153,7 +172,11 @@ func (s *PanelService) UpdateCard(userID, cardID string, req models.UpdateCardRe
 	if owner == "" || owner != userID {
 		return NewError(ErrNotFound, "Card not found")
 	}
-	return s.panels.UpdateCard(cardID, req)
+	if err := s.panels.UpdateCard(cardID, req); err != nil {
+		return err
+	}
+	s.invalidate(userID)
+	return nil
 }
 
 func (s *PanelService) DeleteCard(userID, cardID string) error {
@@ -164,7 +187,11 @@ func (s *PanelService) DeleteCard(userID, cardID string) error {
 	if owner == "" || owner != userID {
 		return NewError(ErrNotFound, "Card not found")
 	}
-	return s.panels.DeleteCard(cardID)
+	if err := s.panels.DeleteCard(cardID); err != nil {
+		return err
+	}
+	s.invalidate(userID)
+	return nil
 }
 
 // Reorder applies ordering; entries not owned by the user are silently ignored
@@ -199,7 +226,11 @@ func (s *PanelService) Reorder(userID string, req models.ReorderRequest) error {
 			cardOrders = append(cardOrders, c)
 		}
 	}
-	return s.panels.Reorder(groupOrders, cardOrders)
+	if err := s.panels.Reorder(groupOrders, cardOrders); err != nil {
+		return err
+	}
+	s.invalidate(userID)
+	return nil
 }
 
 // BatchReorganize applies multiple create/rename/delete group and move/create card
@@ -211,7 +242,7 @@ type BatchOp struct {
 	GroupName string `json:"group_name,omitempty"`
 	GroupID   string `json:"group_id,omitempty"`
 	// For move_card
-	CardID    string `json:"card_id,omitempty"`
+	CardID        string `json:"card_id,omitempty"`
 	TargetGroupID string `json:"target_group_id,omitempty"`
 	// For create_card
 	CardTitle string `json:"card_title,omitempty"`

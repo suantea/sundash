@@ -78,7 +78,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import { useI18n } from 'vue-i18n'
-import axios from '@/api'
+import { api as axios } from '@/api'
 
 const appStore = useAppStore()
 const { t } = useI18n()
@@ -91,7 +91,7 @@ let timer: ReturnType<typeof setInterval> | null = null
 async function fetchMemos() {
   try {
     const token = localStorage.getItem('sundash-token')
-    const res = await axios.get('/api/memo', {
+    const res = await axios.get('memo', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     if (res.status === 200) {
@@ -107,7 +107,7 @@ async function saveMemo() {
   if (!content) return
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.post('/api/memo', { content }, {
+    await axios.post('memo', { content }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     newMemoContent.value = ''
@@ -121,7 +121,7 @@ async function saveMemo() {
 async function toggleArchive(memo: any) {
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.put(`/api/memo/${memo.id}/archive`, { archived: !memo.is_archived }, {
+    await axios.put(`memo/${memo.id}/archive`, { archived: !memo.is_archived }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     await fetchMemos()
@@ -134,7 +134,7 @@ async function deleteMemo(id: string) {
   if (!confirm(t('memo.confirmDelete'))) return
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.delete(`/api/memo/${id}`, {
+    await axios.delete(`memo/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     await fetchMemos()
@@ -150,7 +150,7 @@ async function archiveAll() {
     // We'll archive each memo individually for simplicity
     for (const memo of memos.value) {
       if (!memo.is_archived) {
-        await axios.put(`/api/memo/${memo.id}/archive`, { archived: true }, {
+        await axios.put(`memo/${memo.id}/archive`, { archived: true }, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         })
       }

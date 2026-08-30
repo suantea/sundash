@@ -9,13 +9,13 @@ import (
 
 // SearchResult represents a search result item.
 type SearchResult struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	URL         string `json:"url"`
-	Description string `json:"description,omitempty"`
-	Icon        string `json:"icon,omitempty"`
-	GroupID     string `json:"group_id"`
-	GroupName   string `json:"group_name,omitempty"`
+	ID          string  `json:"id"`
+	Title       string  `json:"title"`
+	URL         string  `json:"url"`
+	Description string  `json:"description,omitempty"`
+	Icon        string  `json:"icon,omitempty"`
+	GroupID     string  `json:"group_id"`
+	GroupName   string  `json:"group_name,omitempty"`
 	Score       float64 `json:"score,omitempty"` // FTS5 rank score
 }
 
@@ -55,7 +55,7 @@ func (s *SearchService) SearchCards(ctx context.Context, userID string, query st
 			g.name as group_name,
 			bm25(cards_fts) as score
 		FROM cards_fts
-		JOIN cards c ON c.card_id = cards_fts.rowid
+		JOIN cards c ON c.id = cards_fts.card_id
 		JOIN panel_groups g ON g.id = c.group_id
 		WHERE cards_fts MATCH ? 
 			AND c.user_id = ?

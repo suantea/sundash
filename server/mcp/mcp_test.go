@@ -25,7 +25,11 @@ func setup(t *testing.T) *Server {
 
 	userRepo := repository.NewUserRepo(db)
 	panelSvc := service.NewPanelService(repository.NewPanelRepo(db), userRepo)
-	return New(panelSvc)
+	faviconSvc := service.NewFaviconService()
+	systemSvc := service.NewSystemService()
+	searchSvc := service.NewSearchService(db)
+	memoSvc := service.NewMemoService(repository.NewMemoRepo(db))
+	return New(panelSvc, faviconSvc, systemSvc, searchSvc, memoSvc)
 }
 
 // adminID returns the id of the default admin user created by database.Init.

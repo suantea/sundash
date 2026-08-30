@@ -30,11 +30,13 @@ type Server struct {
 	panels  *service.PanelService
 	favicon *service.FaviconService
 	system  *service.SystemService
+	search  *service.SearchService
+	memo    *service.MemoService
 }
 
 // New creates an MCPServer with all sundash bookmark-management tools.
-func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService) *Server {
-	s := &Server{panels: panels, favicon: favicon, system: system}
+func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService, search *service.SearchService, memo *service.MemoService) *Server {
+	s := &Server{panels: panels, favicon: favicon, system: system, search: search, memo: memo}
 	mcps := server.NewMCPServer(
 		"sundash",
 		"0.1.0",
@@ -45,6 +47,8 @@ func New(panels *service.PanelService, favicon *service.FaviconService, system *
 	registerCardTools(mcps, s)
 	registerIconTools(mcps, s)
 	registerSystemTools(mcps, s)
+	registerSearchTools(mcps, s)
+	registerMemoTools(mcps, s)
 
 	s.server = mcps
 	return s
@@ -446,12 +450,12 @@ func (s *Server) handleAutoIconify(ctx context.Context, req mcp.CallToolRequest)
 	}
 
 	type iconResult struct {
-		CardID    string `json:"card_id"`
-		Title     string `json:"title"`
-		URL       string `json:"url"`
-		Icon      string `json:"icon"`
-		Source    string `json:"source"`
-		Applied   bool   `json:"applied"`
+		CardID  string `json:"card_id"`
+		Title   string `json:"title"`
+		URL     string `json:"url"`
+		Icon    string `json:"icon"`
+		Source  string `json:"source"`
+		Applied bool   `json:"applied"`
 	}
 	var results []iconResult
 	successCount := 0

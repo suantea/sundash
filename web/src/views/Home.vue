@@ -81,6 +81,9 @@
       <!-- Memo Widget -->
       <MemoWidget />
 
+      <!-- RSS Widget -->
+      <RSSWidget />
+
       <!-- Empty State -->
       <div v-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
         <div class="empty-icon">
@@ -219,6 +222,7 @@ import SystemStatus from '../components/status/SystemStatus.vue'
 import SystemMonitor from '../components/status/SystemMonitor.vue'
 import SearchBar from '../components/search/SearchBar.vue'
 import SettingsDrawer from '../components/settings/SettingsDrawer.vue'
+import RSSWidget from '../components/rss/RSSWidget.vue'
 import type { Card } from '../types'
 
 const appStore = useAppStore()

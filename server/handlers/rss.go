@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
+	"strconv"
 
 	"sundash/service"
 
@@ -21,7 +21,7 @@ func NewRSSHandler(rss *service.RSSService) *RSSHandler {
 // ListFeeds handles GET /api/rss
 func (h *RSSHandler) ListFeeds(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -43,7 +43,7 @@ func (h *RSSHandler) ListFeeds(c *gin.Context) {
 // AddFeed handles POST /api/rss
 func (h *RSSHandler) AddFeed(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -73,7 +73,7 @@ func (h *RSSHandler) AddFeed(c *gin.Context) {
 // UpdateFeed handles PUT /api/rss/:id
 func (h *RSSHandler) UpdateFeed(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -113,7 +113,7 @@ func (h *RSSHandler) UpdateFeed(c *gin.Context) {
 // DeleteFeed handles DELETE /api/rss/:id
 func (h *RSSHandler) DeleteFeed(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -145,7 +145,7 @@ func (h *RSSHandler) DeleteFeed(c *gin.Context) {
 // GetFeedItems handles GET /api/rss/:id/items
 func (h *RSSHandler) GetFeedItems(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
@@ -164,12 +164,12 @@ func (h *RSSHandler) GetFeedItems(c *gin.Context) {
 
 	limit := 10
 	if l := c.Query("limit"); l != "" {
-		if parsed, err := parseInt(l); err == nil && parsed > 0 && parsed <= 100 {
+		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
 			limit = parsed
 		}
 	}
 
-	items, err := h.rss.ItemRepo.ListByFeed(c.Request.Context(), feedID, limit)
+	items, err := h.rss.GetFeedItems(c.Request.Context(), uid, feedID, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -179,24 +179,17 @@ func (h *RSSHandler) GetFeedItems(c *gin.Context) {
 	var rssItems []map[string]interface{}
 	for _, item := range items {
 		rssItems = append(rssItems, map[string]interface{}{
-			"id":        item.ID,
-			"feed_id":   item.FeedID,
-			"title":     item.Title,
-			"link":      item.Link,
+			"id":          item.ID,
+			"feed_id":     item.FeedID,
+			"title":       item.Title,
+			"link":        item.Link,
 			"description": item.Description,
-			"pub_date":  item.PubDate,
-			"author":    item.Author,
-			"guid":      item.Guid,
-			"created_at": item.CreatedAt,
-			"updated_at": item.UpdatedAt,
+			"pub_date":    item.PubDate,
+			"author":      item.Author,
+			"guid":        item.Guid,
+			"created_at":  item.CreatedAt,
+			"updated_at":  item.UpdatedAt,
 		})
 	}
 	c.JSON(http.StatusOK, rssItems)
-}
-
-// Helper to parse int
-func parseInt(s string) (int, error) {
-	var n int
-	_, err := fmt.Sscanf(s, "%d", &n)
-	return n, err
 }

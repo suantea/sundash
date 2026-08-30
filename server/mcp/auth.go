@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"crypto/subtle"
 	"net/http"
 	"strings"
 
@@ -31,7 +32,8 @@ func Auth(r *http.Request, users *repository.UserRepo, jwtSecret []byte, mcpToke
 	token := parts[1]
 
 	// 1) Static MCP token (highest priority when configured).
-	if mcpToken != "" && token == mcpToken {
+	// Constant-time compare: the token gates routing controls and usage data.
+	if mcpToken != "" && subtle.ConstantTimeCompare([]byte(token), []byte(mcpToken)) == 1 {
 		u, err := users.FindByUsername(mcpUsername)
 		if err != nil || u == nil {
 			return ""

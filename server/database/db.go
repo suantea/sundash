@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "modernc.org/sqlite"
 	"golang.org/x/crypto/bcrypt"
+	_ "modernc.org/sqlite"
 )
 
 var DB *sql.DB
@@ -20,8 +20,8 @@ func Init(dbPath string) (*sql.DB, error) {
 	}
 
 	// _pragma=foreign_keys(1) enables FK cascades (ON DELETE CASCADE) which the schema relies on.
-// _pragma=synchronous(NORMAL) balances safety and performance.
-// _pragma=cache_size=-20000 sets cache to 20MB.
+	// _pragma=synchronous(NORMAL) balances safety and performance.
+	// _pragma=cache_size=-20000 sets cache to 20MB.
 	dsn := "file:" + dbPath +
 		"?_journal_mode=WAL" +
 		"&_busy_timeout=5000" +
@@ -131,20 +131,22 @@ var migrations = []migration{
 		content='',
 		contentless_delete=1
 	)`, "", ""},
-	// Triggers to keep FTS index in sync with cards table
+	// Triggers to keep FTS index in sync with cards table. The FTS rowid is
+	// keyed to cards.rowid so the 'delete'-by-rowid form works. Note: this is
+	// a contentless_delete=1 table, where the special INSERT ... VALUES
+	// ('delete', ...) command is NOT allowed — only plain DELETE statements
+	// are (see migration 24, which also rebuilds the old wrong triggers).
 	{13, `CREATE TRIGGER IF NOT EXISTS cards_ai AFTER INSERT ON cards BEGIN
-		INSERT INTO cards_fts(card_id, title, url, description, user_id)
-		VALUES (new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+		INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
+		VALUES (new.rowid, new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
 	END`, "", ""},
 	{14, `CREATE TRIGGER IF NOT EXISTS cards_ad AFTER DELETE ON cards BEGIN
-		INSERT INTO cards_fts(cards_fts, rowid, card_id, title, url, description, user_id)
-		VALUES ('delete', old.rowid, old.id, old.title, old.url, COALESCE(old.description,''), old.user_id);
+		DELETE FROM cards_fts WHERE rowid = old.rowid;
 	END`, "", ""},
 	{15, `CREATE TRIGGER IF NOT EXISTS cards_au AFTER UPDATE ON cards BEGIN
-		INSERT INTO cards_fts(cards_fts, rowid, card_id, title, url, description, user_id)
-		VALUES ('delete', old.rowid, old.id, old.title, old.url, COALESCE(old.description,''), old.user_id);
-		INSERT INTO cards_fts(card_id, title, url, description, user_id)
-		VALUES (new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+		DELETE FROM cards_fts WHERE rowid = old.rowid;
+		INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
+		VALUES (new.rowid, new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
 	END`, "", ""},
 	// Memo table for quick notes
 	{16, `CREATE TABLE IF NOT EXISTS memos (
@@ -189,6 +191,28 @@ var migrations = []migration{
 	)`, "", ""},
 	{22, `CREATE INDEX IF NOT EXISTS idx_rss_items_feed ON rss_items(feed_id)`, "", ""},
 	{23, `CREATE INDEX IF NOT EXISTS idx_rss_items_pub_date ON rss_items(pub_date)`, "", ""},
+	// Repair the FTS sync for databases that already ran migrations 13-15:
+	// the old triggers used the 'delete' INSERT command, which fails on a
+	// contentless_delete=1 table (every card update/reorder errored), and
+	// never keyed the FTS rowid to cards.rowid. Rebuild triggers and index.
+	{24, `DROP TRIGGER IF EXISTS cards_ai;
+	DROP TRIGGER IF EXISTS cards_ad;
+	DROP TRIGGER IF EXISTS cards_au;
+	CREATE TRIGGER cards_ai AFTER INSERT ON cards BEGIN
+		INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
+		VALUES (new.rowid, new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+	END;
+	CREATE TRIGGER cards_ad AFTER DELETE ON cards BEGIN
+		DELETE FROM cards_fts WHERE rowid = old.rowid;
+	END;
+	CREATE TRIGGER cards_au AFTER UPDATE ON cards BEGIN
+		DELETE FROM cards_fts WHERE rowid = old.rowid;
+		INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
+		VALUES (new.rowid, new.id, new.title, new.url, COALESCE(new.description,''), new.user_id);
+	END;
+	DELETE FROM cards_fts;
+	INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
+		SELECT rowid, id, title, url, COALESCE(description,''), user_id FROM cards;`, "", ""},
 }
 
 func runMigrations(db *sql.DB) error {

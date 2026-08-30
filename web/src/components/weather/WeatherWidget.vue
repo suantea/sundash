@@ -79,7 +79,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import { useI18n } from 'vue-i18n'
-import axios from '@/api'
+import { api as axios } from '@/api'
 
 const appStore = useAppStore()
 const { t } = useI18n()
@@ -90,7 +90,7 @@ let timer: ReturnType<typeof setInterval> | null = null
 async function fetchWeather() {
   try {
     const token = localStorage.getItem('sundash-token')
-    const res = await axios.get('/api/weather', {
+    const res = await axios.get('weather', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     if (res.status === 200) {
