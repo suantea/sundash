@@ -68,6 +68,7 @@ func main() {
 	memoH := handlers.NewMemoHandler(memoSvc)
 	rssH := handlers.NewRSSHandler(rssSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
+	backupH := handlers.NewBackupHandler(db)
 
 	// MCP server: AI agents can list / create / organize bookmarks, search
 	// cards and manage memos.
@@ -173,6 +174,8 @@ func main() {
 				admin.GET("/users/:id/panel", authH.GetUserPanel)
 				admin.GET("/admin/settings", authH.GetGlobalSettings)
 				admin.PUT("/admin/settings", authH.UpdateGlobalSettings)
+				// Full SQLite snapshot download (consistent while live, #备份).
+				admin.GET("/admin/backup", backupH.Download)
 			}
 		}
 	}

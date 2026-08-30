@@ -210,7 +210,7 @@ server {
 - [ ] 页面打开正常（静态资源 + SPA 路由）
 - [ ] 登录成功（默认 `admin / admin`，登录后立即修改密码）
 - [ ] 服务重启后自动拉起（systemd / Docker restart）
-- [ ] `data/sundash.db` 持久化且可备份
+- [ ] `data/sundash.db` 持久化且可备份（试一次 `GET /api/admin/backup` 下载快照）
 - [ ] `SUNDASH_JWT_SECRET` 已设置且非默认值
 - [ ] Docker 方式下 healthcheck 状态为 healthy
 - [ ] 系统监控数据正常显示（CPU/内存/磁盘/网络）
@@ -228,7 +228,7 @@ server {
 | 打开页面只有 API 没有界面 | `static/` 目录缺失或为空，重新执行前端构建并上传 |
 | 登录后接口返回 401 | 更换过 `SUNDASH_JWT_SECRET` 导致旧 token 失效，重新登录即可 |
 | 端口被占用 | 检查 `SUNDASH_PORT` 是否被其他进程占用（`ss -lntp` / `netstat -ano`） |
-| 数据库文件被锁 | 确保只有一个实例在运行；SQLite 使用 WAL 模式，勿直接拷贝运行中的 db 文件（应使用备份或 `VACUUM INTO`） |
+| 数据库文件被锁 | 确保只有一个实例在运行；SQLite 使用 WAL 模式，勿直接拷贝运行中的 db 文件——用**管理员后台备份端点** `GET /api/admin/backup`（运行中生成一致性完整快照下载，内部即 `VACUUM INTO`） |
 | 系统监控无数据 | 容器内缺少 `/proc`、`/sys` 挂载；NAS 部署时建议只读挂载这两个目录 |
 | 天气 Widget 显示异常 | 检查网络是否能访问 `api.open-meteo.com`；NAS 需确保容器有外网访问权限 |
 | 搜索无结果 | FTS5 索引在数据库迁移时自动创建；如数据是旧版本导入，需手动执行 `INSERT INTO cards_fts(cards_fts) VALUES('rebuild')` 重建索引 |
