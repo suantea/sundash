@@ -94,8 +94,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, h } from 'vue'
-import { useMessage } from 'naive-ui'
+import { ref, computed, onMounted } from 'vue'
+import { useMessage, NTag, NButton, NInput, NSelect, NForm, NFormItem, NModal, NEmpty, NSpin } from 'naive-ui'
 import { Icon } from '@iconify/vue'
 import router from '../router'
 import BookmarkNode from '../components/bookmark/BookmarkNode.vue'
@@ -171,7 +171,7 @@ async function save() {
   saving.value = true
   try {
     const op = editing.value.syncId ? 'update' : 'create'
-    const { data } = await pushChanges([{
+    const res = await pushChanges([{
       op,
       syncId: editing.value.syncId || undefined,
       type: form.value.type,
@@ -179,8 +179,8 @@ async function save() {
       url: form.value.type === 'bookmark' ? form.value.url.trim() : undefined,
       parentSyncId: form.value.parentSyncId || undefined,
     }])
-    nodes.value = data.nodes
-    status.value.rev = data.rev
+    nodes.value = res.nodes
+    status.value.rev = res.rev
     status.value.hasSynced = true
     showEditor.value = false
     message.success(op === 'create' ? '已创建' : '已保存')
@@ -196,9 +196,9 @@ function confirmDelete(n: SyncNode) {
   const d = window.confirm(`确定删除「${n.title}」吗？\n删除会同步到其他电脑，Chrome / Safari 中的书签也会被移除。`)
   if (!d) return
   pushChanges([{ op: 'delete', syncId: n.syncId }])
-    .then(({ data }) => {
-      nodes.value = data.nodes
-      status.value.rev = data.rev
+    .then((res) => {
+      nodes.value = res.nodes
+      status.value.rev = res.rev
       message.success('已删除（已同步到其他设备）')
     })
     .catch((e: any) => message.error(e.response?.data?.error || '删除失败'))
@@ -208,9 +208,9 @@ function confirmDelete(n: SyncNode) {
 async function refresh() {
   loading.value = true
   try {
-    const { data } = await pullTree()
-    nodes.value = data.nodes
-    status.value.rev = data.rev
+    const res = await pullTree()
+    nodes.value = res.nodes
+    status.value.rev = res.rev
     status.value.hasSynced = true
     message.success('同步完成')
   } catch (e: any) {
@@ -224,8 +224,8 @@ onMounted(async () => {
   try {
     status.value = await getStatus()
     if (status.value.configured && status.value.hasSynced) {
-      const { data } = await getTree()
-      nodes.value = data.nodes
+      const res = await getTree()
+      nodes.value = res.nodes
     }
   } catch {
     // 未配置等错误由 empty 状态引导
