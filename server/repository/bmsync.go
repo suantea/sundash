@@ -62,7 +62,7 @@ func (r *BmsyncRepo) ListAll(ctx context.Context) ([]*models.SyncNode, error) {
 	}
 	defer rows.Close()
 
-	var out []*models.SyncNode
+	var out []*models.SyncNode = []*models.SyncNode{}
 	for rows.Next() {
 		var n models.SyncNode
 		var url, parent, deleted sql.NullString
