@@ -1,0 +1,39 @@
+# SunDash —— 免构建快速部署（使用 ghcr.io 预构建镜像）
+#
+# 用法：
+#   1. 复制 .env.example 为 .env，并填入随机 JWT 密钥：
+#        cp .env.example .env
+#        # 或生成: echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+#   2. 启动：
+#        docker compose up -d --pull always
+#   3. 访问 http://<主机IP>:3000  （默认账号 admin / admin，请立即修改密码）
+#
+# 需要从源码构建？见 docker/docker-compose.yml（build 模式）。
+
+services:
+  sundash:
+    image: ghcr.io/suantea/sundash:latest
+    container_name: sundash
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - sundash-data:/app/data
+    environment:
+      - SUNDASH_PORT=3000
+      - SUNDASH_DATA_DIR=/app/data
+      - TZ=Asia/Shanghai
+      # 必填：未设置时服务拒绝启动（详见 README 环境变量表）
+      - SUNDASH_JWT_SECRET=${SUNDASH_JWT_SECRET:?请在 .env 中设置 SUNDASH_JWT_SECRET}
+      # 可选：MCP（AI 助手）访问令牌
+      # - SUNDASH_MCP_TOKEN=${SUNDASH_MCP_TOKEN:-}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/site-config"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  sundash-data:
+    driver: local

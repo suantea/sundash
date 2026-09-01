@@ -116,14 +116,24 @@ npm run dev
 
 ## 📦 部署
 
-### 方式 A：Docker（推荐）
+### 方式 A：Docker — 预构建镜像（推荐，免编译）
+
+```bash
+# 1. 复制环境变量模板，并填入随机 JWT 密钥
+cp .env.example .env
+# 或直接生成: echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+
+# 2. 启动（自动拉取 ghcr.io/suantea/sundash，amd64 + arm64 双架构）
+docker compose up -d --pull always
+# 访问 http://<主机>:3000
+```
+
+根目录 `docker-compose.yml` 直接使用已发布的镜像，无需本地编译。如需从源码构建，使用 `docker/docker-compose.yml`：
 
 ```bash
 cd docker
-# 先设置密钥（docker/.env，compose 强制要求）
-echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+cp ../.env.example .env
 docker compose up -d --build
-# 访问 http://<主机>:3000
 ```
 
 ### 方式 B：裸二进制 + systemd

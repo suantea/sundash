@@ -116,14 +116,24 @@ Open http://localhost:5173 and sign in with the default account **admin / admin*
 
 ## 📦 Deployment
 
-### Option A: Docker (recommended)
+### Option A: Docker — prebuilt image (recommended, no build)
+
+```bash
+# 1. Copy the env template and set a random JWT secret
+cp .env.example .env
+# or: echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+
+# 2. Start (pulls ghcr.io/suantea/sundash, amd64 + arm64)
+docker compose up -d --pull always
+# Visit http://<host>:3000
+```
+
+The root `docker-compose.yml` uses the published image directly — no local build needed. Prefer the in-repo build? Use `docker/docker-compose.yml` (build from source):
 
 ```bash
 cd docker
-# Set the secret first (docker/.env — compose requires it)
-echo "SUNDASH_JWT_SECRET=$(openssl rand -base64 48)" > .env
+cp ../.env.example .env
 docker compose up -d --build
-# Visit http://<host>:3000
 ```
 
 ### Option B: Bare binary + systemd
