@@ -5,10 +5,11 @@ COPY web/package*.json ./
 RUN npm ci
 COPY web/ .
 RUN npm run build
-# Pre-compress static assets for better performance
-RUN find dist -type f -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.json" | while read f; do \
-    gzip -k -f "$f" && brotli -k -f "$f"; \
-  done
+# Pre-compress static assets for better performance (node:20-alpine lacks brotli)
+RUN apk add --no-cache brotli && \
+    find dist -type f \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.json" \) | while read f; do \
+      gzip -k -f "$f" && brotli -k -f "$f"; \
+    done
 
 # Build backend (match the Go version required by server/go.mod)
 FROM golang:1.26-alpine AS backend
