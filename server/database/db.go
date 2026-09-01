@@ -19,6 +19,18 @@ func Init(dbPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("create data directory: %w", err)
 	}
 
+	// 显式校验目录可写性：MkdirAll 对已存在的目录不会报错，若目录存在但
+	// 不可写（如 NAS 卷权限异常、只读挂载），SQLite 打开数据库时会报晦涩的
+	// "unable to open database file (14)"（CANTOPEN），难以定位。这里先创建
+	// 并删除一个临时文件探测写权限，失败时给出清晰错误。
+	probe, err := os.CreateTemp(dir, ".sundash-write-test-*")
+	if err != nil {
+		return nil, fmt.Errorf("data directory %q is not writable (cannot create database file): %w", dir, err)
+	}
+	probeName := probe.Name()
+	probe.Close()
+	_ = os.Remove(probeName)
+
 	// _pragma=foreign_keys(1) enables FK cascades (ON DELETE CASCADE) which the schema relies on.
 	// _pragma=synchronous(NORMAL) balances safety and performance.
 	// _pragma=cache_size=-20000 sets cache to 20MB.

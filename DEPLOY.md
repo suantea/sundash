@@ -272,6 +272,7 @@ server {
 
 | 现象 | 原因与处理 |
 |---|---|
+| 启动即退出，日志提示 `unable to open database file (14)` | **数据目录不可写**。容器内 `SUNDASH_DATA_DIR` 指向的目录（默认 `/app/data`）存在但无写权限，或宿主机卷只读。排查：`ls -ld <数据目录>` 确认属主与权限（容器内用户需可写）；宿主机目录可 `chmod 775`/`chown` 到容器 UID；确认卷非只读挂载。修复后新版会在启动时直接提示 `data directory ... is not writable`，不再出现晦涩的 14 错误码 |
 | 启动即退出，日志提示 `SUNDASH_JWT_SECRET ... required` | 未设置密钥；生产环境设置随机密钥，开发用 `SUNDASH_DEBUG=true` |
 | 打开页面只有 API 没有界面 | `static/` 目录缺失或为空，重新执行前端构建并上传 |
 | 登录后接口返回 401 | 更换过 `SUNDASH_JWT_SECRET` 导致旧 token 失效，重新登录即可 |
