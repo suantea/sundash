@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"golang.org/x/crypto/bcrypt"
 	_ "modernc.org/sqlite"
 )
 
@@ -56,10 +55,6 @@ func Init(dbPath string) (*sql.DB, error) {
 	}
 
 	if err := runMigrations(db); err != nil {
-		db.Close()
-		return nil, err
-	}
-	if err := createDefaultAdmin(db); err != nil {
 		db.Close()
 		return nil, err
 	}
@@ -319,27 +314,4 @@ func columnExists(db *sql.DB, table, column string) bool {
 func markApplied(db *sql.DB, version int) error {
 	_, err := db.Exec("INSERT INTO schema_migrations (version) VALUES (?)", version)
 	return err
-}
-
-func createDefaultAdmin(db *sql.DB) error {
-	var count int
-	if err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count); err != nil {
-		return fmt.Errorf("count users: %w", err)
-	}
-	if count > 0 {
-		return nil
-	}
-
-	hash, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("hash default admin password: %w", err)
-	}
-	if _, err := db.Exec(
-		`INSERT INTO users (id, username, password_hash, display_name, role, status) VALUES (?, ?, ?, ?, ?, 'approved')`,
-		"admin", "admin", string(hash), "Administrator", "admin",
-	); err != nil {
-		return fmt.Errorf("create default admin: %w", err)
-	}
-	log.Println("Default admin user created (username: admin, password: admin) — CHANGE THE PASSWORD IMMEDIATELY")
-	return nil
 }

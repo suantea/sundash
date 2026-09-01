@@ -24,11 +24,34 @@ func setup(t *testing.T) *UserService {
 	)
 }
 
-func TestLoginDefaultAdmin(t *testing.T) {
+func TestNeedsSetup(t *testing.T) {
 	svc := setup(t)
-	res, err := svc.Login("admin", "admin")
+	needs, err := svc.NeedsSetup()
 	if err != nil {
-		t.Fatalf("login failed: %v", err)
+		t.Fatalf("needs setup: %v", err)
+	}
+	if !needs {
+		t.Fatal("expected needs_setup=true with no users")
+	}
+
+	if _, err := svc.Setup(SetupRequest{Username: "admin", Password: "admin123"}); err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
+
+	needs, err = svc.NeedsSetup()
+	if err != nil {
+		t.Fatalf("needs setup after: %v", err)
+	}
+	if needs {
+		t.Fatal("expected needs_setup=false after setup")
+	}
+}
+
+func TestSetupCreatesAdmin(t *testing.T) {
+	svc := setup(t)
+	res, err := svc.Setup(SetupRequest{Username: "admin", Password: "admin123", DisplayName: "Administrator"})
+	if err != nil {
+		t.Fatalf("setup failed: %v", err)
 	}
 	if res.Token == "" {
 		t.Fatal("expected non-empty token")
@@ -36,10 +59,38 @@ func TestLoginDefaultAdmin(t *testing.T) {
 	if res.User.Username != "admin" {
 		t.Fatalf("expected admin, got %s", res.User.Username)
 	}
+	if res.User.Role != "admin" {
+		t.Fatalf("expected admin role, got %s", res.User.Role)
+	}
+
+	// 再次 Setup 应被拒绝
+	if _, err := svc.Setup(SetupRequest{Username: "admin", Password: "admin123"}); err == nil {
+		t.Fatal("expected error when setup called twice")
+	}
+
+	// 用设置好的账号登录
+	login, err := svc.Login("admin", "admin123")
+	if err != nil {
+		t.Fatalf("login after setup failed: %v", err)
+	}
+	if login.User.Username != "admin" {
+		t.Fatalf("expected admin, got %s", login.User.Username)
+	}
+}
+
+func TestLoginDefaultAdmin(t *testing.T) {
+	svc := setup(t)
+	// 不再有自动创建的 admin/admin：默认密码登录必须失败
+	if _, err := svc.Login("admin", "admin"); err == nil {
+		t.Fatal("expected error: no default admin account exists")
+	}
 }
 
 func TestLoginWrongPassword(t *testing.T) {
 	svc := setup(t)
+	if _, err := svc.Setup(SetupRequest{Username: "admin", Password: "admin123"}); err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
 	if _, err := svc.Login("admin", "wrong"); err == nil {
 		t.Fatal("expected error for wrong password")
 	}
@@ -83,10 +134,16 @@ func TestRegisterDuplicateUsername(t *testing.T) {
 
 func TestChangePassword(t *testing.T) {
 	svc := setup(t)
-	if err := svc.ChangePassword("admin", "admin", "newpass123"); err != nil {
+	// 先通过首次设置创建 admin 账号（返回的 User.ID 是 uuid）
+	setupRes, err := svc.Setup(SetupRequest{Username: "admin", Password: "admin123"})
+	if err != nil {
+		t.Fatalf("setup failed: %v", err)
+	}
+	adminID := setupRes.User.ID
+	if err := svc.ChangePassword(adminID, "admin123", "newpass123"); err != nil {
 		t.Fatalf("change password failed: %v", err)
 	}
-	if _, err := svc.Login("admin", "admin"); err == nil {
+	if _, err := svc.Login("admin", "admin123"); err == nil {
 		t.Fatal("old password should no longer work")
 	}
 	if _, err := svc.Login("admin", "newpass123"); err != nil {

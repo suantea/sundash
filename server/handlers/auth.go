@@ -21,6 +21,30 @@ func NewAuthHandler(users *service.UserService, panels *service.PanelService, se
 
 // --- public auth ---
 
+// SetupStatus 返回系统是否处于首次安装状态（无用户时 needs_setup=true）。
+func (h *AuthHandler) SetupStatus(c *gin.Context) {
+	needs, err := h.users.NeedsSetup()
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"needs_setup": needs})
+}
+
+// Setup 首次初始化：仅在无用户时允许，创建第一个管理员并可选设置站点名。
+func (h *AuthHandler) Setup(c *gin.Context) {
+	var req service.SetupRequest
+	if !bind(c, &req) {
+		return
+	}
+	res, err := h.users.Setup(req)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusCreated, res)
+}
+
 func (h *AuthHandler) GetAuthSettings(c *gin.Context) {
 	settings, err := h.users.AuthSettings()
 	if err != nil {

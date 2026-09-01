@@ -128,7 +128,7 @@ export const useAppStore = defineStore('app', () => {
   const showSystemMonitor = ref(localStorage.getItem(L('show-system-monitor')) !== 'false')
   const showWeatherWidget = ref(localStorage.getItem(L('show-weather-widget')) !== 'false')
   const showMemo = ref(localStorage.getItem(L('show-memo')) !== 'false')
-  const showRSSWidget = ref(localStorage.getItem(L('show-rss-widget')) !== 'false')
+  const showRSSWidget = ref(localStorage.getItem(L('show-rss-widget')) === 'true')
   const networkModeAuto = ref(localStorage.getItem(L('network-auto')) === 'true')
   const groupCardTransparent = ref(localStorage.getItem(L('group-card-transparent')) === 'true')
   const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Google')

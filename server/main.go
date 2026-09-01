@@ -110,6 +110,8 @@ func main() {
 			auth.POST("/login", middleware.LoginRateLimit(), authH.Login)
 			auth.POST("/register", authH.Register)
 			auth.GET("/settings", authH.GetAuthSettings)
+			auth.GET("/setup-status", authH.SetupStatus)
+			auth.POST("/setup", authH.Setup)
 		}
 
 		api.GET("/site-config", authH.GetSiteConfig)

@@ -154,7 +154,7 @@ let timer: ReturnType<typeof setInterval> | null = null
 async function fetchFeeds() {
   try {
     const token = localStorage.getItem('sundash-token')
-    const res = await axios.get('/api/rss', {
+    const res = await axios.get('rss', {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     if (res.status === 200) {
@@ -174,7 +174,7 @@ async function addFeed() {
   if (!url) return
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.post('/api/rss', { url }, {
+    await axios.post('rss', { url }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     newFeedUrl.value = ''
@@ -189,7 +189,7 @@ async function updateFeed() {
   if (!editFeedId || !editFeedUrl.value.trim()) return
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.put(`/api/rss/${editFeedId}`, { url: editFeedUrl.value.trim() }, {
+    await axios.put(`rss/${editFeedId}`, { url: editFeedUrl.value.trim() }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     editFeedId = ''
@@ -210,7 +210,7 @@ async function confirmDeleteFeed() {
   if (!editFeedId) return
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.delete(`/api/rss/${editFeedId}`, {
+    await axios.delete(`rss/${editFeedId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     editFeedId = ''
@@ -224,7 +224,7 @@ async function confirmDeleteFeed() {
 async function refreshFeed(feed: any) {
   try {
     const token = localStorage.getItem('sundash-token')
-    await axios.put(`/api/rss/${feed.id}`, { url: feed.url }, {
+    await axios.put(`rss/${feed.id}`, { url: feed.url }, {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     await fetchFeeds()
@@ -238,7 +238,7 @@ async function refreshAll() {
     const token = localStorage.getItem('sundash-token')
     // We'll refresh each feed by calling update (which triggers a fetch)
     for (const feed of feeds.value) {
-      await axios.put(`/api/rss/${feed.id}`, { url: feed.url }, {
+      await axios.put(`rss/${feed.id}`, { url: feed.url }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
     }

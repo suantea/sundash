@@ -49,6 +49,15 @@ export const useUserStore = defineStore('user', () => {
     user.value = u
   }
 
+  // Fill token + user (used by the first-time setup flow after POST /auth/setup).
+  function setToken(t: string, u: User) {
+    token.value = t
+    user.value = u
+    localStorage.setItem('sundash-token', t)
+    api.defaults.headers.common['Authorization'] = `Bearer ${t}`
+    router.push('/')
+  }
+
   function logout() {
     token.value = null
     user.value = null
@@ -62,5 +71,5 @@ export const useUserStore = defineStore('user', () => {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
   }
 
-  return { token, user, isLoggedIn, login, register, fetchProfile, setUser, logout }
+  return { token, user, isLoggedIn, login, register, fetchProfile, setUser, setToken, logout }
 })

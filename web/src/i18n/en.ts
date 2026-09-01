@@ -90,6 +90,17 @@ export default {
     lightTheme: 'Light theme',
   },
 
+  // ── First-time setup page ─────────────────────────────
+  setup: {
+    title: 'First-time Setup',
+    subtitle: 'Create your admin account to get started',
+    siteTitlePlaceholder: 'Site title (optional)',
+    create: 'Create & Enter',
+    hint: 'This account has full admin privileges. Keep the password safe.',
+    success: 'Setup complete. Welcome!',
+    failed: 'Setup failed',
+  },
+
   // ── 首页 / 面板 ──────────────────────────────────────
   home: {
     searchPlaceholder: 'Search bookmarks...',

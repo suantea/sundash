@@ -240,6 +240,80 @@ func (s *UserService) SetUserStatus(targetID, status string) error {
 	return s.users.SetStatus(targetID, status)
 }
 
+// NeedsSetup 报告系统是否处于"首次安装"状态（没有任何用户时返回 true）。
+// 前端据此在首次访问时引导创建管理员账号，而不是使用硬编码的 admin/admin。
+func (s *UserService) NeedsSetup() (bool, error) {
+	n, err := s.users.Count()
+	if err != nil {
+		return false, err
+	}
+	return n == 0, nil
+}
+
+// SetupRequest 首次初始化请求。
+type SetupRequest struct {
+	Username    string `json:"username" binding:"required,min=3,max=32"`
+	Password    string `json:"password" binding:"required,min=6"`
+	DisplayName string `json:"display_name"`
+	SiteTitle   string `json:"site_title"` // 可选：站点名称，空则保持默认
+}
+
+// Setup 首次初始化：仅在没有任何用户时允许，创建第一个管理员并可选设置站点名。
+// 返回登录响应（token + user），前端可直接进入面板。
+func (s *UserService) Setup(req SetupRequest) (*models.LoginResponse, error) {
+	userCount, err := s.users.Count()
+	if err != nil {
+		return nil, err
+	}
+	if userCount > 0 {
+		return nil, NewError(ErrForbidden, "System already initialized")
+	}
+
+	exists, err := s.users.ExistsByUsername(req.Username)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, NewError(ErrConflict, "Username already exists")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("hash password: %w", err)
+	}
+
+	displayName := req.DisplayName
+	if displayName == "" {
+		displayName = req.Username
+	}
+
+	user := models.User{
+		ID:           uuid.New().String(),
+		Username:     req.Username,
+		PasswordHash: string(hash),
+		DisplayName:  displayName,
+		Role:         "admin",
+		Status:       StatusApproved,
+	}
+	if err := s.users.Create(&user); err != nil {
+		return nil, err
+	}
+
+	// 可选：设置站点名称
+	if req.SiteTitle != "" {
+		if err := s.settings.Upsert(models.SettingSiteTitle, req.SiteTitle, nil); err != nil {
+			return nil, err
+		}
+	}
+
+	token, err := s.generateToken(user)
+	if err != nil {
+		return nil, err
+	}
+	user.PasswordHash = ""
+	return &models.LoginResponse{Token: token, User: user}, nil
+}
+
 func (s *UserService) generateToken(user models.User) (string, error) {
 	claims := &models.Claims{
 		UserID:   user.ID,

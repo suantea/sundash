@@ -84,8 +84,8 @@
       <!-- Memo Widget -->
       <MemoWidget />
 
-      <!-- RSS Widget -->
-      <RSSWidget />
+      <!-- RSS Widget (可选：设置里开启) -->
+      <RSSWidget v-if="appStore.showRSSWidget" />
 
       <!-- Empty State -->
       <div v-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
