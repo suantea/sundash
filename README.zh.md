@@ -48,6 +48,12 @@
 - 面板服务缓存：用户面板数据内存缓存 5 分钟，所有变更操作即时失效，改动立刻可见
 - NAS 友好部署：提供 `docker-compose.nas.yml` 示例，支持本地持久化卷、时区设置、健康检查与自动重启
 
+### 🔄 跨浏览器书签同步
+- **`/bookmarks` 子页面**（不在主页展示）：展示从外部 **bookmark-sync** 服务器同步来的完整书签树——与 Chrome MV3 / Safari 扩展共享的文件夹与书签
+- **完整读写**：在仪表盘中直接新增、编辑、移动、删除书签；变更推送到同步服务器后传播到所有其他设备
+- **LWW + 墓碑语义**：删除采用软删除墓碑（服务端保留、绝不物理删除），但会传播到其他电脑——在这里删掉一个书签，其他设备的 Chrome/Safari 也会移除它；`updatedAt` 仅在真实变更时刷新
+- **配置**：在「管理面板 → 全局设置」填写同步服务器地址与 Token（`bmsync_server_url`、`bmsync_token`）；本地镜像存于 SQLite（`bmsync_nodes`），通过 pull / push 刷新
+
 ### 🔧 工程化
 - 后端三层分层架构（handler → service → repository）+ 手动依赖注入，可单元测试
 - 版本化数据库迁移（`schema_migrations`）、SQLite WAL 并发读、FTS5 全文索引
@@ -223,6 +229,10 @@ SunDash 内置 [MCP](https://modelcontextprotocol.io)（Model Context Protocol�
 | GET/POST/PUT/DELETE | `/api/memo` `/api/memo/:id` | 便签列表 / 新建 / 归档 / 更新 / 删除 |
 | GET/POST/PUT/DELETE | `/api/rss` `/api/rss/:id` | RSS 订阅管理 |
 | GET | `/api/rss/:id/items` | RSS 文章列表（支持 `limit`，校验订阅归属） |
+| GET | `/api/bmsync/status` | 书签同步连接状态（是否配置 / 是否已同步 / rev） |
+| GET | `/api/bmsync/tree` | 本地书签镜像（只读，不触发网络请求） |
+| POST | `/api/bmsync/pull` | 从同步服务器拉取全量规范书签树 |
+| POST | `/api/bmsync/push` | 推送新增/编辑/删除变更（LWW + 墓碑），并存储返回的规范状态 |
 
 ---
 

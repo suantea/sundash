@@ -48,6 +48,12 @@
 - Panel cache: per-user panel data cached in memory for 5 minutes; every mutation invalidates it instantly so changes are visible immediately
 - NAS-friendly deploys: `docker-compose.nas.yml` example with local volumes, timezone, healthcheck, and auto-restart
 
+### 🔄 Cross-Browser Bookmark Sync
+- **`/bookmarks` sub-page** (not the home page) shows the full bookmark tree synced from an external **bookmark-sync** server — folders and bookmarks shared with the Chrome MV3 / Safari extensions
+- **Full read/write**: create, edit, move and delete bookmarks right from the dashboard; changes are pushed to the sync server and propagate to every other device
+- **LWW + tombstone semantics**: deletions are soft-deleted tombstones kept on the server (never physically erased) but propagated to other computers, so removing a bookmark here removes it from Chrome/Safari on other devices; `updatedAt` is only stamped on real changes
+- **Config**: set the sync server URL + bearer token in **Admin → global settings** (`bmsync_server_url`, `bmsync_token`); the local mirror lives in SQLite (`bmsync_nodes`) and is refreshed via pull/push
+
 ### 🔧 Engineering
 - Three-layer backend (handler → service → repository) with manual dependency injection, unit-testable
 - Versioned database migrations (`schema_migrations`), SQLite WAL, FTS5 full-text index
@@ -223,6 +229,10 @@ SunDash ships with a built-in [MCP](https://modelcontextprotocol.io) (Model Cont
 | GET/POST/PUT/DELETE | `/api/memo` `/api/memo/:id` | Memos: list / create / archive / update / delete |
 | GET/POST/PUT/DELETE | `/api/rss` `/api/rss/:id` | RSS feed management |
 | GET | `/api/rss/:id/items` | RSS article list (supports `limit`, ownership checked) |
+| GET | `/api/bmsync/status` | Bookmark-sync connection status (configured / synced / rev) |
+| GET | `/api/bmsync/tree` | Local bookmark mirror (read-only, no network) |
+| POST | `/api/bmsync/pull` | Pull the full canonical bookmark tree from the sync server |
+| POST | `/api/bmsync/push` | Push create/update/delete changes (LWW + tombstones) and store the returned canonical state |
 
 ---
 
