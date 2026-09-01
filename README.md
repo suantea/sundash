@@ -136,6 +136,17 @@ cp ../.env.example .env
 docker compose up -d --build
 ```
 
+Common `docker compose` operations:
+
+```bash
+docker compose logs -f sundash   # follow logs
+docker compose down              # stop (data persists in the volume)
+docker compose up -d --pull always   # upgrade to the latest image
+docker compose exec sundash sh   # shell into the container
+```
+
+Change the host port (e.g. 8080) by editing `ports:` in `docker-compose.yml` (`"8080:3000"`), then `docker compose up -d` again.
+
 ### Option B: Bare binary + systemd
 
 ```bash

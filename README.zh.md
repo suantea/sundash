@@ -136,6 +136,17 @@ cp ../.env.example .env
 docker compose up -d --build
 ```
 
+常用的 `docker compose` 操作：
+
+```bash
+docker compose logs -f sundash         # 查看日志
+docker compose down                    # 停止（数据保留在 volume 中）
+docker compose up -d --pull always     # 升级到最新镜像
+docker compose exec sundash sh         # 进入容器
+```
+
+如需修改宿主机端口（例如改用 8080），编辑 `docker-compose.yml` 的 `ports:`（改成 `"8080:3000"`），再重新执行 `docker compose up -d` 即可。
+
 ### 方式 B：裸二进制 + systemd
 
 ```bash

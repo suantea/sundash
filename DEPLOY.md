@@ -128,6 +128,54 @@ cd nas-deploy
 # 或 start.bat（Windows）
 ```
 
+### QNAP 部署（两种方式）
+
+#### 方式 C1：Container Station 直接拉取镜像（最简单）
+
+QNAP 的 **Container Station**（容器工作站）支持直接从 ghcr.io 拉取镜像，无需离线包：
+
+1. 打开 Container Station → **Images（映像）** → **Pull**（拉取）
+2. 输入镜像名：`ghcr.io/suantea/sundash:latest`（已发布 amd64 + arm64 双架构）
+3. 拉取完成后点击 **Create**（创建）：
+   - **Ports（端口映射）**：`3000:3000`
+   - **Volume（卷挂载）**：`/share/Container/sundash/data:/app/data`（宿主机路径请按 NAS 存储卷调整）
+   - **Environment（环境变量）**：
+     - `SUNDASH_JWT_SECRET`：必填（用 `openssl rand -base64 48` 生成）
+     - `TZ=Asia/Shanghai`
+4. 启动后访问 `http://<NAS_IP>:3000`，默认账号 `admin / admin`
+
+> 群晖 / TrueNAS 的操作类似（Synology Container Manager / TrueNAS Apps 均支持 ghcr.io 镜像）。
+
+#### 方式 C2：离线包（无外网 / 内网 NAS）
+
+适用于 NAS 无法直连 ghcr.io 的情况：
+
+```bash
+# 1. 在一台能联网的机器（或本机 Mac）构建 linux/amd64 镜像
+./docker/build-qnap.sh            # 产物: qnap/sundash-image.tar.gz
+# 注：宿主机是 arm64（M 系 Mac）时，脚本会自动用 buildx 交叉编译 linux/amd64
+
+# 2. 将 qnap/sundash-image.tar.gz 传到 NAS（scp / WebDAV / 共享文件夹）
+
+# 3. 在 NAS 上执行一键部署（需在 tar 所在目录）
+cd nas-deploy
+./start.sh        # Linux/NAS；Windows 用 start.bat
+# 脚本自动: docker load → 停止旧容器 → docker run 启动
+```
+
+或手动操作：
+
+```bash
+docker load < sundash-image.tar.gz
+docker run -d --name sundash --restart unless-stopped \
+  -p 3000:3000 \
+  -v /share/Container/sundash/data:/app/data \
+  -e SUNDASH_PORT=3000 -e SUNDASH_DATA_DIR=/app/data -e TZ=Asia/Shanghai \
+  sundash:latest
+```
+
+> 注意：方式 C2 构建出的镜像名为 `sundash:latest`，`nas-deploy/docker-compose.yml` / `docker-compose.nas.yml` 默认即引用该标签，可直接 `docker compose -f docker-compose.nas.yml up -d`。
+
 ### NAS 部署注意事项
 
 1. **数据持久化**：确保 `docker-compose.nas.yml` 中配置的宿主机路径（如 `/share/Container/sundash/data`）指向 NAS 存储卷，避免容器重建时数据丢失。
