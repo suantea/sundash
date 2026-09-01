@@ -14,6 +14,9 @@ var GlobalSettingKeys = []string{
 	"default_wallpaper_opacity", "default_wallpaper_copyright",
 	"site_title", "site_icon_url", "site_cdn_url", "site_analytics_code",
 	"site_custom_head", "site_custom_footer",
+	// Bookmark-sync connection (server URL + bearer token). Device id is
+	// exposed via /api/bmsync/status only and not editable from the UI.
+	"bmsync_server_url", "bmsync_token",
 }
 
 var SiteConfigKeys = []string{

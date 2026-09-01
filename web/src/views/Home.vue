@@ -48,6 +48,9 @@
           <Icon :icon="appStore.isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :size="17" />
         </button>
         <div class="hdr-divider"></div>
+        <button class="hdr-btn" @click="router.push('/bookmarks')" title="书签同步">
+          <Icon icon="mdi:bookmark-multiple-outline" :size="17" />
+        </button>
         <button class="hdr-btn accent" @click="showAddGroup = true" title="新建分组">
           <Icon icon="mdi:plus" :size="17" />
         </button>

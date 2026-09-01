@@ -34,6 +34,12 @@ const router = createRouter({
       component: () => import('../views/Admin.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
     },
+    {
+      path: '/bookmarks',
+      name: 'Bookmarks',
+      component: () => import('../views/Bookmarks.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

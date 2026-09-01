@@ -11,6 +11,7 @@ const (
 	ErrForbidden
 	ErrNotFound
 	ErrConflict
+	ErrBadGateway
 )
 
 // AppError is the unified application error used across the service layer.

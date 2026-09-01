@@ -57,6 +57,7 @@ func main() {
 	weatherSvc := service.NewWeatherService()
 	memoSvc := service.NewMemoService(repository.NewMemoRepo(db))
 	rssSvc := service.NewRSSService(repository.NewRSSFeedRepo(db), repository.NewRSSItemRepo(db))
+	bmsyncSvc := service.NewBmsyncService(repository.NewBmsyncRepo(db), settingsRepo)
 
 	authH := handlers.NewAuthHandler(userSvc, panelSvc, settingsSvc)
 	panelH := handlers.NewPanelHandler(panelSvc, settingsSvc)
@@ -67,6 +68,7 @@ func main() {
 	weatherH := handlers.NewWeatherHandler(weatherSvc)
 	memoH := handlers.NewMemoHandler(memoSvc)
 	rssH := handlers.NewRSSHandler(rssSvc)
+	bmsyncH := handlers.NewBmsyncHandler(bmsyncSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
 	backupH := handlers.NewBackupHandler(db)
 
@@ -161,6 +163,15 @@ func main() {
 			protected.PUT("/rss/:id", rssH.UpdateFeed)
 			protected.DELETE("/rss/:id", rssH.DeleteFeed)
 			protected.GET("/rss/:id/items", rssH.GetFeedItems)
+
+			// Bookmark-sync: full tree mirror driven by the canonical
+			// bookmark-sync server. Pull refreshes the mirror from the
+			// server; Push uploads local changes and stores the returned
+			// canonical state. All endpoints require login.
+			protected.GET("/bmsync/status", bmsyncH.Status)
+			protected.GET("/bmsync/tree", bmsyncH.Tree)
+			protected.POST("/bmsync/pull", bmsyncH.Pull)
+			protected.POST("/bmsync/push", bmsyncH.Push)
 
 			admin := protected.Group("")
 			admin.Use(middleware.AdminMiddleware())

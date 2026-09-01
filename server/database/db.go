@@ -213,6 +213,21 @@ var migrations = []migration{
 	DELETE FROM cards_fts;
 	INSERT INTO cards_fts(rowid, card_id, title, url, description, user_id)
 		SELECT rowid, id, title, url, COALESCE(description,''), user_id FROM cards;`, "", ""},
+	// Bookmark-sync (bmsync): sundash keeps a local mirror of the canonical
+	// bookmark tree (same shape as the bookmark-sync server) plus sync meta.
+	{25, `CREATE TABLE IF NOT EXISTS bmsync_nodes (
+		sync_id TEXT PRIMARY KEY,
+		type TEXT NOT NULL,
+		title TEXT NOT NULL,
+		url TEXT,
+		parent_sync_id TEXT,
+		idx INTEGER,
+		created_at TEXT NOT NULL,
+		updated_at TEXT NOT NULL,
+		deleted_at TEXT,
+		rev INTEGER NOT NULL
+	);
+	CREATE TABLE IF NOT EXISTS bmsync_meta (key TEXT PRIMARY KEY, value TEXT);`, "", ""},
 }
 
 func runMigrations(db *sql.DB) error {
