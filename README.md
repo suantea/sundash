@@ -147,6 +147,19 @@ docker compose exec sundash sh   # shell into the container
 
 Change the host port (e.g. 8080) by editing `ports:` in `docker-compose.yml` (`"8080:3000"`), then `docker compose up -d` again.
 
+#### NAS / QNAP deployment
+
+Two ways to deploy on NAS (QNAP / Synology / TrueNAS):
+
+- **Pull the image in Container Station** (QNAP) — easiest, no offline package:
+  1. Container Station → **Images** → **Pull** → `ghcr.io/suantea/sundash:latest`
+  2. **Create**: ports `3000:3000`, volume `/share/Container/sundash/data:/app/data`, env `SUNDASH_JWT_SECRET` (required) + `TZ=Asia/Shanghai`
+  3. Open `http://<NAS_IP>:3000`, default account `admin / admin`
+
+- **Offline package** (no internet on the NAS): build `qnap/sundash-image.tar.gz` with `./docker/build-qnap.sh`, copy it to the NAS, then `cd nas-deploy && ./start.sh` (or `start.bat` on Windows). The script loads the image, auto-generates the JWT secret, and starts the container.
+
+Full details: [DEPLOY.md → NAS deployment](DEPLOY.md#方式-cnas-部署qnap--群晖--truenas).
+
 ### Option B: Bare binary + systemd
 
 ```bash

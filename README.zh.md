@@ -147,6 +147,19 @@ docker compose exec sundash sh         # 进入容器
 
 如需修改宿主机端口（例如改用 8080），编辑 `docker-compose.yml` 的 `ports:`（改成 `"8080:3000"`），再重新执行 `docker compose up -d` 即可。
 
+#### NAS / QNAP 部署
+
+NAS（QNAP / 群晖 / TrueNAS）上的两种部署方式：
+
+- **Container Station 直接拉取镜像**（QNAP，最简单，无需离线包）：
+  1. Container Station → **映像（Images）** → **拉取（Pull）** → 输入 `ghcr.io/suantea/sundash:latest`
+  2. **创建（Create）**：端口映射 `3000:3000`、卷挂载 `/share/Container/sundash/data:/app/data`、环境变量 `SUNDASH_JWT_SECRET`（必填）+ `TZ=Asia/Shanghai`
+  3. 访问 `http://<NAS_IP>:3000`，默认账号 `admin / admin`
+
+- **离线包**（NAS 无外网时）：用 `./docker/build-qnap.sh` 构建 `qnap/sundash-image.tar.gz`，拷到 NAS 后执行 `cd nas-deploy && ./start.sh`（Windows 用 `start.bat`）。脚本会自动加载镜像、生成 JWT 密钥并启动容器。
+
+完整步骤见 [DEPLOY.md → NAS 部署](DEPLOY.md#方式-cnas-部署qnap--群晖--truenas)。
+
 ### 方式 B：裸二进制 + systemd
 
 ```bash
