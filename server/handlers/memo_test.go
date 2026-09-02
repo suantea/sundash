@@ -32,6 +32,11 @@ func TestMemoRoutesAuthorizeWithJWT(t *testing.T) {
 
 	users := repository.NewUserRepo(db)
 	userSvc := service.NewUserService(users, repository.NewSettingsRepo(db), []byte("test-secret"))
+	// database.Init no longer auto-creates an admin account; register one via
+	// the setup flow so login below succeeds.
+	if _, err := userSvc.Setup(service.SetupRequest{Username: "admin", Password: "admin"}); err != nil {
+		t.Fatalf("setup admin: %v", err)
+	}
 	login, err := userSvc.Login("admin", "admin")
 	if err != nil {
 		t.Fatalf("login: %v", err)

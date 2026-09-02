@@ -132,7 +132,7 @@ func (s *RSSService) GetFeeds(ctx context.Context, userID string) ([]*RSSFeed, e
 	}
 
 	// Convert to service format and include recent items
-	var feeds []*RSSFeed
+	feeds := make([]*RSSFeed, 0)
 	for _, dbFeed := range dbFeeds {
 		// Get recent items for this feed
 		items, err := s.itemRepo.ListByFeed(ctx, dbFeed.ID, 10) // latest 10 items

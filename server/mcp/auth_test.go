@@ -16,6 +16,9 @@ func TestMCPAuthStaticToken(t *testing.T) {
 	}
 	defer db.Close()
 	users := repository.NewUserRepo(db)
+	// database.Init no longer auto-creates an admin; static-token auth looks up
+	// mcpUsername, so create the admin user first.
+	ensureAdmin(t, users)
 
 	req, _ := http.NewRequest("POST", "/mcp", nil)
 	req.Header.Set("Authorization", "Bearer test-static-mcp-token")

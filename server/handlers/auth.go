@@ -42,6 +42,9 @@ func (h *AuthHandler) Setup(c *gin.Context) {
 		respondError(c, err)
 		return
 	}
+	// Setup 内部直接写库（repository.Upsert），需手动失效 site-config 缓存，
+	// 否则 30s TTL 内页面/HTML 注入仍返回旧标题。
+	h.settings.InvalidateSiteConfig()
 	c.JSON(http.StatusCreated, res)
 }
 

@@ -16,12 +16,15 @@ var GlobalSettingKeys = []string{
 	"site_custom_head", "site_custom_footer",
 	// Bookmark-sync connection (server URL + bearer token). Device id is
 	// exposed via /api/bmsync/status only and not editable from the UI.
-	"bmsync_server_url", "bmsync_token",
+	// bmsync_enabled 控制书签同步功能总开关（默认开启），经 site-config 下发，
+	// 关闭后前端隐藏书签同步入口。
+	"bmsync_server_url", "bmsync_token", "bmsync_enabled",
 }
 
 var SiteConfigKeys = []string{
 	"site_title", "site_icon_url", "site_cdn_url", "site_analytics_code",
 	"site_custom_head", "site_custom_footer",
+	"bmsync_enabled",
 }
 
 type SettingsService struct {
@@ -57,14 +60,22 @@ func (s *SettingsService) GetGlobal() (map[string]string, error) {
 	return s.settings.GlobalByKeys(GlobalSettingKeys)
 }
 
+// UpdateGlobal 更新全局设置并使 site-config 缓存失效。
 func (s *SettingsService) UpdateGlobal(settings map[string]string) error {
 	if err := s.settings.UpsertBatch(settings, nil); err != nil {
 		return err
 	}
-	s.mu.Lock()
-	s.siteConfig = nil // invalidate cache
-	s.mu.Unlock()
+	s.InvalidateSiteConfig()
 	return nil
+}
+
+// InvalidateSiteConfig 清除 site-config 缓存。
+// 供绕过 UpdateGlobal 直接写库（如首次 Setup 写入 site_title）后调用，
+// 避免 30s TTL 内新标题不生效。
+func (s *SettingsService) InvalidateSiteConfig() {
+	s.mu.Lock()
+	s.siteConfig = nil
+	s.mu.Unlock()
 }
 
 // GetSiteConfig returns the global site config with a short TTL cache.

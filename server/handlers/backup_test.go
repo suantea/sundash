@@ -25,7 +25,12 @@ func TestBackupDownloadProducesSQLiteSnapshot(t *testing.T) {
 	}
 	t.Cleanup(func() { db.Close() })
 
-	// Some data so the snapshot has content.
+	// Some data so the snapshot has content. memos.user_id has a FK to users,
+	// and database.Init no longer auto-creates the "admin" user.
+	if _, err := db.Exec(`INSERT INTO users (id, username, password_hash, display_name, role, status)
+		VALUES ('admin', 'admin', '', 'Administrator', 'admin', 'approved')`); err != nil {
+		t.Fatalf("seed admin: %v", err)
+	}
 	if _, err := db.Exec(`INSERT INTO memos (id, user_id, content) VALUES ('m1', 'admin', 'backup-me')`); err != nil {
 		t.Fatalf("seed memo: %v", err)
 	}

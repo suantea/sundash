@@ -24,6 +24,9 @@ func setup(t *testing.T) *Server {
 	t.Cleanup(func() { db.Close() })
 
 	userRepo := repository.NewUserRepo(db)
+	// database.Init no longer auto-creates an admin; create one explicitly in
+	// the SAME db so FK constraints (groups.user_id → users.id) hold.
+	ensureAdmin(t, userRepo)
 	panelSvc := service.NewPanelService(repository.NewPanelRepo(db), userRepo)
 	faviconSvc := service.NewFaviconService()
 	systemSvc := service.NewSystemService()
@@ -32,19 +35,32 @@ func setup(t *testing.T) *Server {
 	return New(panelSvc, faviconSvc, systemSvc, searchSvc, memoSvc)
 }
 
-// adminID returns the id of the default admin user created by database.Init.
-func adminID(t *testing.T) string {
+// ensureAdmin inserts the fixed admin user if missing.
+func ensureAdmin(t *testing.T, repo *repository.UserRepo) {
 	t.Helper()
-	db, err := database.Init(filepath.Join(t.TempDir(), "test.db"))
+	u, err := repo.FindByUsername("admin")
 	if err != nil {
-		t.Fatalf("init db: %v", err)
-	}
-	u, err := repository.NewUserRepo(db).FindByUsername("admin")
-	db.Close()
-	if err != nil || u == nil {
 		t.Fatalf("find admin: %v", err)
 	}
-	return u.ID
+	if u == nil {
+		admin := &models.User{
+			ID:           "admin",
+			Username:     "admin",
+			PasswordHash: "",
+			DisplayName:  "Administrator",
+			Role:         "admin",
+			Status:       "approved",
+		}
+		if err := repo.Create(admin); err != nil {
+			t.Fatalf("create admin: %v", err)
+		}
+	}
+}
+
+// adminID returns the id of the admin user created by setup().
+func adminID(t *testing.T) string {
+	t.Helper()
+	return "admin"
 }
 
 // withUser wraps the authenticated user id into ctx, same as the HTTP path.
