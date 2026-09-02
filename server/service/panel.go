@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -323,5 +324,109 @@ func (s *PanelService) GetUserPanel(targetID string) (map[string]any, error) {
 		"user_id":  targetID,
 		"username": user.Username,
 		"groups":   data.Groups,
+	}, nil
+}
+
+// SuggestCategorize analyzes existing group patterns and suggests group assignments
+// for cards in low-value groups ("暂停使用", "其他"). Returns suggested operations
+// that can be applied via BatchReorganize.
+type CategorizeSuggestion struct {
+	CardID      string `json:"card_id"`
+	CardTitle   string `json:"card_title"`
+	SourceGroup string `json:"source_group"`
+	TargetGroup string `json:"target_group"`
+	TargetID    string `json:"target_id"`
+	Confidence  string `json:"confidence"` // "high" | "medium"
+}
+
+type SuggestCategorizeResult struct {
+	Suggestions []CategorizeSuggestion `json:"suggestions"`
+	Summary     map[string]int         `json:"summary"` // groupName -> count of suggested moves
+}
+
+// keywordRules defines category classification rules based on domain/title keywords.
+// Each rule maps keywords to a target group name.
+var keywordRules = map[string][]string{
+	"APP":             {"nas", "qnap", "fnos", "transmission", "emby", "jellyfin", "qbittorrent", "docker", "alist", "home assistant", "ha.", "pve", "proxmox", "openwrt", "virtualization", "1panel"},
+	"商标检索":         {"商标", "标局", "专利", "版权", "检索", "查询", "企查", "权大师", "马德里", "分类", "知产", "ip.", "lanternfish", "标库"},
+	"公司门户":         {"chery", "奇瑞", "合同", "采购", "门户", "办公", "oa", "crm", "hr.", "erp"},
+	"工具":            {"翻译", "转换", "pdf", "图片", "压缩", "字体", "icon", "logo", "图表", "chart", "放大", "remove", "tinify", "photopea", "vectormagic", "工具箱"},
+	"新闻咨询类":       {"新闻", "资讯", "快讯", "36氪", "汽车", "媒体", "数据", "新闻", "新浪", "so.car", "艾媒", "autothinker"},
+	"开发":            {"git", "github", "gitee", "code", "api", "docs", "nocobase", "wordpress", "bi ", "dashboard", "rsshub", "freshrss", "searxng", "kodbox", "mrdoc", "签到"},
+	"影音":            {"music", "音乐", "navidrome", "video", "视频", "tv", "电影", "刮削", "audiobook", "播客", "podcast"},
+	"网络":            {"vpn", "加速", "proxy", "tunnel", "ssh", "网盘", "同步", "sync", "百度网盘", "github加速", "docker加速"},
+}
+
+func (s *PanelService) SuggestCategorize(userID string) (*SuggestCategorizeResult, error) {
+	data, err := s.GetPanel(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Build group name->id map
+	groupMap := make(map[string]string)
+	for _, g := range data.Groups {
+		groupMap[g.Name] = g.ID
+	}
+
+	// Find low-value groups (source candidates)
+	lowValueGroups := map[string]bool{"暂停使用": true, "其他": true}
+
+	var suggestions []CategorizeSuggestion
+
+	for _, group := range data.Groups {
+		if !lowValueGroups[group.Name] {
+			continue
+		}
+		for _, card := range group.Cards {
+			bestGroup := ""
+			bestConfidence := ""
+			titleLower := strings.ToLower(card.Title)
+			urlLower := strings.ToLower(card.URL)
+
+			for targetGroup, keywords := range keywordRules {
+				for _, kw := range keywords {
+					if strings.Contains(titleLower, kw) || strings.Contains(urlLower, kw) {
+						if bestGroup == "" {
+							bestGroup = targetGroup
+							bestConfidence = "medium"
+						}
+						// If matched by title (not just URL), higher confidence
+						if strings.Contains(titleLower, kw) {
+							bestConfidence = "high"
+							bestGroup = targetGroup
+							break
+						}
+					}
+				}
+				if bestConfidence == "high" {
+					break
+				}
+			}
+
+			if bestGroup != "" {
+				if targetID, ok := groupMap[bestGroup]; ok {
+					suggestions = append(suggestions, CategorizeSuggestion{
+						CardID:      card.ID,
+						CardTitle:   card.Title,
+						SourceGroup: group.Name,
+						TargetGroup: bestGroup,
+						TargetID:    targetID,
+						Confidence:  bestConfidence,
+					})
+				}
+			}
+		}
+	}
+
+	// Build summary
+	summary := make(map[string]int)
+	for _, s := range suggestions {
+		summary[s.TargetGroup]++
+	}
+
+	return &SuggestCategorizeResult{
+		Suggestions: suggestions,
+		Summary:     summary,
 	}, nil
 }

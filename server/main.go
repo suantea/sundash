@@ -60,6 +60,7 @@ func main() {
 	bmsyncSvc := service.NewBmsyncService(repository.NewBmsyncRepo(db), settingsRepo)
 	dockerSvc := service.NewDockerService()
 	deepseekSvc := service.NewDeepSeekService()
+	themeRepo := repository.NewThemeRepo(db)
 
 	authH := handlers.NewAuthHandler(userSvc, panelSvc, settingsSvc)
 	panelH := handlers.NewPanelHandler(panelSvc, settingsSvc)
@@ -72,7 +73,8 @@ func main() {
 	rssH := handlers.NewRSSHandler(rssSvc)
 	bmsyncH := handlers.NewBmsyncHandler(bmsyncSvc)
 	bootstrapH := handlers.NewBootstrapHandler(userSvc, panelSvc, settingsSvc)
-	backupH := handlers.NewBackupHandler(db)
+	backupH := handlers.NewBackupHandler(db, cfg.DataDir)
+	themeH := handlers.NewThemeHandler(themeRepo)
 
 	// MCP server: AI agents can list / create / organize bookmarks, search
 	// cards and manage memos.
@@ -169,6 +171,12 @@ func main() {
 			protected.DELETE("/rss/:id", rssH.DeleteFeed)
 			protected.GET("/rss/:id/items", rssH.GetFeedItems)
 
+			// Theme API
+			protected.GET("/themes", themeH.List)
+			protected.POST("/themes", themeH.Create)
+			protected.PUT("/themes/:id", themeH.Update)
+			protected.DELETE("/themes/:id", themeH.Delete)
+
 			// Bookmark-sync: full tree mirror driven by the canonical
 			// bookmark-sync server. Pull refreshes the mirror from the
 			// server; Push uploads local changes and stores the returned
@@ -192,6 +200,8 @@ func main() {
 				admin.PUT("/admin/settings", authH.UpdateGlobalSettings)
 				// Full SQLite snapshot download (consistent while live, #备份).
 				admin.GET("/admin/backup", backupH.Download)
+			admin.POST("/admin/restore", backupH.Restore)
+			admin.GET("/admin/suggest-categorize", panelH.SuggestCategorize)
 			}
 		}
 	}

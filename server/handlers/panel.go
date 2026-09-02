@@ -139,3 +139,13 @@ func (h *PanelHandler) BatchUpdateSettings(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Settings updated"})
 }
+
+// SuggestCategorize handles GET /api/admin/suggest-categorize
+func (h *PanelHandler) SuggestCategorize(c *gin.Context) {
+	result, err := h.panels.SuggestCategorize(c.GetString("user_id"))
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}

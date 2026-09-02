@@ -235,6 +235,15 @@ var migrations = []migration{
 		rev INTEGER NOT NULL
 	);
 	CREATE TABLE IF NOT EXISTS bmsync_meta (key TEXT PRIMARY KEY, value TEXT);`, "", ""},
+{26, `CREATE TABLE IF NOT EXISTS themes (
+	id TEXT PRIMARY KEY,
+	name TEXT NOT NULL UNIQUE,
+	description TEXT,
+	css_content TEXT NOT NULL,
+	author TEXT DEFAULT '',
+	is_builtin INTEGER DEFAULT 0,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);`, "", ""},
 }
 
 func runMigrations(db *sql.DB) error {
