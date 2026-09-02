@@ -7,12 +7,17 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "deploy": "tsc && vite build && xcopy /E /Y /Q dist ..\\server\\static\\",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "@vue/test-utils": "^2.5.0",
     "@vue/tsconfig": "^0.9.1",
+    "jsdom": "^30.0.1",
     "typescript": "~6.0.2",
     "vite": "^8.0.12",
+    "vitest": "^4.1.11",
     "vue-tsc": "^3.3.5"
   },
   "dependencies": {
