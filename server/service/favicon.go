@@ -199,7 +199,7 @@ func extractDomain(rawURL string) string {
 }
 
 func googleFavicon(domain string) string {
-	return fmt.Sprintf("https://www.google.com/s2/favicons?domain=%s&sz=64", domain)
+	return fmt.Sprintf("https://favicon.im/%s", domain)
 }
 
 func findFaviconHref(html string, re1, re2 *regexp.Regexp) string {
@@ -223,4 +223,13 @@ func absolutize(href, domain string) string {
 	default:
 		return href
 	}
+}
+
+// BatchFetchFavicons 批量获取多个 URL 的 favicon
+func (s *FaviconService) BatchFetchFavicons(urls []string) []FaviconResponse {
+	results := make([]FaviconResponse, len(urls))
+	for i, u := range urls {
+		results[i], _ = s.FetchFavicon(u)
+	}
+	return results
 }

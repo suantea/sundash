@@ -145,6 +145,7 @@ func main() {
 			protected.GET("/wallpaper/bing/:date", wallpaperH.GetWallpaperByDate)
 
 			protected.GET("/favicon", faviconH.FetchFavicon)
+			protected.POST("/favicons", faviconH.BatchFetchFavicons)
 			protected.GET("/system/stats", systemH.GetStats)
 
 			// Search API
