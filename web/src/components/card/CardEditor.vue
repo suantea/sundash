@@ -228,11 +228,13 @@ async function fetchFavicon() {
     if (data.icon_name) {
       form.value.icon = data.icon_name
     } else if (data.favicon_url) {
-      // If only favicon URL available, try to find matching iconify icon
-      // For now use mdi:web as fallback
       form.value.icon = 'mdi:web'
     } else {
       form.value.icon = 'mdi:web'
+    }
+    // Auto-fill title if empty and server returned one
+    if (data.title && !form.value.title) {
+      form.value.title = data.title
     }
   } catch {
     form.value.icon = 'mdi:web'

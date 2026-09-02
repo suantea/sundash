@@ -3,6 +3,7 @@
     <div class="search-input-wrap" :style="searchWrapStyle">
       <Icon icon="mdi:magnify" :width="16" :height="16" class="search-icon" :style="searchIconStyle" />
       <input
+        ref="inputRef"
         v-model="query"
         class="search-input"
         :style="searchInputStyle"
@@ -242,6 +243,13 @@ onUnmounted(() => {
 watch(() => appStore.isDark, () => {
   if (!appStore.wallpaperUrl) detectBackground()
 })
+
+// Expose focus method for keyboard shortcuts
+const inputRef = ref<HTMLInputElement | null>(null)
+function focus() {
+  inputRef.value?.focus()
+}
+defineExpose({ focus })
 </script>
 
 <style scoped>

@@ -346,6 +346,48 @@
       </div>
       <n-input v-model:value="newDisplayName" :placeholder="$t('admin.enterNewDisplayName')" @keyup.enter="handleEditDisplayName" />
     </n-modal>
+
+    <!-- ===== Backup/Restore Section ===== -->
+    <div class="section-header" style="margin-top: 32px;">
+      <div>
+        <h2>{{ $t('admin.backupRestore') || '备份与恢复' }}</h2>
+        <p>{{ $t('admin.backupRestoreDesc') || '下载完整数据库备份或从备份文件恢复' }}</p>
+      </div>
+    </div>
+    <div class="backup-actions">
+      <button class="add-btn" @click="handleBackup">
+        <Icon icon="mdi:download" :width="16" :height="16" />
+        {{ $t('admin.downloadBackup') || '下载备份' }}
+      </button>
+      <button class="add-btn" style="background: var(--sd-warning, #FF9500);" @click="restoreInput?.click()">
+        <Icon icon="mdi:upload" :width="16" :height="16" />
+        {{ $t('admin.restoreBackup') || '从备份恢复' }}
+      </button>
+      <input ref="restoreInput" type="file" accept=".db,.sqlite" style="display:none" @change="handleRestore" />
+    </div>
+
+    <!-- ===== AI Auto-Categorize ===== -->
+    <div class="section-header" style="margin-top: 32px;">
+      <div>
+        <h2>{{ $t('admin.autoCategorize') || 'AI 智能归类' }}</h2>
+        <p>{{ $t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</p>
+      </div>
+    </div>
+    <div class="backup-actions">
+      <button class="add-btn" style="background: #AF52DE;" @click="handleSuggestCategorize" :disabled="categorizeLoading">
+        <Icon icon="mdi:auto-fix" :width="16" :height="16" />
+        {{ categorizeLoading ? '分析中...' : ($t('admin.startCategorize') || '开始分析') }}
+      </button>
+      <button v-if="categorizeSuggestions.length > 0" class="add-btn" style="background: #34C759;" @click="handleApplyCategorize">
+        <Icon icon="mdi:check-all" :width="16" :height="16" />
+        {{ $t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})
+      </button>
+    </div>
+    <div v-if="categorizeSummary" class="categorize-summary">
+      <div v-for="(count, group) in categorizeSummary" :key="group" class="summary-pill">
+        {{ group }}: {{ count }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -632,6 +674,95 @@ async function handleResetPassword() {
     resetPasswordLoading.value = false
   }
   return true
+}
+
+// Backup / Restore
+const restoreInput = ref<HTMLInputElement | null>(null)
+
+function handleBackup() {
+  const token = localStorage.getItem('sundash-token')
+  if (!token) return
+  const url = '/api/admin/backup'
+  // Create a temporary link with auth header via fetch + blob
+  fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then(res => {
+      if (!res.ok) throw new Error('Backup failed')
+      return res.blob()
+    })
+    .then(blob => {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `sundash-backup-${new Date().toISOString().slice(0,19).replace(/[T:]/g,'-')}.db`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      message.success(t('admin.backupSuccess') || '备份下载成功')
+    })
+    .catch(() => message.error(t('admin.backupFailed') || '备份失败'))
+}
+
+async function handleRestore(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  if (!confirm(t('admin.restoreConfirm') || '恢复将覆盖当前所有数据，确定继续？')) {
+    input.value = ''
+    return
+  }
+  const formData = new FormData()
+  formData.append('file', file)
+  try {
+    await api.post('/admin/restore', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    message.success(t('admin.restoreSuccess') || '恢复成功，请刷新页面')
+  } catch (err: any) {
+    message.error(err.response?.data?.error || t('admin.restoreFailed') || '恢复失败')
+  } finally {
+    input.value = ''
+  }
+}
+
+// AI Auto-Categorize
+const categorizeLoading = ref(false)
+const categorizeSuggestions = ref<any[]>([])
+const categorizeSummary = ref<Record<string, number> | null>(null)
+
+async function handleSuggestCategorize() {
+  categorizeLoading.value = true
+  categorizeSuggestions.value = []
+  categorizeSummary.value = null
+  try {
+    const res = await api.get('admin/suggest-categorize')
+    categorizeSuggestions.value = res.data.suggestions || []
+    categorizeSummary.value = res.data.summary || null
+    if (categorizeSuggestions.value.length === 0) {
+      message.info(t('admin.noSuggestions') || '没有需要归类的书签')
+    } else {
+      message.success(`发现 ${categorizeSuggestions.value.length} 条归类建议`)
+    }
+  } catch (e: any) {
+    message.error(e.response?.data?.error || t('admin.categorizeFailed') || '分析失败')
+  } finally {
+    categorizeLoading.value = false
+  }
+}
+
+async function handleApplyCategorize() {
+  if (categorizeSuggestions.value.length === 0) return
+  const ops = categorizeSuggestions.value.map((s: any) => ({
+    action: 'move_card',
+    card_id: s.card_id,
+    target_group_id: s.target_id,
+  }))
+  try {
+    await api.post('panels/batch', { operations: ops })
+    message.success(`已归类 ${ops.length} 个书签`)
+    categorizeSuggestions.value = []
+    categorizeSummary.value = null
+    await fetchUsers() // refresh
+  } catch (e: any) {
+    message.error(e.response?.data?.error || t('admin.applyFailed') || '应用失败')
+  }
 }
 </script>
 
@@ -1314,5 +1445,27 @@ async function handleResetPassword() {
     width: calc(100vw - 24px) !important;
     max-width: 400px;
   }
+}
+
+.backup-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.categorize-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.summary-pill {
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(175, 82, 222, 0.12);
+  color: #AF52DE;
+  font-size: 12px;
+  font-weight: 500;
 }
 </style>

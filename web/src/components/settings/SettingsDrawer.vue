@@ -113,6 +113,22 @@
                 <button :class="['seg-btn', { active: appStore.themeMode === 'dark' }]" @click="appStore.setTheme('dark')">{{ $t('settings.themeDark') }}</button>
                 <button :class="['seg-btn', { active: appStore.themeMode === 'system' }]" @click="appStore.setTheme('system')">{{ $t('settings.themeSystem') }}</button>
               </div>
+              <!-- Custom themes -->
+              <div v-if="customThemes.length" class="theme-list">
+                <div v-for="theme in customThemes" :key="theme.id"
+                  :class="['theme-chip', { active: activeThemeId === theme.id }]"
+                  @click="applyTheme(theme)">
+                  <span class="theme-dot" :style="{ background: extractPrimaryColor(theme.css_content) }"></span>
+                  <span class="theme-chip-name">{{ theme.name }}</span>
+                  <button v-if="!theme.is_builtin" class="theme-chip-del" @click.stop="deleteTheme(theme.id)" title="删除">
+                    <Icon icon="mdi:close" :width="12" :height="12" />
+                  </button>
+                </div>
+              </div>
+              <button class="apply-btn" style="margin-top:8px;font-size:12px;" @click="openThemeEditor">
+                <Icon icon="mdi:plus" :width="14" :height="14" />
+                {{ $t('settings.createTheme') || '新建主题' }}
+              </button>
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row">
@@ -765,6 +781,85 @@ function importTemplate() {
   message.info(t('settings.importTemplateInfo', { name: tmpl.name, groups: tmpl.groups.length, cards: cardCount }))
   doImport({ groups: tmpl.groups }).catch(() => message.error(t('settings.templateImportFailed')))
 }
+
+// Theme management
+interface ThemeItem { id: string; name: string; description: string; css_content: string; is_builtin: boolean }
+const customThemes = ref<ThemeItem[]>([])
+const activeThemeId = ref(localStorage.getItem('sundash-active-theme') || '')
+
+async function fetchThemes() {
+  try {
+    const res = await api.get('themes')
+    customThemes.value = res.data || []
+  } catch { /* ignore */ }
+}
+
+function applyTheme(theme: ThemeItem) {
+  let el = document.getElementById('sundash-custom-theme')
+  if (!el) {
+    el = document.createElement('style')
+    el.id = 'sundash-custom-theme'
+    document.head.appendChild(el)
+  }
+  if (activeThemeId.value === theme.id) {
+    // Toggle off
+    activeThemeId.value = ''
+    el.textContent = ''
+    localStorage.removeItem('sundash-active-theme')
+  } else {
+    el.textContent = theme.css_content
+    activeThemeId.value = theme.id
+    localStorage.setItem('sundash-active-theme', theme.id)
+    message.success(`已应用主题「${theme.name}」`)
+  }
+}
+
+async function deleteTheme(id: string) {
+  try {
+    await api.delete(`themes/${id}`)
+    customThemes.value = customThemes.value.filter(t => t.id !== id)
+    if (activeThemeId.value === id) {
+      activeThemeId.value = ''
+      const el = document.getElementById('sundash-custom-theme')
+      if (el) el.textContent = ''
+      localStorage.removeItem('sundash-active-theme')
+    }
+    message.success('主题已删除')
+  } catch { message.error('删除失败') }
+}
+
+function extractPrimaryColor(css: string): string {
+  const m = css.match(/--sd-primary:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/)
+  return m ? m[1] : '#007AFF'
+}
+
+function openThemeEditor() {
+  const name = prompt('主题名称：')
+  if (!name) return
+  const css = prompt('CSS 内容（自定义变量，如 :root { --sd-primary: #ff0000 }）：')
+  if (!css) return
+  api.post('themes', { name, css_content: css }).then(res => {
+    customThemes.value.push(res.data)
+    message.success('主题已创建')
+  }).catch(() => message.error('创建失败'))
+}
+
+// Restore active theme on mount
+const savedThemeId = localStorage.getItem('sundash-active-theme')
+if (savedThemeId) {
+  fetchThemes().then(() => {
+    const theme = customThemes.value.find(t => t.id === savedThemeId)
+    if (theme) {
+      const el = document.createElement('style')
+      el.id = 'sundash-custom-theme'
+      el.textContent = theme.css_content
+      document.head.appendChild(el)
+      activeThemeId.value = savedThemeId
+    }
+  })
+} else {
+  fetchThemes()
+}
 </script>
 
 <style scoped>
@@ -1118,5 +1213,79 @@ function importTemplate() {
   .setting-sub {
     padding: 6px 12px 12px;
   }
+}
+
+/* Theme chips */
+.theme-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.theme-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.04);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.theme-chip:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+.theme-chip.active {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--sd-primary, #007AFF);
+}
+
+:root[data-theme="dark"] .theme-chip {
+  background: rgba(255,255,255,0.06);
+}
+
+:root[data-theme="dark"] .theme-chip:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+:root[data-theme="dark"] .theme-chip.active {
+  background: rgba(0, 122, 255, 0.2);
+}
+
+.theme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.theme-chip-name {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-chip-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.theme-chip-del:hover {
+  background: rgba(244, 67, 54, 0.15);
+  color: #f44336;
 }
 </style>
