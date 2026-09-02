@@ -26,18 +26,19 @@ const UserIDContextKey ctxKey = "sundash_user_id"
 
 // Server wraps the mcp-go server with access to the panel service.
 type Server struct {
-	server  *server.MCPServer
-	panels  *service.PanelService
-	favicon *service.FaviconService
-	system  *service.SystemService
-	search  *service.SearchService
-	memo    *service.MemoService
-	docker  *service.DockerService
+	server   *server.MCPServer
+	panels   *service.PanelService
+	favicon  *service.FaviconService
+	system   *service.SystemService
+	search   *service.SearchService
+	memo     *service.MemoService
+	docker   *service.DockerService
+	deepseek *service.DeepSeekService
 }
 
 // New creates an MCPServer with all sundash bookmark-management tools.
-func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService, search *service.SearchService, memo *service.MemoService, docker *service.DockerService) *Server {
-	s := &Server{panels: panels, favicon: favicon, system: system, search: search, memo: memo, docker: docker}
+func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService, search *service.SearchService, memo *service.MemoService, docker *service.DockerService, deepseek *service.DeepSeekService) *Server {
+	s := &Server{panels: panels, favicon: favicon, system: system, search: search, memo: memo, docker: docker, deepseek: deepseek}
 	mcps := server.NewMCPServer(
 		"sundash",
 		"0.1.0",
@@ -51,6 +52,7 @@ func New(panels *service.PanelService, favicon *service.FaviconService, system *
 	registerSearchTools(mcps, s)
 	registerMemoTools(mcps, s)
 	registerDockerTools(mcps, s)
+	registerDeepSeekTools(mcps, s)
 
 	s.server = mcps
 	return s
@@ -620,6 +622,89 @@ func (s *Server) handleDockerLogs(ctx context.Context, req mcp.CallToolRequest) 
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 	return mcp.NewToolResultText(logs), nil
+}
+
+// --- deepseek tools ---------------------------------------------------------
+
+func registerDeepSeekTools(mcps *server.MCPServer, s *Server) {
+	mcps.AddTool(mcp.NewTool(
+		"sundash_ai_suggest_group",
+		mcp.WithDescription("AI 智能推荐书签分组：根据标题和 URL，从已有分组中选择最合适的。需要配置 DEEPSEEK_API_KEY。"),
+		mcp.WithString("title", mcp.Required(), mcp.Description("书签标题")),
+		mcp.WithString("url", mcp.Required(), mcp.Description("书签 URL")),
+	), s.handleAISuggestGroup)
+
+	mcps.AddTool(mcp.NewTool(
+		"sundash_ai_summarize",
+		mcp.WithDescription("AI 生成摘要：用一句话总结给定文本内容。需要配置 DEEPSEEK_API_KEY。"),
+		mcp.WithString("text", mcp.Required(), mcp.Description("需要总结的文本")),
+	), s.handleAISummarize)
+
+	mcps.AddTool(mcp.NewTool(
+		"sundash_ai_status",
+		mcp.WithDescription("检查 AI 服务状态（DeepSeek API 是否可用）"),
+		mcp.WithReadOnlyHintAnnotation(true),
+	), s.handleAIStatus)
+}
+
+func (s *Server) handleAISuggestGroup(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	if !s.deepseek.Available() {
+		return mcp.NewToolResultError("AI 服务未配置（需要设置 DEEPSEEK_API_KEY 环境变量）"), nil
+	}
+	uid, err := s.userID(ctx)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	args, _ := req.Params.Arguments.(map[string]any)
+	title, _ := args["title"].(string)
+	url, _ := args["url"].(string)
+	if title == "" || url == "" {
+		return mcp.NewToolResultError("缺少参数 title 或 url"), nil
+	}
+	// Get user's group names for context
+	panel, err := s.panels.GetPanel(uid)
+	if err != nil {
+		return mcp.NewToolResultError("获取面板失败: " + err.Error()), nil
+	}
+	var groupNames []string
+	for _, g := range panel.Groups {
+		groupNames = append(groupNames, g.Name)
+	}
+	if len(groupNames) == 0 {
+		return mcp.NewToolResultError("用户没有分组，请先创建分组"), nil
+	}
+	suggestion, err := s.deepseek.SuggestGroup(title, url, groupNames)
+	if err != nil {
+		return mcp.NewToolResultError("AI 推荐失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultJSON(map[string]any{
+		"suggested_group": suggestion,
+		"available_groups": groupNames,
+	})
+}
+
+func (s *Server) handleAISummarize(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	if !s.deepseek.Available() {
+		return mcp.NewToolResultError("AI 服务未配置（需要设置 DEEPSEEK_API_KEY 环境变量）"), nil
+	}
+	args, _ := req.Params.Arguments.(map[string]any)
+	text, _ := args["text"].(string)
+	if text == "" {
+		return mcp.NewToolResultError("缺少参数 text"), nil
+	}
+	summary, err := s.deepseek.Summarize(text)
+	if err != nil {
+		return mcp.NewToolResultError("AI 摘要失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultJSON(map[string]any{"summary": summary})
+}
+
+func (s *Server) handleAIStatus(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return mcp.NewToolResultJSON(map[string]any{
+		"available": s.deepseek.Available(),
+		"provider":  "deepseek",
+		"model":     "deepseek-chat",
+	})
 }
 
 func (s *Server) handleDeleteCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {

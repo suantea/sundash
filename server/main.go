@@ -59,6 +59,7 @@ func main() {
 	rssSvc := service.NewRSSService(repository.NewRSSFeedRepo(db), repository.NewRSSItemRepo(db))
 	bmsyncSvc := service.NewBmsyncService(repository.NewBmsyncRepo(db), settingsRepo)
 	dockerSvc := service.NewDockerService()
+	deepseekSvc := service.NewDeepSeekService()
 
 	authH := handlers.NewAuthHandler(userSvc, panelSvc, settingsSvc)
 	panelH := handlers.NewPanelHandler(panelSvc, settingsSvc)
@@ -77,7 +78,7 @@ func main() {
 	// cards and manage memos.
 	// Endpoint: POST /mcp (Streamable HTTP). Auth: Bearer <SUNDASH_MCP_TOKEN>
 	// or a regular sundash JWT; the resolved user is bound to the session.
-	mcpSrv := mcp.New(panelSvc, faviconSvc, systemSvc, searchSvc, memoSvc, dockerSvc)
+	mcpSrv := mcp.New(panelSvc, faviconSvc, systemSvc, searchSvc, memoSvc, dockerSvc, deepseekSvc)
 	mcpHTTP := mcpserver.NewStreamableHTTPServer(mcpSrv.MCPServer())
 
 	r := gin.New()
