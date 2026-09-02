@@ -58,18 +58,18 @@ a {
 }
 
 /* === Page Transitions === */
-.page-enter-active,
+/* 进入时不动画（避免刷新时 header 按钮闪白/闪烁）；离开时保留淡出 */
+.page-enter-active {
+  transition-duration: 0.01ms !important;
+}
 .page-leave-active {
-  transition: opacity var(--sd-duration-normal) var(--sd-ease),
-              transform var(--sd-duration-normal) var(--sd-ease);
+  transition: opacity var(--sd-duration-normal) var(--sd-ease);
 }
 .page-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
+  opacity: 1;
 }
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
 }
 
 .fade-enter-active,

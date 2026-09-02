@@ -7,7 +7,7 @@
 
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
-        <Icon icon="mdi:chevron-left" :size="18" />
+        <Icon icon="mdi:chevron-left" :width="18" :height="18" />
         <span>{{ $t("common.back") }}</span>
       </button>
       <h1>{{ $t("settings.title") }}</h1>
@@ -22,7 +22,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:lan" :size="18" color="#007AFF" />
+                <Icon icon="mdi:lan" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.networkMode") }}</div>
@@ -44,7 +44,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                <Icon icon="mdi:theme-light-dark" :size="18" color="#FF9500" />
+                <Icon icon="mdi:theme-light-dark" :width="18" :height="18" color="#FF9500" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.themeMode") }}</div>
@@ -61,7 +61,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                <Icon icon="mdi:image-outline" :size="18" color="#34C759" />
+                <Icon icon="mdi:image-outline" :width="18" :height="18" color="#34C759" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.customBackground") }}</div>
@@ -78,17 +78,17 @@
           <div v-if="appStore.wallpaperType === 'bing'" class="setting-sub">
             <button class="apply-btn" @click="fetchBingWallpaper"> {{ $t("settings.refreshBingWallpaper") }}</button>
             <span v-if="appStore.wallpaperUrl" class="bing-preview">
-              <img :src="appStore.wallpaperUrl" alt="{{ $t('settings.bingWallpaperPreview') }}" class="bing-preview-img" />
+              <img :src="appStore.wallpaperUrl" :alt="$t('settings.bingWallpaperPreview')" class="bing-preview-img" />
             </span>
           </div>
           <div v-if="appStore.wallpaperType === 'custom'" class="setting-sub">
-            <input v-model="customUrl" class="bg-url-input" placeholder="{{ $t('settings.enterBackgroundUrl') }}" />
+            <input v-model="customUrl" class="bg-url-input" :placeholder="$t('settings.enterBackgroundUrl')" />
             <button class="apply-btn" @click="applyCustomBackground"> {{ $t('settings.apply') }}</button>
           </div>
           <div v-if="appStore.wallpaperType !== 'default'" class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                <Icon icon="mdi:blur" :size="18" color="#FF9500" />
+                <Icon icon="mdi:blur" :width="18" :height="18" color="#FF9500" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.wallpaperBlur") }}</div>
@@ -110,7 +110,7 @@
           <div v-if="appStore.wallpaperType !== 'default'" class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:opacity" :size="18" color="#007AFF" />
+                <Icon icon="mdi:opacity" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.wallpaperOpacity") }}</div>
@@ -132,7 +132,7 @@
           <div v-if="appStore.wallpaperType !== 'default'" class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(88,86,214,0.1);">
-                <Icon icon="mdi:text" :size="18" color="#5856D6" />
+                <Icon icon="mdi:text" :width="18" :height="18" color="#5856D6" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.showCopyright") }}</div>
@@ -152,7 +152,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:magnify" :size="18" color="#007AFF" />
+                <Icon icon="mdi:magnify" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.searchBar") }}</div>
@@ -166,7 +166,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                <Icon icon="mdi:clock-outline" :size="18" color="#34C759" />
+                <Icon icon="mdi:clock-outline" :width="18" :height="18" color="#34C759" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.clockWidget") }}</div>
@@ -193,7 +193,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                <Icon icon="mdi:server-network" :size="18" color="#AF52DE" />
+                <Icon icon="mdi:server-network" :width="18" :height="18" color="#AF52DE" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.systemStatus") }}</div>
@@ -212,7 +212,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:image" :size="18" color="#007AFF" />
+                <Icon icon="mdi:image" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.logoType") }}</div>
@@ -225,10 +225,10 @@
             </div>
           </div>
           <div v-if="appStore.logoType === 'image'" class="setting-sub">
-            <input v-model="logoImageInput" class="bg-url-input" placeholder="{{ $t('settings.enterLogoImageUrl') }}" @change="appStore.setLogoImageUrl(logoImageInput)" />
+            <input v-model="logoImageInput" class="bg-url-input" :placeholder="$t('settings.enterLogoImageUrl')" @change="appStore.setLogoImageUrl(logoImageInput)" />
           </div>
           <div v-if="appStore.logoType === 'text'" class="setting-sub">
-            <input v-model="logoTextInput" class="bg-url-input" placeholder="{{ $t('settings.enterLogoText') }}" @change="appStore.setLogoText(logoTextInput)" />
+            <input v-model="logoTextInput" class="bg-url-input" :placeholder="$t('settings.enterLogoText')" @change="appStore.setLogoText(logoTextInput)" />
           </div>
         </div>
       </section>
@@ -240,7 +240,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                <Icon icon="mdi:card-multiple" :size="18" color="#FF9500" />
+                <Icon icon="mdi:card-multiple" :width="18" :height="18" color="#FF9500" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.cardStyle") }}</div>
@@ -263,7 +263,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:arrow-expand-horizontal" :size="18" color="#007AFF" />
+                <Icon icon="mdi:arrow-expand-horizontal" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.maxWidth") }}</div>
@@ -279,7 +279,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                <Icon icon="mdi:format-horizontal-align-left" :size="18" color="#34C759" />
+                <Icon icon="mdi:format-horizontal-align-left" :width="18" :height="18" color="#34C759" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.paddingX") }}</div>
@@ -295,7 +295,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                <Icon icon="mdi:format-vertical-align-top" :size="18" color="#AF52DE" />
+                <Icon icon="mdi:format-vertical-align-top" :width="18" :height="18" color="#AF52DE" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.paddingTopBottom") }}</div>
@@ -323,7 +323,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:palette" :size="18" color="#007AFF" />
+                <Icon icon="mdi:palette" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.primaryColor") }}</div>
@@ -339,7 +339,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                <Icon icon="mdi:format-color-fill" :size="18" color="#FF9500" />
+                <Icon icon="mdi:format-color-fill" :width="18" :height="18" color="#FF9500" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.borderColor") }}</div>
@@ -361,20 +361,20 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(88,86,214,0.1);">
-                <Icon icon="mdi:format-title" :size="18" color="#5856D6" />
+                <Icon icon="mdi:format-title" :width="18" :height="18" color="#5856D6" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.siteTitle") }}</div>
                 <div class="setting-desc">{{ $t("settings.siteTitleDesc") }}</div>
               </div>
             </div>
-            <input v-model="siteTitleInput" class="site-input" placeholder="{{ $t('login.subtitle') }}" @change="updateSiteTitle" />
+            <input v-model="siteTitleInput" class="site-input" :placeholder="$t('login.subtitle')" @change="updateSiteTitle" />
           </div>
           <div class="setting-divider"></div>
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                <Icon icon="mdi:login" :size="18" color="#34C759" />
+                <Icon icon="mdi:login" :width="18" :height="18" color="#34C759" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.enableCaptcha") }}</div>
@@ -393,14 +393,14 @@
           <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                <Icon icon="mdi:page-layout-footer" :size="18" color="#AF52DE" />
+                <Icon icon="mdi:page-layout-footer" :width="18" :height="18" color="#AF52DE" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.customFooter") }}</div>
                 <div class="setting-desc">{{ $t("settings.customFooterDesc") }}</div>
               </div>
             </div>
-            <textarea v-model="footerInput" class="footer-input" placeholder="{{ $t('settings.enterFooterContent') }}" rows="3" @change="appStore.setFooterHtml(footerInput)" />
+            <textarea v-model="footerInput" class="footer-input" :placeholder="$t('settings.enterFooterContent')" rows="3" @change="appStore.setFooterHtml(footerInput)" />
           </div>
         </div>
       </section>
@@ -412,7 +412,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                <Icon icon="mdi:export-variant" :size="18" color="#007AFF" />
+                <Icon icon="mdi:export-variant" :width="18" :height="18" color="#007AFF" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.exportData") }}</div>
@@ -425,7 +425,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                <Icon icon="mdi:import" :size="18" color="#34C759" />
+                <Icon icon="mdi:import" :width="18" :height="18" color="#34C759" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("settings.importData") }}</div>
@@ -448,14 +448,14 @@
           <div class="setting-row clickable" @click="handleResetSettings">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                <Icon icon="mdi:restart" :size="18" color="#FF9500" />
+                <Icon icon="mdi:restart" :width="18" :height="18" color="#FF9500" />
               </div>
               <div>
                 <div class="setting-title" style="color: #FF9500;">{{ $t("settings.resetSettings") }}</div>
                 <div class="setting-desc">{{ $t("settings.resetSettingsDesc") }}</div>
               </div>
             </div>
-            <Icon icon="mdi:chevron-right" :size="16" color="var(--sd-text-tertiary)" />
+            <Icon icon="mdi:chevron-right" :width="16" :height="16" color="var(--sd-text-tertiary)" />
           </div>
         </div>
       </section>
@@ -467,7 +467,7 @@
           <div class="setting-row">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(88,86,214,0.1);">
-                <Icon icon="mdi:account-circle-outline" :size="18" color="#5856D6" />
+                <Icon icon="mdi:account-circle-outline" :width="18" :height="18" color="#5856D6" />
               </div>
               <div>
                 <div class="setting-title">{{ $t("user.currentUser") }}</div>
@@ -479,13 +479,13 @@
           <div class="setting-row clickable" @click="userStore.logout()">
             <div class="setting-left">
               <div class="setting-icon" style="background: rgba(255,59,48,0.1);">
-                <Icon icon="mdi:logout" :size="18" color="#FF3B30" />
+                <Icon icon="mdi:logout" :width="18" :height="18" color="#FF3B30" />
               </div>
               <div>
                 <div class="setting-title" style="color: #FF3B30;">{{ $t("user.logout") }}</div>
               </div>
             </div>
-            <Icon icon="mdi:chevron-right" :size="16" color="var(--sd-text-tertiary)" />
+            <Icon icon="mdi:chevron-right" :width="16" :height="16" color="var(--sd-text-tertiary)" />
           </div>
         </div>
       </section>

@@ -41,21 +41,21 @@
 
       <!-- Right actions -->
       <div class="header-actions">
-        <button class="hdr-btn" @click="appStore.toggleNetwork()" :title="appStore.networkMode === 'internal' ? '内网模式' : '外网模式'">
-          <Icon :icon="appStore.networkMode === 'internal' ? 'mdi:lan' : 'mdi:wan'" :size="17" />
+        <button class="hdr-btn" @click="appStore.toggleNetwork()" :title="appStore.networkMode === 'internal' ? $t('settings.networkInternal') : $t('settings.networkExternal')">
+          <Icon :icon="appStore.networkMode === 'internal' ? 'mdi:lan' : 'mdi:wan'" :width="17" :height="17" />
         </button>
-        <button class="hdr-btn" @click="toggleTheme" :title="appStore.isDark ? '浅色模式' : '深色模式'">
-          <Icon :icon="appStore.isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :size="17" />
+        <button class="hdr-btn" @click="toggleTheme" :title="appStore.isDark ? $t('common.lightMode') : $t('common.darkMode')">
+          <Icon :icon="appStore.isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :width="17" :height="17" />
         </button>
         <div class="hdr-divider"></div>
-        <button class="hdr-btn" @click="router.push('/bookmarks')" title="书签同步">
-          <Icon icon="mdi:bookmark-multiple-outline" :size="17" />
+        <button v-if="appStore.bmsyncEnabled" class="hdr-btn" @click="router.push('/bookmarks')" :title="$t('bookmarks.title')">
+          <Icon icon="mdi:bookmark-multiple-outline" :width="17" :height="17" />
         </button>
-        <button class="hdr-btn accent" @click="showAddGroup = true" title="新建分组">
-          <Icon icon="mdi:plus" :size="17" />
+        <button class="hdr-btn accent" @click="showAddGroup = true" :title="$t('home.addGroup')">
+          <Icon icon="mdi:plus" :width="17" :height="17" />
         </button>
-        <button class="hdr-btn" @click="showSettings = true" title="设置">
-          <Icon icon="mdi:cog-outline" :size="17" />
+        <button class="hdr-btn" @click="showSettings = true" :title="$t('common.settings')">
+          <Icon icon="mdi:cog-outline" :width="17" :height="17" />
         </button>
         <n-dropdown :options="userMenuOptions" @select="handleUserMenu" trigger="click">
           <button class="avatar-btn">
@@ -97,11 +97,11 @@
             <rect x="26" y="26" width="18" height="18" rx="5" fill="#007AFF" opacity="0.15"/>
           </svg>
         </div>
-        <h2>欢迎使用 SunDash</h2>
-        <p>创建你的第一个分组，开始组织你的导航</p>
+        <h2>{{ $t('home.welcome', { name: appStore.siteTitle }) }}</h2>
+        <p>{{ $t('home.welcomeHint') }}</p>
         <button class="cta-btn" @click="showAddGroup = true">
-          <Icon icon="mdi:plus" :size="18" />
-          <span>新建分组</span>
+          <Icon icon="mdi:plus" :width="18" :height="18" />
+          <span>{{ $t('home.addGroup') }}</span>
         </button>
       </div>
 
@@ -111,22 +111,22 @@
           <div class="group-card" :class="{ 'card-transparent': appStore.groupCardTransparent }">
             <div class="group-head">
               <div class="group-name" @click="toggleCollapse(group.id)" style="cursor: pointer;">
-                <Icon :icon="isCollapsed(group.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" :size="18" class="collapse-icon" />
+                <Icon :icon="isCollapsed(group.id) ? 'mdi:chevron-right' : 'mdi:chevron-down'" :width="18" :height="18" class="collapse-icon" />
                 <h3>{{ group.name }}</h3>
                 <span class="group-badge">{{ group.cards?.length || 0 }}</span>
               </div>
               <div class="group-tools">
-                <button class="tool-btn" @click="openAddCard(group.id)" title="添加卡片">
-                  <Icon icon="mdi:plus" :size="15" />
+                <button class="tool-btn" @click="openAddCard(group.id)" :title="$t('home.addBookmark')">
+                  <Icon icon="mdi:plus" :width="15" :height="15" />
                 </button>
-                <button class="tool-btn" @click="toggleHideGroup(group.id)" :title="hiddenGroupIds.has(group.id) ? '显示分组' : '隐藏分组'">
-                  <Icon :icon="hiddenGroupIds.has(group.id) ? 'mdi:eye-off' : 'mdi:eye-outline'" :size="15" />
+                <button class="tool-btn" @click="toggleHideGroup(group.id)" :title="hiddenGroupIds.has(group.id) ? $t('home.showGroup') : $t('home.hideGroup')">
+                  <Icon :icon="hiddenGroupIds.has(group.id) ? 'mdi:eye-off' : 'mdi:eye-outline'" :width="15" :height="15" />
                 </button>
-                <button class="tool-btn" @click="openEditGroup({ id: group.id, name: group.name })" title="$t('home.editGroup')">
-                  <Icon icon="mdi:pencil-outline" :size="15" />
+                <button class="tool-btn" @click="openEditGroup({ id: group.id, name: group.name })" :title="$t('home.editGroup')">
+                  <Icon icon="mdi:pencil-outline" :width="15" :height="15" />
                 </button>
-                <button class="tool-btn danger" @click="confirmDeleteGroup(group.id)" title="$t('home.deleteGroup')">
-                  <Icon icon="mdi:delete-outline" :size="15" />
+                <button class="tool-btn danger" @click="confirmDeleteGroup(group.id)" :title="$t('home.deleteGroup')">
+                  <Icon icon="mdi:delete-outline" :width="15" :height="15" />
                 </button>
               </div>
             </div>
@@ -146,7 +146,7 @@
               </div>
               <div v-if="hiddenCardsCount(group) > 0" class="hidden-cards-bar">
                 <button class="hidden-cards-btn" @click="toggleShowHiddenCards(group.id)">
-                  <Icon :icon="showHiddenCardsGroup.has(group.id) ? 'mdi:eye-off' : 'mdi:eye-outline'" :size="13" />
+                  <Icon :icon="showHiddenCardsGroup.has(group.id) ? 'mdi:eye-off' : 'mdi:eye-outline'" :width="13" :height="13" />
                   <span>{{ hiddenCardsCount(group) }} 个书签已隐藏</span>
                 </button>
               </div>
@@ -156,13 +156,13 @@
 
         <div v-if="hiddenGroupIds.size > 0" class="hidden-groups-bar">
           <button class="hidden-groups-btn" @click="showHiddenGroups = !showHiddenGroups">
-            <Icon :icon="showHiddenGroups ? 'mdi:eye-off' : 'mdi:eye-outline'" :size="14" />
+            <Icon :icon="showHiddenGroups ? 'mdi:eye-off' : 'mdi:eye-outline'" :width="14" :height="14" />
             <span>{{ hiddenGroupIds.size }} 个分组已隐藏</span>
-            <Icon :icon="showHiddenGroups ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" />
+            <Icon :icon="showHiddenGroups ? 'mdi:chevron-up' : 'mdi:chevron-down'" :width="14" :height="14" />
           </button>
           <div v-if="showHiddenGroups" class="hidden-groups-list">
             <button v-for="gid in hiddenGroupIds" :key="gid" class="hidden-group-item" @click="toggleHideGroup(gid)">
-              <Icon icon="mdi:eye" :size="14" />
+              <Icon icon="mdi:eye" :width="14" :height="14" />
               <span>{{ getGroupName(gid) }}</span>
             </button>
           </div>
@@ -177,14 +177,14 @@
     </main>
 
     <!-- Modals -->
-    <n-modal v-model:show="showAddGroup" preset="dialog" title="新建分组" positive-text="创建" negative-text="取消"
+    <n-modal v-model:show="showAddGroup" preset="dialog" :title="$t('home.addGroup')" :positive-text="$t('common.create')" :negative-text="$t('common.cancel')"
       :loading="modalLoading" @positive-click="handleCreateGroup">
-      <n-input v-model:value="newGroupName" placeholder="$t('home.groupName')" autofocus />
+      <n-input v-model:value="newGroupName" :placeholder="$t('home.groupName')" autofocus />
     </n-modal>
 
-    <n-modal v-model:show="showEditGroup" preset="dialog" title="$t('home.editGroup')" positive-text="保存" negative-text="取消"
+    <n-modal v-model:show="showEditGroup" preset="dialog" :title="$t('home.editGroup')" :positive-text="$t('common.save')" :negative-text="$t('common.cancel')"
       :loading="modalLoading" @positive-click="handleUpdateGroup">
-      <n-input v-model:value="editGroupName" placeholder="$t('home.groupName')" />
+      <n-input v-model:value="editGroupName" :placeholder="$t('home.groupName')" />
     </n-modal>
 
     <CardEditor
@@ -199,8 +199,8 @@
 
     <n-modal v-model:show="showDeleteConfirm" preset="dialog" type="warning"
       :title="deleteTarget.type === 'group' ? $t('home.deleteGroup') : $t('home.deleteCard')"
-      :content="deleteTarget.type === 'group' ? '确定要删除该分组及其所有卡片吗？此操作无法撤销。' : '确定要删除该卡片吗？此操作无法撤销。'"
-      positive-text="删除" negative-text="取消" :loading="modalLoading"
+      :content="deleteTarget.type === 'group' ? $t('home.deleteGroupConfirm') : $t('home.deleteCardConfirm')"
+      :positive-text="$t('common.delete')" :negative-text="$t('common.cancel')" :loading="modalLoading"
       @positive-click="handleDelete" />
 
     <SettingsDrawer v-model:show="showSettings" />
@@ -208,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, type DropdownOption, NDropdown, NModal, NInput } from 'naive-ui'
@@ -234,9 +234,18 @@ const panelStore = usePanelStore()
 const message = useMessage()
 const { t } = useI18n()
 
-// Grid style based on cardsPerRow setting
+// Grid style based on cardsPerRow setting, clamped responsively so cards
+// never get squeezed narrow enough to hide their labels.
+const viewportWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200)
+function onViewportResize() { viewportWidth.value = window.innerWidth }
 const gridStyle = computed(() => {
-  const count = parseInt(appStore.cardsPerRow) || 5
+  const pref = parseInt(appStore.cardsPerRow) || 5
+  const w = viewportWidth.value
+  let count = pref
+  if (w <= 520) count = Math.min(pref, 2)
+  else if (w <= 860) count = Math.min(pref, 3)
+  else if (w <= 1100) count = Math.min(pref, 4)
+  else if (w <= 1280) count = Math.min(pref, 5)
   return { gridTemplateColumns: `repeat(${count}, 1fr)` }
 })
 
@@ -285,6 +294,9 @@ onMounted(async () => {
   syncLayoutVars()
   await fetchWallpaper()
 })
+
+onMounted(() => window.addEventListener('resize', onViewportResize))
+onUnmounted(() => window.removeEventListener('resize', onViewportResize))
 
 // Theme
 function toggleTheme() {
@@ -602,7 +614,7 @@ function openCardUrl(card: Card) {
 }
 
 .header-logo .brand-text {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 700;
   color: white;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
@@ -620,7 +632,7 @@ function openCardUrl(card: Card) {
 }
 
 .header-clock :deep(.clock-time) {
-  font-size: 28px !important;
+  font-size: 32px !important;
   font-weight: 600 !important;
   color: white !important;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
@@ -775,7 +787,7 @@ function openCardUrl(card: Card) {
   flex-direction: column;
   align-items: center;
   padding: 120px var(--sd-space-6);
-  animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: fadeIn 0.4s ease both;
 }
 
 @keyframes fadeInUp {
@@ -1158,6 +1170,11 @@ function openCardUrl(card: Card) {
 .group-cards {
   display: grid;
   gap: 8px;
+}
+
+.group-cards .card-item {
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* === Footer === */

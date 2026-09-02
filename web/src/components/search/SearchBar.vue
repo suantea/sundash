@@ -1,30 +1,22 @@
 <template>
   <div class="search-bar" :class="{ 'search-dark-bg': isDarkBg }">
     <div class="search-input-wrap" :style="searchWrapStyle">
-      <Icon :icon="currentEngine.icon" :size="16" class="search-icon" :style="searchIconStyle" />
+      <Icon icon="mdi:magnify" :width="16" :height="16" class="search-icon" :style="searchIconStyle" />
       <input
         v-model="query"
         class="search-input"
         :style="searchInputStyle"
-        :placeholder="currentEngine.name + ' ' + t('search.placeholder')"
+        :placeholder="t('search.placeholder')"
         @keydown.enter="handleSearch"
         @input="onSearchInput">
-      <kbd v-if="!query" class="search-kbd">Enter</kbd>
-      <button v-else class="search-clear" @click="query = ''; searchResults = []">
-        <Icon icon="mdi:close" :size="14" />
+      <button v-if="query" class="search-clear" @click="query = ''; searchResults = []">
+        <Icon icon="mdi:close" :width="14" :height="14" />
       </button>
-      <div class="search-divider"></div>
-      <n-dropdown :options="engineOptions" @select="selectEngine" trigger="click" placement="bottom-end">
-        <button class="engine-select">
-          <span>{{ currentEngine.name }}</span>
-          <Icon icon="mdi:chevron-down" :size="12" />
-        </button>
-      </n-dropdown>
     </div>
     <!-- Bookmarks search results -->
     <div v-if="searchResults.length > 0" class="search-results">
       <div v-for="item in searchResults" :key="item.id" class="search-result-item" @click="openBookmark(item.url)">
-        <Icon :icon="item.icon || 'mdi:bookmark-outline'" :size="16" class="result-icon" />
+        <Icon :icon="item.icon || 'mdi:bookmark-outline'" :width="16" :height="16" class="result-icon" />
         <div class="result-info">
           <div class="result-title">{{ item.title }}</div>
           <div class="result-url">{{ item.url }}</div>
@@ -35,9 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { NDropdown } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import { ref, computed, h, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '../../stores/app'
 import { usePanelStore } from '../../stores/panel'
@@ -81,23 +72,20 @@ const searchInputStyle = computed(() => {
   return style
 })
 
+// 搜索引擎配置（供管理后台设置使用）
 const engines = [
-  { name: 'Google', url: 'https://www.google.com/search?q=', icon: 'mdi:google' },
-  { name: 'Bing', url: 'https://www.bing.com/search?q=', icon: 'mdi:microsoft-bing' },
-  { name: 'Baidu', url: 'https://www.baidu.com/s?wd=', icon: 'mdi:alpha-b-circle' },
-  { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', icon: 'mdi:duck' },
+  { name: 'Baidu', url: 'https://www.baidu.com/s?wd=' },
+  { name: 'Google', url: 'https://www.google.com/search?q=' },
+  { name: 'Bing', url: 'https://www.bing.com/search?q=' },
+  { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
 ]
 
-// Initialize from saved setting
-const savedEngineIndex = engines.findIndex(e => e.name === appStore.searchEngine)
-const currentEngineIndex = ref(savedEngineIndex >= 0 ? savedEngineIndex : 0)
-const currentEngine = ref(engines[currentEngineIndex.value])
-
-const engineOptions = engines.map((e, i) => ({
-  label: e.name,
-  key: i,
-  icon: () => h(Icon, { icon: e.icon, width: 16 }),
-}))
+// 使用 appStore 中保存的默认搜索引擎
+const defaultEngine = computed(() => {
+  const saved = appStore.searchEngine
+  const idx = engines.findIndex(e => e.name === saved)
+  return engines[idx >= 0 ? idx : 0]
+})
 
 // Search results for bookmarks from backend
 const searchResults = ref<Array<{ id: string; title: string; url: string; icon?: string }>>([])
@@ -105,16 +93,9 @@ const searchResults = ref<Array<{ id: string; title: string; url: string; icon?:
 // Debounce timer for suggestions
 let suggestionTimer: NodeJS.Timeout | null = null
 
-function selectEngine(index: number) {
-  currentEngineIndex.value = index
-  currentEngine.value = engines[index]
-  // Save to user account
-  appStore.setSearchEngine(engines[index].name)
-}
-
 function handleSearch() {
   if (query.value.trim()) {
-    window.open(currentEngine.value.url + encodeURIComponent(query.value.trim()), '_blank')
+    window.open(defaultEngine.value.url + encodeURIComponent(query.value.trim()), '_blank')
   }
 }
 
@@ -323,11 +304,14 @@ watch(() => appStore.isDark, () => {
 }
 
 .search-dark-bg .engine-select {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
 }
 
 .search-dark-bg .engine-select:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.2);
   color: white;
 }
 
@@ -371,13 +355,14 @@ watch(() => appStore.isDark, () => {
   display: inline-block;
   width: 32px;
   height: 20px;
-  background: rgba(0,0,0,0.05);
+  background: transparent;
   border-radius: 3px;
   font-size: 10px;
   line-height: 20px;
   text-align: center;
   margin-left: 8px;
   font-family: monospace;
+  color: var(--sd-text-tertiary);
 }
 
 .search-clear {
@@ -410,15 +395,34 @@ watch(() => appStore.isDark, () => {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: var(--sd-text-tertiary);
-  padding: 4px 8px;
-  border-radius: 6px;
+  font-weight: 500;
+  color: var(--sd-text-secondary);
+  background: var(--sd-bg-surface-secondary);
+  border: 1px solid var(--sd-border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-right: 6px;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .engine-select:hover {
-  background: rgba(0,0,0,0.04);
+  background: var(--sd-bg-base);
+  border-color: var(--sd-divider);
+  color: var(--sd-text-primary);
+}
+
+:root[data-theme="dark"] .engine-select {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .engine-select:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .search-results {
@@ -490,3 +494,24 @@ watch(() => appStore.isDark, () => {
   background: var(--sd-text-tertiary);
 }
 </style>
+/* 窄屏适配 */
+@media (max-width: 480px) {
+  .search-bar {
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .search-input-wrap {
+    height: 38px;
+  }
+
+  .search-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .engine-select {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+}

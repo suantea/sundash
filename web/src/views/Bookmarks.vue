@@ -2,51 +2,53 @@
   <div class="bookmarks-page">
     <header class="bm-header">
       <div class="bm-header-left">
-        <button class="bm-back" @click="router.push('/')" title="返回主页">
-          <Icon icon="mdi:arrow-left" :size="18" />
+        <button class="bm-back" @click="router.push('/')" :title="$t('bookmarks.backToHome')">
+          <Icon icon="mdi:arrow-left" :width="18" :height="18" />
         </button>
-        <h1 class="bm-title">书签同步</h1>
+        <h1 class="bm-title">{{ $t('bookmarks.title') }}</h1>
         <n-tag v-if="!status.configured" type="warning" size="small" round>
-          未配置同步服务器
+          {{ $t('bookmarks.tagUnconfigured') }}
         </n-tag>
         <n-tag v-else-if="status.hasSynced" type="success" size="small" round>
-          已同步 · rev {{ status.rev }}
+          {{ $t('bookmarks.tagSynced') }} · rev {{ status.rev }}
         </n-tag>
         <n-tag v-else type="info" size="small" round>
-          尚未同步
+          {{ $t('bookmarks.tagNotSynced') }}
         </n-tag>
       </div>
       <div class="bm-header-actions">
-        <n-input v-model:value="keyword" placeholder="搜索书签…" clearable class="bm-search">
-          <template #prefix><Icon icon="mdi:magnify" :size="15" /></template>
+        <n-input v-model:value="keyword" :placeholder="$t('bookmarks.searchPlaceholder')" clearable class="bm-search">
+          <template #prefix><Icon icon="mdi:magnify" :width="15" :height="15" /></template>
         </n-input>
         <n-button size="medium" @click="refresh">
-          <template #icon><Icon icon="mdi:refresh" :size="16" /></template>
-          同步
+          <template #icon><Icon icon="mdi:refresh" :width="16" :height="16" /></template>
+          {{ $t('bookmarks.sync') }}
         </n-button>
         <n-button size="medium" type="primary" @click="openCreate('folder')">
-          <template #icon><Icon icon="mdi:folder-plus" :size="16" /></template>
-          新建文件夹
+          <template #icon><Icon icon="mdi:folder-plus" :width="16" :height="16" /></template>
+          {{ $t('bookmarks.newFolder') }}
         </n-button>
         <n-button size="medium" type="primary" secondary @click="openCreate('bookmark')">
-          <template #icon><Icon icon="mdi:bookmark-plus" :size="16" /></template>
-          新建书签
+          <template #icon><Icon icon="mdi:bookmark-plus" :width="16" :height="16" /></template>
+          {{ $t('bookmarks.newBookmark') }}
         </n-button>
       </div>
     </header>
 
-    <!-- 未配置引导 -->
-    <n-empty v-if="!status.configured" description="请先在「设置 → 管理面板」中填写 bookmark-sync 服务器地址与 Token">
+    <!-- 未配置引导：管理员 → 直达管理面板；普通用户 → 联系管理员 -->
+    <n-empty v-if="!status.configured" :description="isAdmin ? $t('bookmarks.unconfiguredAdmin') : $t('bookmarks.unconfiguredUser')">
       <template #extra>
-        <n-button size="small" @click="router.push('/admin')">前往设置</n-button>
+        <n-button v-if="isAdmin" size="small" type="primary" @click="router.push('/admin')">
+          {{ $t('bookmarks.goToAdmin') }}
+        </n-button>
       </template>
     </n-empty>
 
     <!-- 已配置但无数据 -->
-    <n-empty v-else-if="loading" description="正在同步书签…">
+    <n-empty v-else-if="loading" :description="$t('bookmarks.syncingDesc')">
       <template #extra><n-spin size="small" /></template>
     </n-empty>
-    <n-empty v-else-if="!hasContent" description="暂无书签，点击右上角新建，或先在 Chrome / Safari 扩展中导入">
+    <n-empty v-else-if="!hasContent" :description="$t('bookmarks.emptyDesc')">
     </n-empty>
 
     <!-- 书签树 -->
@@ -65,28 +67,28 @@
     <!-- 新建 / 编辑弹窗 -->
     <n-modal
       v-model:show="showEditor" preset="card" style="width: 460px"
-      :title="editing.syncId ? '编辑' : (form.type === 'folder' ? '新建文件夹' : '新建书签')"
+      :title="editing.syncId ? $t('bookmarks.edit') : (form.type === 'folder' ? $t('bookmarks.newFolder') : $t('bookmarks.newBookmark'))"
     >
       <n-form label-placement="top">
-        <n-form-item label="名称">
-          <n-input v-model:value="form.title" placeholder="名称" />
+        <n-form-item :label="$t('bookmarks.name')">
+          <n-input v-model:value="form.title" :placeholder="$t('bookmarks.name')" />
         </n-form-item>
-        <n-form-item v-if="form.type === 'bookmark'" label="链接">
+        <n-form-item v-if="form.type === 'bookmark'" :label="$t('bookmarks.link')">
           <n-input v-model:value="form.url" placeholder="https://…" />
         </n-form-item>
-        <n-form-item label="所在文件夹">
+        <n-form-item :label="$t('bookmarks.parentFolder')">
           <n-select
             v-model:value="form.parentSyncId"
             :options="folderOptions"
-            placeholder="根目录"
+            :placeholder="$t('bookmarks.rootFolder')"
             clearable
           />
         </n-form-item>
       </n-form>
       <template #footer>
         <div class="bm-modal-footer">
-          <n-button @click="showEditor = false">取消</n-button>
-          <n-button type="primary" :loading="saving" @click="save">保存</n-button>
+          <n-button @click="showEditor = false">{{ $t('common.cancel') }}</n-button>
+          <n-button type="primary" :loading="saving" @click="save">{{ $t('bookmarks.save') }}</n-button>
         </div>
       </template>
     </n-modal>
@@ -97,11 +99,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useMessage, NTag, NButton, NInput, NSelect, NForm, NFormItem, NModal, NEmpty, NSpin } from 'naive-ui'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import router from '../router'
+import { useUserStore } from '../stores/user'
 import BookmarkNode from '../components/bookmark/BookmarkNode.vue'
 import { getStatus, getTree, pullTree, pushChanges, type SyncNode } from '../api/bmsync'
 
+const { t } = useI18n()
+const userStore = useUserStore()
 const message = useMessage()
+
+// 仅管理员能进入管理面板完成配置（/admin 路由有权限守卫）
+const isAdmin = computed(() => userStore.user?.role === 'admin')
 
 const status = ref({ configured: false, serverUrl: '', hasSynced: false, rev: 0 })
 const nodes = ref<SyncNode[]>([])
@@ -161,11 +170,11 @@ const folderOptions = computed(() =>
 
 async function save() {
   if (!form.value.title.trim()) {
-    message.warning('请填写名称')
+    message.warning(t('bookmarks.nameRequired'))
     return
   }
   if (form.value.type === 'bookmark' && !form.value.url.trim()) {
-    message.warning('请填写链接')
+    message.warning(t('bookmarks.linkRequired'))
     return
   }
   saving.value = true
@@ -183,9 +192,9 @@ async function save() {
     status.value.rev = res.rev
     status.value.hasSynced = true
     showEditor.value = false
-    message.success(op === 'create' ? '已创建' : '已保存')
+    message.success(op === 'create' ? t('bookmarks.created') : t('bookmarks.saved'))
   } catch (e: any) {
-    message.error(e.response?.data?.error || '保存失败')
+    message.error(e.response?.data?.error || t('bookmarks.saveFailed'))
   } finally {
     saving.value = false
   }
@@ -193,15 +202,15 @@ async function save() {
 
 // ── 删除（墓碑语义） ──────────────────────
 function confirmDelete(n: SyncNode) {
-  const d = window.confirm(`确定删除「${n.title}」吗？\n删除会同步到其他电脑，Chrome / Safari 中的书签也会被移除。`)
+  const d = window.confirm(t('bookmarks.deleteConfirm', { name: n.title }))
   if (!d) return
   pushChanges([{ op: 'delete', syncId: n.syncId }])
     .then((res) => {
       nodes.value = res.nodes
       status.value.rev = res.rev
-      message.success('已删除（已同步到其他设备）')
+      message.success(t('bookmarks.deleted'))
     })
-    .catch((e: any) => message.error(e.response?.data?.error || '删除失败'))
+    .catch((e: any) => message.error(e.response?.data?.error || t('bookmarks.deleteFailed')))
 }
 
 // ── 拉取 ────────────────────────────────
@@ -212,9 +221,9 @@ async function refresh() {
     nodes.value = res.nodes
     status.value.rev = res.rev
     status.value.hasSynced = true
-    message.success('同步完成')
+    message.success(t('bookmarks.syncComplete'))
   } catch (e: any) {
-    message.error(e.response?.data?.error || '同步失败')
+    message.error(e.response?.data?.error || t('bookmarks.syncFailed'))
   } finally {
     loading.value = false
   }

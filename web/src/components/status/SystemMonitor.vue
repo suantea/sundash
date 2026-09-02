@@ -3,26 +3,26 @@
     <!-- Compact bar -->
     <div class="monitor-bar" @click="isExpanded = !isExpanded">
       <div class="monitor-item cpu" :title="t('system.cpu') + ': ' + stats?.cpu.usage_percent.toFixed(1) + '%'">
-        <Icon icon="mdi:cpu-64-bit" :size="13" />
+        <Icon icon="mdi:cpu-64-bit" :width="13" :height="13" />
         <span>{{ stats?.cpu.usage_percent.toFixed(0) }}%</span>
       </div>
       <div class="monitor-item memory" :title="t('system.memory') + ': ' + stats?.memory.used_percent.toFixed(1) + '%'">
-        <Icon icon="mdi:memory" :size="13" />
+        <Icon icon="mdi:memory" :width="13" :height="13" />
         <span>{{ stats?.memory.used_percent.toFixed(0) }}%</span>
       </div>
       <div class="monitor-item disk" :title="t('system.disk') + ': ' + stats?.disk.used_percent.toFixed(1) + '%'">
-        <Icon icon="mdi:harddisk" :size="13" />
+        <Icon icon="mdi:harddisk" :width="13" :height="13" />
         <span>{{ stats?.disk.used_percent.toFixed(0) }}%</span>
       </div>
       <div class="monitor-item net" :title="t('system.netSent') + ': ' + formatBytes(stats?.network.bytes_sent || 0) + ' / ' + t('system.netRecv') + ': ' + formatBytes(stats?.network.bytes_recv || 0)">
-        <Icon icon="mdi:swap-vertical" :size="13" />
+        <Icon icon="mdi:swap-vertical" :width="13" :height="13" />
         <span class="net-speed">
-          <Icon icon="mdi:arrow-up" :size="10" class="net-up" />
+          <Icon icon="mdi:arrow-up" :width="10" :height="10" class="net-up" />
           {{ formatSpeed(stats?.network.bytes_sent || 0) }}
         </span>
       </div>
       <div class="monitor-expand">
-        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" />
+        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :width="14" :height="14" />
       </div>
     </div>
 
@@ -33,7 +33,7 @@
           <!-- CPU Detail -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:cpu-64-bit" :size="16" />
+              <Icon icon="mdi:cpu-64-bit" :width="16" :height="16" />
               <span>{{ t('system.cpu') }}</span>
             </div>
             <div class="detail-value">{{ stats?.cpu.usage_percent.toFixed(1) }}%</div>
@@ -46,7 +46,7 @@
           <!-- Memory Detail -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:memory" :size="16" />
+              <Icon icon="mdi:memory" :width="16" :height="16" />
               <span>{{ t('system.memory') }}</span>
             </div>
             <div class="detail-value">{{ stats?.memory.used_percent.toFixed(1) }}%</div>
@@ -59,7 +59,7 @@
           <!-- Disk Detail -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:harddisk" :size="16" />
+              <Icon icon="mdi:harddisk" :width="16" :height="16" />
               <span>{{ t('system.disk') }}</span>
             </div>
             <div class="detail-value">{{ stats?.disk.used_percent.toFixed(1) }}%</div>
@@ -72,7 +72,7 @@
           <!-- Uptime -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:clock-outline" :size="16" />
+              <Icon icon="mdi:clock-outline" :width="16" :height="16" />
               <span>{{ t('system.uptime') }}</span>
             </div>
             <div class="detail-value uptime">{{ formatUptime(stats?.host.uptime_seconds || 0) }}</div>

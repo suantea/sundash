@@ -26,7 +26,7 @@
           <n-form-item path="username" :show-label="false">
             <n-input v-model:value="setupForm.username" :placeholder="$t('login.username')" round>
               <template #prefix>
-                <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
+                <Icon icon="mdi:account-outline" :width="18" :height="18" color="#8E8E93" />
               </template>
             </n-input>
           </n-form-item>
@@ -34,21 +34,21 @@
             <n-input v-model:value="setupForm.password" type="password"
               :placeholder="$t('login.passwordMinLength')" round show-password-on="click">
               <template #prefix>
-                <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
+                <Icon icon="mdi:lock-outline" :width="18" :height="18" color="#8E8E93" />
               </template>
             </n-input>
           </n-form-item>
           <n-form-item path="displayName" :show-label="false">
             <n-input v-model:value="setupForm.displayName" :placeholder="$t('login.displayName')" round>
               <template #prefix>
-                <Icon icon="mdi:card-account-details-outline" :size="18" color="#8E8E93" />
+                <Icon icon="mdi:card-account-details-outline" :width="18" :height="18" color="#8E8E93" />
               </template>
             </n-input>
           </n-form-item>
           <n-form-item path="siteTitle" :show-label="false">
             <n-input v-model:value="setupForm.siteTitle" :placeholder="$t('setup.siteTitlePlaceholder')" round>
               <template #prefix>
-                <Icon icon="mdi:web" :size="18" color="#8E8E93" />
+                <Icon icon="mdi:web" :width="18" :height="18" color="#8E8E93" />
               </template>
             </n-input>
           </n-form-item>
@@ -69,10 +69,12 @@ import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { NForm, NFormItem, useMessage, type FormInst, type FormRules, NInput, NButton } from 'naive-ui'
 import { api } from '../api'
+import { useAppStore } from '../stores/app'
 import { useUserStore } from '../stores/user'
 import { resetSetupCache } from '../router'
 
 const { t } = useI18n()
+const appStore = useAppStore()
 const userStore = useUserStore()
 const message = useMessage()
 const loading = ref(false)
@@ -100,6 +102,12 @@ async function handleSetup() {
     })
     // 系统已初始化，重置路由守卫缓存，避免退出后再次被引导到设置页
     resetSetupCache()
+    // 主动拉取 site-config 刷新浏览器标题（首次设置的站点名立即生效）
+    await appStore.fetchSiteConfig()
+    // 同步页面顶栏 Logo 文字为站点名（首次设置填了站点名时）
+    if (setupForm.value.siteTitle) {
+      appStore.setLogoText(setupForm.value.siteTitle)
+    }
     // 初始化成功：直接写入 token 并进入面板
     userStore.setToken(res.data.token, res.data.user)
     message.success(t('setup.success'))

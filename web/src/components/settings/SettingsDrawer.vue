@@ -9,7 +9,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:translate" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:translate" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.language') }}</div>
@@ -31,7 +31,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:lan" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:lan" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.networkMode') }}</div>
@@ -47,7 +47,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:image" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:image" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.logoType') }}</div>
@@ -60,16 +60,16 @@
               </div>
             </div>
             <div v-if="appStore.logoType === 'image'" class="setting-sub">
-              <input v-model="logoImageInput" class="bg-url-input" :placeholder="$t('settings.logoImageUrl')" @change="appStore.setLogoImageUrl(logoImageInput)" />
+              <input v-model="logoImageInput" class="bg-url-input" :placeholder="$t('settings.logoImageUrlPlaceholder')" @change="appStore.setLogoImageUrl(logoImageInput)" />
             </div>
             <div v-if="appStore.logoType === 'text'" class="setting-sub">
-              <input v-model="logoTextInput" class="bg-url-input" :placeholder="$t('settings.logoTextValue')" @change="appStore.setLogoText(logoTextInput)" />
+              <input v-model="logoTextInput" class="bg-url-input" :placeholder="$t('settings.logoTextPlaceholder')" @change="appStore.setLogoText(logoTextInput)" />
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:text-short" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:text-short" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.siteTitle') }}</div>
@@ -82,7 +82,7 @@
             <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:code-tags" :size="18" color="#34C759" />
+                  <Icon icon="mdi:code-tags" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.footerHtml') }}</div>
@@ -101,7 +101,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:theme-light-dark" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:theme-light-dark" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.theme') }}</div>
@@ -118,7 +118,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:image-outline" :size="18" color="#34C759" />
+                  <Icon icon="mdi:image-outline" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.wallpaper') }}</div>
@@ -147,7 +147,7 @@
               <div class="setting-row">
                 <div class="setting-left">
                   <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                    <Icon icon="mdi:blur" :size="18" color="#FF9500" />
+                    <Icon icon="mdi:blur" :width="18" :height="18" color="#FF9500" />
                   </div>
                   <div>
                     <div class="setting-title">{{ $t('settings.wallpaperBlur') }}</div>
@@ -162,7 +162,7 @@
               <div class="setting-row">
                 <div class="setting-left">
                   <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                    <Icon icon="mdi:opacity" :size="18" color="#007AFF" />
+                    <Icon icon="mdi:opacity" :width="18" :height="18" color="#007AFF" />
                   </div>
                   <div>
                     <div class="setting-title">{{ $t('settings.wallpaperOpacity') }}</div>
@@ -178,7 +178,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:palette" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:palette" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.primaryColor') }}</div>
@@ -194,7 +194,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:format-color-fill" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:format-color-fill" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.borderColor') }}</div>
@@ -216,7 +216,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:arrow-expand-horizontal" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:arrow-expand-horizontal" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.maxWidth') }}</div>
@@ -231,7 +231,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:format-horizontal-align-left" :size="18" color="#34C759" />
+                  <Icon icon="mdi:format-horizontal-align-left" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.paddingX') }}</div>
@@ -246,7 +246,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                  <Icon icon="mdi:format-vertical-align-top" :size="18" color="#AF52DE" />
+                  <Icon icon="mdi:format-vertical-align-top" :width="18" :height="18" color="#AF52DE" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.paddingTop') }}</div>
@@ -261,7 +261,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:format-vertical-align-bottom" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:format-vertical-align-bottom" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.paddingBottom') }}</div>
@@ -282,7 +282,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:clock-outline" :size="18" color="#34C759" />
+                  <Icon icon="mdi:clock-outline" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.clock') }}</div>
@@ -308,7 +308,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                  <Icon icon="mdi:server-network" :size="18" color="#AF52DE" />
+                  <Icon icon="mdi:server-network" :width="18" :height="18" color="#AF52DE" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.systemStatus') }}</div>
@@ -321,7 +321,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(88,86,214,0.1);">
-                  <Icon icon="mdi:monitor-dashboard" :size="18" color="#5856D6" />
+                  <Icon icon="mdi:monitor-dashboard" :width="18" :height="18" color="#5856D6" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.systemMonitor') }}</div>
@@ -334,7 +334,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:weather-partly-cloudy" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:weather-partly-cloudy" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.weatherWidget') }}</div>
@@ -346,7 +346,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:note-text-outline" :size="18" color="#34C759" />
+                  <Icon icon="mdi:note-text-outline" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.memoWidget') }}</div>
@@ -358,7 +358,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,69,58,0.1);">
-                  <Icon icon="mdi:rss" :size="18" color="#FF453A" />
+                  <Icon icon="mdi:rss" :width="18" :height="18" color="#FF453A" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.rssWidget') }}</div>
@@ -370,7 +370,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-                  <Icon icon="mdi:format-size" :size="18" color="#FF9500" />
+                  <Icon icon="mdi:format-size" :width="18" :height="18" color="#FF9500" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.cardLabelSize') }}</div>
@@ -385,7 +385,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:resize" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:resize" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.cardItemSize') }}</div>
@@ -400,7 +400,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-                  <Icon icon="mdi:view-grid" :size="18" color="#AF52DE" />
+                  <Icon icon="mdi:view-grid" :width="18" :height="18" color="#AF52DE" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.cardsPerRow') }}</div>
@@ -418,7 +418,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:eye-off" :size="18" color="#34C759" />
+                  <Icon icon="mdi:eye-off" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.groupCardTransparent') }}</div>
@@ -437,7 +437,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-                  <Icon icon="mdi:export" :size="18" color="#007AFF" />
+                  <Icon icon="mdi:export" :width="18" :height="18" color="#007AFF" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.exportData') }}</div>
@@ -450,7 +450,7 @@
             <div class="setting-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-                  <Icon icon="mdi:import" :size="18" color="#34C759" />
+                  <Icon icon="mdi:import" :width="18" :height="18" color="#34C759" />
                 </div>
                 <div>
                   <div class="setting-title">{{ $t('settings.importData') }}</div>
@@ -468,6 +468,11 @@
 
       <template #footer>
         <div class="drawer-footer">
+          <button v-if="isAdmin" class="admin-entry-btn" @click="goToAdmin">
+            <Icon icon="mdi:shield-cog" :width="14" :height="14" />
+            <span>{{ $t('settings.goToAdmin') }}</span>
+            <Icon icon="mdi:chevron-right" :width="14" :height="14" class="admin-entry-arrow" />
+          </button>
           <span class="footer-text">{{ $t('settings.autoSave') }}</span>
         </div>
       </template>
@@ -481,7 +486,9 @@ import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useMessage, NDrawer, NDrawerContent, NSwitch } from 'naive-ui'
+import { useRouter } from 'vue-router'
 import { useAppStore } from '../../stores/app'
+import { useUserStore } from '../../stores/user'
 import { usePanelStore } from '../../stores/panel'
 import { importTemplates } from '../../data/importTemplates'
 
@@ -496,6 +503,16 @@ function setLocale(lang: string) {
 }
 const appStore = useAppStore()
 const panelStore = usePanelStore()
+const userStore = useUserStore()
+const router = useRouter()
+
+// 仅管理员能进入管理后台（/admin 路由有权限守卫）
+const isAdmin = computed(() => userStore.user?.role === 'admin')
+
+function goToAdmin() {
+  emit('update:show', false)
+  router.push('/admin')
+}
 
 // Responsive drawer width
 const windowWidth = ref(window.innerWidth)
@@ -640,6 +657,91 @@ async function doImport(data: any) {
     }
     await panelStore.fetchPanel()
     message.success(t('settings.importSuccess', { n: data.groups.length }))
+  }
+  // Sun-Panel 导出格式（{ icons: [{ title, children: [{ icon: { src/text }, url, ... }] }] }）
+  if (data.icons && Array.isArray(data.icons)) {
+    let totalCards = 0
+    for (const group of data.icons) {
+      const newGroup = await panelStore.createGroup(group.title)
+      if (!group.children || !Array.isArray(group.children)) continue
+
+      // 收集需要获取 favicon 的 URL
+      const urlsToFetch: string[] = []
+      const cardDataList: Array<{ child: any; iconObj: any }> = []
+
+      for (const child of group.children) {
+        const iconObj: Record<string, any> = child.icon || {}
+        let cardIcon = ''
+        let cardIconColor = '#2a2a2a6b'
+        // itemType 0=文字图标(src为空)，1=图片图标(src有值)，3=图标文本(text=iconify key)
+        if (iconObj.itemType === 1 && iconObj.src) {
+          cardIcon = iconObj.src
+        } else if (iconObj.itemType === 3 && iconObj.text) {
+          cardIcon = iconObj.text // iconify key
+        } else if (iconObj.itemType === 2 && iconObj.src) {
+          cardIcon = iconObj.src
+        } else if (iconObj.itemType === 0 && iconObj.text) {
+          cardIcon = iconObj.text
+        }
+        if (iconObj.backgroundColor) cardIconColor = iconObj.backgroundColor
+
+        cardDataList.push({ child, iconObj })
+        // 如果没有 icon 且有 URL，收集用于获取 favicon
+        if (!cardIcon && child.url) {
+          urlsToFetch.push(child.url)
+        }
+      }
+
+      // 批量获取 favicon
+      let faviconResults: any[] = []
+      if (urlsToFetch.length > 0) {
+        try {
+          const { api } = await import('../../api')
+          const res = await api.post('favicons', { urls: urlsToFetch })
+          faviconResults = res.data?.results || []
+        } catch {
+          faviconResults = []
+        }
+      }
+
+      // 创建卡片
+      for (let i = 0; i < cardDataList.length; i++) {
+        const { child, iconObj } = cardDataList[i]
+        let cardIcon = ''
+        let cardIconColor = '#2a2a2a6b'
+        if (iconObj.itemType === 1 && iconObj.src) {
+          cardIcon = iconObj.src
+        } else if (iconObj.itemType === 3 && iconObj.text) {
+          cardIcon = iconObj.text
+        } else if (iconObj.itemType === 2 && iconObj.src) {
+          cardIcon = iconObj.src
+        } else if (iconObj.itemType === 0 && iconObj.text) {
+          cardIcon = iconObj.text
+        }
+        if (iconObj.backgroundColor) cardIconColor = iconObj.backgroundColor
+
+        // 如果原来没有 icon，尝试用批量获取的结果
+        if (!cardIcon && faviconResults[i]) {
+          const favicon = faviconResults[i]
+          cardIcon = favicon.icon_name || favicon.favicon_url || ''
+        }
+
+        await panelStore.createCard({
+          group_id: newGroup.id,
+          title: child.title,
+          url: child.url || '',
+          url_internal: child.lanUrl || '',
+          icon: cardIcon,
+          icon_color: cardIconColor,
+          bg_color: child.backgroundColor || '',
+          description: child.description || '',
+          open_type: 'new_tab',
+        })
+        totalCards++
+      }
+    }
+    await panelStore.fetchPanel()
+    message.success(t('settings.sunPanelImportSuccess', { n: data.icons.length, cards: totalCards }))
   }
 }
 
@@ -945,11 +1047,76 @@ function importTemplate() {
 }
 
 .drawer-footer {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-entry-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sd-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-entry-btn:hover {
+  background: var(--sd-primary-light);
+  color: var(--sd-primary);
+}
+
+.admin-entry-arrow {
+  opacity: 0.5;
 }
 
 .footer-text {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--sd-text-tertiary);
+}
+
+/* 窄屏适配 */
+@media (max-width: 480px) {
+  .drawer-settings {
+    padding: 4px 0 16px;
+    gap: 12px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .settings-card {
+    border-radius: 12px;
+  }
+
+  .setting-row {
+    padding: 10px 12px;
+    min-height: 44px;
+    flex-wrap: wrap;
+  }
+
+  .setting-left {
+    gap: 6px;
+  }
+
+  .setting-title {
+    font-size: 13px;
+  }
+
+  .setting-desc {
+    font-size: 11px;
+  }
+
+  .setting-sub {
+    padding: 6px 12px 12px;
+  }
 }
 </style>

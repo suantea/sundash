@@ -13,7 +13,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // 后端地址可用环境变量覆盖（本地联调时指向任意端口后端）
+        target: process.env.API_PROXY || 'http://localhost:3000',
         changeOrigin: true,
       },
     },

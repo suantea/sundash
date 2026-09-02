@@ -3,19 +3,19 @@
     <!-- Compact bar -->
     <div class="weather-bar" @click="isExpanded = !isExpanded">
       <div class="weather-item temp" :title="t('weather.temperature') + ': ' + weather?.temperature.toFixed(1) + '°C'">
-        <Icon icon="mdi:thermometer" :size="13" />
+        <Icon icon="mdi:thermometer" :width="13" :height="13" />
         <span>{{ weather?.temperature.toFixed(0) }}°C</span>
       </div>
       <div class="weather-item wind" :title="t('weather.wind') + ': ' + (weather?.windspeed || 0).toFixed(1) + ' km/h'">
-        <Icon icon="mdi:weather-windy" :size="13" />
+        <Icon icon="mdi:weather-windy" :width="13" :height="13" />
         <span>{{ (weather?.windspeed || 0).toFixed(0) }} km/h</span>
       </div>
       <div class="weather-item condition">
-        <Icon :icon="weatherIcon" :size="13" />
+        <Icon :icon="weatherIcon" :width="13" :height="13" />
         <span>{{ weatherCondition }}</span>
       </div>
       <div class="weather-expand">
-        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" />
+        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :width="14" :height="14" />
       </div>
     </div>
 
@@ -26,7 +26,7 @@
           <!-- Temperature Detail -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:thermometer" :size="16" />
+              <Icon icon="mdi:thermometer" :width="16" :height="16" />
               <span>{{ t('weather.temperature') }}</span>
             </div>
             <div class="detail-value">{{ weather?.temperature.toFixed(1) }}°C</div>
@@ -36,7 +36,7 @@
           <!-- Wind Detail -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:weather-windy" :size="16" />
+              <Icon icon="mdi:weather-windy" :width="16" :height="16" />
               <span>{{ t('weather.wind') }}</span>
             </div>
             <div class="detail-value">{{ (weather?.windspeed || 0).toFixed(1) }} km/h</div>
@@ -46,7 +46,7 @@
           <!-- Location -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:map-marker" :size="16" />
+              <Icon icon="mdi:map-marker" :width="16" :height="16" />
               <span>{{ t('weather.location') }}</span>
             </div>
             <div class="detail-value">{{ weather?.latitude.toFixed(2) }}, {{ weather?.longitude.toFixed(2) }}</div>
@@ -56,7 +56,7 @@
           <!-- Update Time -->
           <div class="detail-card">
             <div class="detail-header">
-              <Icon icon="mdi:clock-outline" :size="16" />
+              <Icon icon="mdi:clock-outline" :width="16" :height="16" />
               <span>{{ t('weather.updated') }}</span>
             </div>
             <div class="detail-value update-time">{{ formatTime(weather?.time) }}</div>

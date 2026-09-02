@@ -7,7 +7,7 @@
 
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
-        <Icon icon="mdi:chevron-left" :size="18" />
+        <Icon icon="mdi:chevron-left" :width="18" :height="18" />
         <span>{{ $t("common.back") }}</span>
       </button>
       <h1>{{ $t("admin.title") }}</h1>
@@ -27,7 +27,7 @@
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-              <Icon icon="mdi:account-plus" :size="18" color="#34C759" />
+              <Icon icon="mdi:account-plus" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
               <div class="setting-title">{{ $t("admin.allowRegistration") }}</div>
@@ -40,7 +40,7 @@
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-              <Icon icon="mdi:shield-check" :size="18" color="#FF9500" />
+              <Icon icon="mdi:shield-check" :width="18" :height="18" color="#FF9500" />
             </div>
             <div>
               <div class="setting-title">{{ $t("admin.requireApproval") }}</div>
@@ -53,7 +53,7 @@
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-              <Icon icon="mdi:image" :size="18" color="#007AFF" />
+              <Icon icon="mdi:image" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
               <div class="setting-title">{{ $t("admin.defaultWallpaperType") }}</div>
@@ -69,6 +69,49 @@
         <div v-if="globalSettings.default_wallpaper_type === 'custom'" class="setting-sub">
           <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" :placeholder="$t('admin.enterBackgroundUrl')" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
         </div>
+        <div class="setting-divider"></div>
+        <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(90,200,250,0.1);">
+              <Icon icon="mdi:sync" :width="18" :height="18" color="#5AC8FA" />
+            </div>
+            <div>
+              <div class="setting-title">{{ $t('admin.bookmarkSync') }}</div>
+              <div class="setting-desc">{{ $t('admin.bookmarkSyncDesc') }}</div>
+            </div>
+          </div>
+          <div class="setting-toggle-row">
+            <span>{{ $t('admin.bookmarkSyncEnabled') }}</span>
+            <n-switch v-model:value="globalSettings.bmsync_enabled" @update:value="saveGlobalSetting('bmsync_enabled', $event)" />
+          </div>
+          <div v-if="globalSettings.bmsync_enabled" class="setting-sub">
+            <input v-model="globalSettings.bmsync_server_url" class="bg-url-input" :placeholder="$t('admin.bmsyncServerUrlPlaceholder')" @change="saveGlobalSetting('bmsync_server_url', globalSettings.bmsync_server_url)" />
+            <input v-model="globalSettings.bmsync_token" type="password" class="bg-url-input" :placeholder="$t('admin.bmsyncTokenPlaceholder')" @change="saveGlobalSetting('bmsync_token', globalSettings.bmsync_token)" />
+          </div>
+          <div v-else class="setting-sub disabled-hint">
+            {{ $t('admin.bookmarkSyncDisabledHint') }}
+          </div>
+        </div>
+        <div class="setting-divider"></div>
+        <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
+              <Icon icon="mdi:magnify" :width="18" :height="18" color="#007AFF" />
+            </div>
+            <div>
+              <div class="setting-title">{{ $t('admin.searchEngine') }}</div>
+              <div class="setting-desc">{{ $t('admin.searchEngineDesc') }}</div>
+            </div>
+          </div>
+          <div class="seg-control">
+            <button
+              v-for="eng in searchEngines"
+              :key="eng.name"
+              :class="['seg-btn', { active: globalSettings.search_engine === eng.name }]"
+              @click="saveGlobalSetting('search_engine', eng.name)"
+            >{{ eng.name }}</button>
+          </div>
+        </div>
       </div>
 
       <!-- ===== 2. Site Configuration ===== -->
@@ -78,7 +121,7 @@
           <p>{{ $t("admin.manageWebsiteConfig") }}</p>
         </div>
         <button class="add-btn" @click="saveAllSiteConfig" :disabled="siteSaving">
-          <Icon icon="mdi:content-save" :size="16" />
+          <Icon icon="mdi:content-save" :width="16" :height="16" />
           {{ siteSaving ? $t('common.saving') : $t('admin.saveConfig') }}
         </button>
       </div>
@@ -87,79 +130,79 @@
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-              <Icon icon="mdi:text-short" :size="18" color="#007AFF" />
+              <Icon icon="mdi:text-short" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
               <div class="setting-title">{{ $t('settings.siteTitle') }}</div>
               <div class="setting-desc">{{ $t('admin.siteTitleDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_title" class="mini-text-input" placeholder="{{ $t('login.subtitle') }}" />
+          <input v-model="siteConfig.site_title" class="mini-text-input" :placeholder="$t('admin.siteTitlePlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-              <Icon icon="mdi:icon" :size="18" color="#FF9500" />
+              <Icon icon="mdi:icon" :width="18" :height="18" color="#FF9500" />
             </div>
             <div>
               <div class="setting-title">{{ $t('admin.siteIcon') }}</div>
               <div class="setting-desc">{{ $t('admin.siteIconDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" placeholder="{{ $t('admin.siteIconPlaceholder') }}" />
+          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" :placeholder="$t('admin.siteIconPlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-              <Icon icon="mdi:cloud" :size="18" color="#34C759" />
+              <Icon icon="mdi:cloud" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
               <div class="setting-title">{{ $t('admin.cdnUrl') }}</div>
               <div class="setting-desc">{{ $t('admin.cdnUrlDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" placeholder="{{ $t('admin.cdnPlaceholder') }}" />
+          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" :placeholder="$t('admin.cdnPlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-              <Icon icon="mdi:chart-line" :size="18" color="#AF52DE" />
+              <Icon icon="mdi:chart-line" :width="18" :height="18" color="#AF52DE" />
             </div>
             <div>
               <div class="setting-title">{{ $t('admin.analyticsCode') }}</div>
               <div class="setting-desc">{{ $t('admin.analyticsCodeDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_analytics_code" class="code-input" placeholder="{{ $t('admin.analyticsCodePlaceholder') }}" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_analytics_code" class="code-input" :placeholder="$t('admin.analyticsCodePlaceholder')" rows="3"></textarea>
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-              <Icon icon="mdi:code-tags" :size="18" color="#007AFF" />
+              <Icon icon="mdi:code-tags" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
               <div class="setting-title">{{ $t('admin.customHead') }}</div>
               <div class="setting-desc">{{ $t('admin.customHeadDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_custom_head" class="code-input" placeholder="<link rel=&quot;stylesheet&quot; href=&quot;...&quot;>" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_custom_head" class="code-input" :placeholder="$t('admin.customHeadPlaceholder')" rows="3"></textarea>
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-              <Icon icon="mdi:code-tags" :size="18" color="#34C759" />
+              <Icon icon="mdi:code-tags" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
               <div class="setting-title">{{ $t('admin.customFooter') }}</div>
               <div class="setting-desc">{{ $t('admin.customFooterDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_custom_footer" class="code-input" placeholder="{{ $t('admin.customFooterCodePlaceholder') }}" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_custom_footer" class="code-input" :placeholder="$t('admin.customFooterCodePlaceholder')" rows="3"></textarea>
         </div>
       </div>
 
@@ -181,11 +224,11 @@
           <div class="td" style="flex: 2; color: var(--sd-text-secondary);">{{ user.display_name || '-' }}</div>
           <div class="td" style="flex: 2; gap: 6px;">
             <button class="row-btn approve" @click="approveUser(user)">
-              <Icon icon="mdi:check" :size="14" />
+              <Icon icon="mdi:check" :width="14" :height="14" />
               {{ $t("admin.approve") }}
             </button>
             <button class="row-btn danger" @click="rejectUser(user)">
-              <Icon icon="mdi:close" :size="14" />
+              <Icon icon="mdi:close" :width="14" :height="14" />
               {{ $t("admin.reject") }}
             </button>
           </div>
@@ -200,7 +243,7 @@
           <p>{{ $t("admin.manageAllUsers") }}</p>
         </div>
         <button class="add-btn" @click="showAddUser = true">
-          <Icon icon="mdi:plus" :size="16" />
+          <Icon icon="mdi:plus" :width="16" :height="16" />
           {{ $t("admin.addUser") }}
         </button>
       </div>
@@ -234,16 +277,16 @@
               {{ user.role === 'admin' ? $t('admin.setAsUser') : $t('admin.setAsAdmin') }}
             </button>
             <button class="row-btn" @click="viewUserPanel(user)">
-              <Icon icon="mdi:view-grid" :size="14" />
+              <Icon icon="mdi:view-grid" :width="14" :height="14" />
               {{ $t("admin.bookmarks") }}
             </button>
             <button class="row-btn danger" @click="deleteUser(user)"> {{ $t('common.delete') }}</button>
             <button class="row-btn" @click="openEditDisplayName(user)">
-              <Icon icon="mdi:rename-box" :size="14" />
+              <Icon icon="mdi:rename-box" :width="14" :height="14" />
               {{ $t("admin.rename") }}
             </button>
             <button class="row-btn" @click="openResetPassword(user)" style="color: #FF9500; border-color: rgba(255,149,0,0.3);">
-              <Icon icon="mdi:key-variant" :size="14" />
+              <Icon icon="mdi:key-variant" :width="14" :height="14" />
               {{ $t("admin.resetPassword") }}
             </button>
           </div>
@@ -257,7 +300,7 @@
       <div v-if="viewingGroups.length === 0" class="table-empty">{{ $t('admin.noBookmarksForUser') }}</div>
       <div v-for="group in viewingGroups" :key="group.id" class="view-group">
         <div class="view-group-name">
-          <Icon icon="mdi:folder" :size="16" color="#007AFF" />
+          <Icon icon="mdi:folder" :width="16" :height="16" color="#007AFF" />
           {{ group.name }}
           <span class="view-card-count">{{ group.cards?.length || 0 }} {{ $t('admin.bookmarkCount') }}</span>
         </div>
@@ -271,37 +314,37 @@
     </n-modal>
 
     <!-- ===== Add User Modal ===== -->
-    <n-modal v-model:show="showAddUser" preset="dialog" title="{{ $t('admin.addUser') }}" positive-text="{{ $t('admin.create') }}" negative-text="{{ $t('common.cancel') }}"
+    <n-modal v-model:show="showAddUser" preset="dialog" :title="$t('admin.addUser')" :positive-text="$t('admin.create')" :negative-text="$t('common.cancel')"
       :loading="modalLoading" @positive-click="handleCreateUser">
       <n-form label-placement="top">
         <n-form-item :label="$t('login.username')">
-          <n-input v-model:value="newUser.username" placeholder="{{ $t('admin.enterUsername') }}" />
+          <n-input v-model:value="newUser.username" :placeholder="$t('admin.enterUsername')" @keyup.enter="handleCreateUser" />
         </n-form-item>
         <n-form-item :label="$t('login.password')">
-          <n-input v-model:value="newUser.password" type="password" placeholder="{{ $t('admin.enterPassword') }}" show-password-on="click" />
+          <n-input v-model:value="newUser.password" type="password" :placeholder="$t('admin.enterPassword')" show-password-on="click" @keyup.enter="handleCreateUser" />
         </n-form-item>
         <n-form-item :label="$t('admin.displayName')">
-          <n-input v-model:value="newUser.displayName" placeholder="{{ $t('admin.enterDisplayName') }}" />
+          <n-input v-model:value="newUser.displayName" :placeholder="$t('admin.enterDisplayName')" @keyup.enter="handleCreateUser" />
         </n-form-item>
       </n-form>
     </n-modal>
 
     <!-- ===== Reset Password Modal ===== -->
-    <n-modal v-model:show="showResetPassword" preset="dialog" title="{{ $t('admin.resetUserPassword') }}" positive-text="{{ $t('admin.reset') }}" negative-text="{{ $t('common.cancel') }}"
+    <n-modal v-model:show="showResetPassword" preset="dialog" :title="$t('admin.resetUserPassword')" :positive-text="$t('admin.reset')" :negative-text="$t('common.cancel')"
       :loading="resetPasswordLoading" @positive-click="handleResetPassword">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
         {{ $t("admin.setPasswordForUser") }} <strong>{{ resettingUser?.username }}</strong> {{ $t('admin.setNewPassword') }}
       </div>
-      <n-input v-model:value="newResetPassword" type="password" placeholder="{{ $t('admin.enterNewPassword') }}" show-password-on="click" @keyup.enter="handleResetPassword" />
+      <n-input v-model:value="newResetPassword" type="password" :placeholder="$t('admin.enterNewPassword')" show-password-on="click" @keyup.enter="handleResetPassword" />
     </n-modal>
 
     <!-- ===== Edit Display Name Modal ===== -->
-    <n-modal v-model:show="showEditDisplayName" preset="dialog" title="{{ $t('admin.editDisplayName') }}" positive-text="{{ $t('common.save') }}" negative-text="{{ $t('common.cancel') }}"
+    <n-modal v-model:show="showEditDisplayName" preset="dialog" :title="$t('admin.editDisplayName')" :positive-text="$t('common.save')" :negative-text="$t('common.cancel')"
       :loading="editDisplayNameLoading" @positive-click="handleEditDisplayName">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
         {{ $t('admin.editUser') }} <strong>{{ editingDisplayNameUser?.username }}</strong> {{ $t('admin.sDisplayName') }}
       </div>
-      <n-input v-model:value="newDisplayName" placeholder="{{ $t('admin.enterNewDisplayName') }}" @keyup.enter="handleEditDisplayName" />
+      <n-input v-model:value="newDisplayName" :placeholder="$t('admin.enterNewDisplayName')" @keyup.enter="handleEditDisplayName" />
     </n-modal>
   </div>
 </template>
@@ -315,6 +358,14 @@ import { api } from '../api'
 import type { User, PanelGroup } from '../types'
 
 const { t } = useI18n()
+
+// 搜索引擎列表
+const searchEngines = [
+  { name: 'Baidu', url: 'https://www.baidu.com/s?wd=' },
+  { name: 'Google', url: 'https://www.google.com/search?q=' },
+  { name: 'Bing', url: 'https://www.bing.com/search?q=' },
+  { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' },
+]
 
 const message = useMessage()
 const users = ref<User[]>([])
@@ -338,6 +389,10 @@ const globalSettings = reactive({
   default_wallpaper_blur: '0',
   default_wallpaper_opacity: '100',
   default_wallpaper_copyright: 'false',
+  bmsync_server_url: '',
+  bmsync_token: '',
+  bmsync_enabled: true,
+  search_engine: 'Baidu',
 })
 
 // Site configuration
@@ -389,6 +444,10 @@ async function fetchSettings() {
         default_wallpaper_opacity: res.data.default_wallpaper_opacity || '100',
         default_wallpaper_copyright: res.data.default_wallpaper_copyright || 'false',
       })
+      globalSettings.bmsync_server_url = res.data.bmsync_server_url || ''
+      globalSettings.bmsync_token = res.data.bmsync_token || ''
+      globalSettings.bmsync_enabled = res.data.bmsync_enabled !== 'false'
+      globalSettings.search_engine = res.data.search_engine || 'Baidu'
       siteConfig.site_title = res.data.site_title || ''
       siteConfig.site_icon_url = res.data.site_icon_url || ''
       siteConfig.site_cdn_url = res.data.site_cdn_url || ''
@@ -799,8 +858,25 @@ async function handleResetPassword() {
 .setting-sub {
   padding: 8px 14px 14px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
+}
+
+.setting-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 4px;
+  font-size: 13px;
+  color: var(--sd-text-secondary);
+}
+
+.disabled-hint {
+  padding: 8px 14px 14px;
+  font-size: 12px;
+  color: var(--sd-text-tertiary);
+  line-height: 1.6;
 }
 
 .seg-control {
@@ -1170,6 +1246,73 @@ async function handleResetPassword() {
   .mini-text-input,
   .mini-text-input.wide {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 12px 10px 80px;
+  }
+
+  .admin-page header.page-header {
+    padding: 12px 10px;
+  }
+
+  .section-header {
+    padding: 0 0 8px;
+  }
+
+  .section-header h2 {
+    font-size: 15px;
+  }
+
+  .section-header p {
+    font-size: 12px;
+  }
+
+  .settings-card {
+    border-radius: 12px;
+  }
+
+  .setting-row {
+    padding: 10px 12px;
+  }
+
+  .setting-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .setting-icon :deep(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .setting-title {
+    font-size: 13px;
+  }
+
+  .setting-desc {
+    font-size: 11px;
+  }
+
+  /* 表格卡片化 */
+  .data-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .table-head .th,
+  .table-row .td {
+    min-width: 80px;
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  /* 弹窗窄屏适配 */
+  .n-modal {
+    width: calc(100vw - 24px) !important;
+    max-width: 400px;
   }
 }
 </style>

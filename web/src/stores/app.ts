@@ -129,9 +129,11 @@ export const useAppStore = defineStore('app', () => {
   const showWeatherWidget = ref(localStorage.getItem(L('show-weather-widget')) !== 'false')
   const showMemo = ref(localStorage.getItem(L('show-memo')) !== 'false')
   const showRSSWidget = ref(localStorage.getItem(L('show-rss-widget')) === 'true')
+  // 书签同步总开关：默认开启；site-config 下发 bmsync_enabled=false 时隐藏主页入口
+  const bmsyncEnabled = ref(true)
   const networkModeAuto = ref(localStorage.getItem(L('network-auto')) === 'true')
   const groupCardTransparent = ref(localStorage.getItem(L('group-card-transparent')) === 'true')
-  const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Google')
+  const searchEngine = ref(localStorage.getItem(L('search-engine')) || 'Baidu')
   const cardStyle = ref<'default' | 'round' | 'square'>((localStorage.getItem(L('card-style')) as 'default' | 'round' | 'square') || 'default')
 
   // Auth settings (from server)
@@ -271,11 +273,20 @@ export const useAppStore = defineStore('app', () => {
       const res = await api.get<Record<string, string>>('site-config')
       const config = res.data || {}
       if (config.site_title) {
-        document.title = config.site_title
+        // 同步 store + localStorage + document.title（而不是只改 document.title）
+        setSiteTitle(config.site_title)
+        // 顶栏 Logo 文字若仍是默认值，跟随站点名（用户后续可到设置里自定义覆盖）
+        if (logoText.value === 'SunDash') {
+          setLogoText(config.site_title)
+        }
       }
       if (config.site_icon_url) {
         const link = document.querySelector("link[rel='icon']") as HTMLLinkElement
         if (link) link.href = config.site_icon_url
+      }
+      // 书签同步总开关（site-config 下发 bmsync_enabled；缺失默认开启）
+      if (config.bmsync_enabled !== undefined) {
+        bmsyncEnabled.value = config.bmsync_enabled !== 'false'
       }
     } catch (e) {
       console.error('Failed to load site config:', e)
@@ -307,7 +318,7 @@ export const useAppStore = defineStore('app', () => {
     siteTitle, siteIconUrl, loginBgUrl, enableCaptcha,
     setSiteTitle, setSiteIconUrl, setLoginBgUrl, setEnableCaptcha,
     // Components
-    showSystemStatus, showWeatherWidget, showMemo, showRSSWidget, networkModeAuto, groupCardTransparent, searchEngine, cardStyle,
+    showSystemStatus, showWeatherWidget, showMemo, showRSSWidget, bmsyncEnabled, networkModeAuto, groupCardTransparent, searchEngine, cardStyle,
     setShowSystemStatus, setShowWeatherWidget, setShowMemo, setShowRSSWidget, setNetworkModeAuto, setGroupCardTransparent, setSearchEngine, setCardStyle,
     // Server sync
     loadSettingsFromServer, applyServerSettings,

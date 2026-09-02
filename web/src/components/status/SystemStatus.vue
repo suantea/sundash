@@ -1,22 +1,22 @@
 <template>
   <div v-if="appStore.showSystemStatus" class="system-status">
     <div class="status-item">
-      <Icon icon="mdi:folder-outline" :size="14" />
+      <Icon icon="mdi:folder-outline" :width="14" :height="14" />
       <span>{{ groupCount }} 分组</span>
     </div>
     <div class="status-divider"></div>
     <div class="status-item">
-      <Icon icon="mdi:bookmark-outline" :size="14" />
+      <Icon icon="mdi:bookmark-outline" :width="14" :height="14" />
       <span>{{ cardCount }} 卡片</span>
     </div>
     <div v-if="hiddenCount > 0" class="status-divider"></div>
     <div v-if="hiddenCount > 0" class="status-item hidden">
-      <Icon icon="mdi:eye-off-outline" :size="14" />
+      <Icon icon="mdi:eye-off-outline" :width="14" :height="14" />
       <span>{{ hiddenCount }} 已隐藏</span>
     </div>
     <div class="status-divider"></div>
     <div class="status-item">
-      <Icon icon="mdi:clock-outline" :size="14" />
+      <Icon icon="mdi:clock-outline" :width="14" :height="14" />
       <span>{{ currentTime }}</span>
     </div>
   </div>

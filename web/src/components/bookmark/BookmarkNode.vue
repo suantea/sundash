@@ -3,14 +3,14 @@
     <div class="bm-row" :class="{ hovered: hover }" @mouseenter="hover = true" @mouseleave="hover = false">
       <template v-if="isFolder">
         <button class="bm-caret" @click="toggle">
-          <Icon :icon="collapsed ? 'mdi:chevron-right' : 'mdi:chevron-down'" :size="16" />
+          <Icon :icon="collapsed ? 'mdi:chevron-right' : 'mdi:chevron-down'" :width="16" :height="16" />
         </button>
-        <Icon icon="mdi:folder" :size="17" class="bm-folder-icon" />
+        <Icon icon="mdi:folder" :width="17" :height="17" class="bm-folder-icon" />
         <span class="bm-label" @dblclick="emit('edit', node)">{{ node.title }}</span>
       </template>
       <template v-else>
         <span class="bm-caret-spacer"></span>
-        <Icon icon="mdi:bookmark" :size="15" class="bm-bookmark-icon" />
+        <Icon icon="mdi:bookmark" :width="15" :height="15" class="bm-bookmark-icon" />
         <a
           class="bm-label bm-link"
           :href="node.url || '#'"
@@ -23,11 +23,11 @@
       <span v-if="isFolder && matchesKeyword" class="bm-match-count">{{ matchedChildrenCount }} 个匹配</span>
 
       <div v-if="hover" class="bm-actions">
-        <button class="bm-act" title="编辑" @click="emit('edit', node)">
-          <Icon icon="mdi:pencil-outline" :size="14" />
+        <button class="bm-act" :title="$t('common.edit')" @click="emit('edit', node)">
+          <Icon icon="mdi:pencil-outline" :width="14" :height="14" />
         </button>
-        <button class="bm-act danger" title="删除" @click="emit('delete', node)">
-          <Icon icon="mdi:delete-outline" :size="14" />
+        <button class="bm-act danger" :title="$t('common.delete')" @click="emit('delete', node)">
+          <Icon icon="mdi:delete-outline" :width="14" :height="14" />
         </button>
       </div>
     </div>

@@ -11,6 +11,12 @@ export function useWallpaper() {
   const wallpaperCopyright = ref('')
   const wallpaperReady = ref(false)
 
+  // 若已有壁纸 URL（localStorage 同步初始化），首帧立即可见，
+  // 不必等 bootstrap/fetchWallpaper 异步返回后才淡入，避免刷新时壁纸"迟到跳动"。
+  if (appStore.wallpaperType !== 'default' && appStore.wallpaperUrl) {
+    wallpaperReady.value = true
+  }
+
   // Preload image to prevent flicker.
   function preloadImage(url: string): Promise<void> {
     return new Promise((resolve) => {

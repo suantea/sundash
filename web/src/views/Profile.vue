@@ -7,7 +7,7 @@
 
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
-        <Icon icon="mdi:chevron-left" :size="18" />
+        <Icon icon="mdi:chevron-left" :width="18" :height="18" />
         <span>{{ $t("common.back") }}</span>
       </button>
       <h1>{{ $t("user.profile") }}</h1>
@@ -43,7 +43,7 @@
         <div class="setting-row">
           <div class="setting-left">
             <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-              <Icon icon="mdi:card-account-details-outline" :size="18" color="#007AFF" />
+              <Icon icon="mdi:card-account-details-outline" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
               <div class="setting-title">{{ $t("user.displayName") }}</div>

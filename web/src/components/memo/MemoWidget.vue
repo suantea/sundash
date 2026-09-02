@@ -3,14 +3,14 @@
     <!-- Compact bar -->
     <div class="memo-bar" @click="isExpanded = !isExpanded">
       <div class="memo-item count" :title="t('memo.count', { count: memos.length })">
-        <Icon icon="mdi:note-text" :size="13" />
+        <Icon icon="mdi:note-text" :width="13" :height="13" />
         <span>{{ memos.length }}</span>
       </div>
       <div class="memo-item add" @click="showAddMemo = true" :title="t('memo.add')">
-        <Icon icon="mdi:plus" :size="13" />
+        <Icon icon="mdi:plus" :width="13" :height="13" />
       </div>
       <div class="memo-expand">
-        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" />
+        <Icon :icon="isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'" :width="14" :height="14" />
       </div>
     </div>
 

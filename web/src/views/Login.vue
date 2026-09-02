@@ -36,7 +36,7 @@
             <n-form-item path="username" :show-label="false">
               <n-input v-model:value="loginForm.username" :placeholder="$t('login.username')" round>
                 <template #prefix>
-                  <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
+                  <Icon icon="mdi:account-outline" :width="18" :height="18" color="#8E8E93" />
                 </template>
               </n-input>
             </n-form-item>
@@ -44,7 +44,7 @@
               <n-input v-model:value="loginForm.password" type="password" :placeholder="$t('login.password')" round
                 show-password-on="click" @keyup.enter="handleLogin">
                 <template #prefix>
-                  <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
+                  <Icon icon="mdi:lock-outline" :width="18" :height="18" color="#8E8E93" />
                 </template>
               </n-input>
             </n-form-item>
@@ -62,7 +62,7 @@
               <n-form-item path="username" :show-label="false">
                 <n-input v-model:value="loginForm.username" :placeholder="$t('login.username')" round>
                   <template #prefix>
-                    <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
+                    <Icon icon="mdi:account-outline" :width="18" :height="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
@@ -70,7 +70,7 @@
                 <n-input v-model:value="loginForm.password" type="password" :placeholder="$t('login.password')" round
                   show-password-on="click" @keyup.enter="handleLogin">
                   <template #prefix>
-                    <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
+                    <Icon icon="mdi:lock-outline" :width="18" :height="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
@@ -86,7 +86,7 @@
               <n-form-item path="username" :show-label="false">
                 <n-input v-model:value="registerForm.username" :placeholder="$t('login.username')" round>
                   <template #prefix>
-                    <Icon icon="mdi:account-outline" :size="18" color="#8E8E93" />
+                    <Icon icon="mdi:account-outline" :width="18" :height="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
@@ -94,14 +94,14 @@
                 <n-input v-model:value="registerForm.password" type="password" :placeholder="$t('login.passwordMinLength')" round
                   show-password-on="click">
                   <template #prefix>
-                    <Icon icon="mdi:lock-outline" :size="18" color="#8E8E93" />
+                    <Icon icon="mdi:lock-outline" :width="18" :height="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
               <n-form-item path="displayName" :show-label="false">
                 <n-input v-model:value="registerForm.displayName" :placeholder="$t('login.displayName')" round>
                   <template #prefix>
-                    <Icon icon="mdi:card-account-details-outline" :size="18" color="#8E8E93" />
+                    <Icon icon="mdi:card-account-details-outline" :width="18" :height="18" color="#8E8E93" />
                   </template>
                 </n-input>
               </n-form-item>
@@ -117,7 +117,7 @@
       <!-- Footer -->
       <div class="login-footer">
         <button class="theme-toggle" @click="toggleTheme" :title="isDark ? $t('login.lightTheme') : $t('login.darkTheme')">
-          <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :size="18" />
+          <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" :width="18" :height="18" />
         </button>
         <div class="copyright-notice">SunDash · Open Source · MIT License</div>
       </div>
