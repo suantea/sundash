@@ -43,11 +43,37 @@
         <span id="page-title" class="page-title">当前页面</span>
         <span id="page-url" class="page-url"></span>
       </div>
-      <button id="btn-add-monitor" class="btn-add" title="添加到监控">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-      </button>
+      <div class="page-actions">
+        <button id="btn-bookmark" class="btn-bookmark" title="一键收藏到 SunDash">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </button>
+        <button id="btn-add-monitor" class="btn-add" title="添加到监控">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bookmark section (hidden by default) -->
+    <div id="bookmark-section" class="bookmark-section hidden">
+      <div class="bookmark-form">
+        <label class="form-label">收藏到分组</label>
+        <select id="bookmark-group" class="form-select">
+          <option value="">加载中...</option>
+        </select>
+        <label class="form-label">标题</label>
+        <input id="bookmark-title" class="form-input" type="text" placeholder="页面标题" />
+        <label class="form-label">URL</label>
+        <input id="bookmark-url" class="form-input" type="text" placeholder="页面地址" />
+      </div>
+      <div class="bookmark-actions">
+        <button id="btn-save-bookmark" class="btn-primary btn-sm">保存书签</button>
+        <button id="btn-cancel-bookmark" class="btn-text btn-sm">取消</button>
+      </div>
+      <div id="bookmark-status" class="bookmark-status hidden"></div>
     </div>
 
     <div class="monitor-list">

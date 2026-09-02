@@ -28,6 +28,9 @@ async function init() {
   if (tab) {
     pageTitle.textContent = tab.title || '未知页面'
     pageUrl.textContent = tab.url || ''
+    // Pre-fill bookmark form
+    document.getElementById('bookmark-title').value = tab.title || ''
+    document.getElementById('bookmark-url').value = tab.url || ''
   }
 
   // Load settings
@@ -164,7 +167,7 @@ btnOpenPanel.addEventListener('click', () => {
 function getFavicon(url) {
   try {
     const hostname = new URL(url).hostname
-    return `<img src="https://www.google.com/s2/favicons?domain=${hostname}&sz=32" width="20" height="20" onerror="this.style.display='none'">`
+    return `<img src="https://favicon.im/${hostname}" width="20" height="20" onerror="this.style.display='none'">`
   } catch {
     return '?'
   }
@@ -185,18 +188,137 @@ function escapeHtml(str) {
   return div.innerHTML
 }
 
-// Listen for updates from background
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'MONITOR_UPDATE') {
-    const item = monitorList.find(m => m.url === msg.data.url)
-    if (item) {
-      item.changed = msg.data.changed
-      item.lastCheck = Date.now()
-      chrome.storage.local.set({ [MONITOR_LIST_KEY]: monitorList })
-      updateUI()
-    }
+// ==================== Bookmark Feature ====================
+const SERVER_URL_KEY = 'sundash_server_url'
+const SERVER_TOKEN_KEY = 'sundash_token'
+
+const btnBookmark = document.getElementById('btn-bookmark')
+const bookmarkSection = document.getElementById('bookmark-section')
+const bookmarkGroup = document.getElementById('bookmark-group')
+const bookmarkTitle = document.getElementById('bookmark-title')
+const bookmarkUrl = document.getElementById('bookmark-url')
+const btnSaveBookmark = document.getElementById('btn-save-bookmark')
+const btnCancelBookmark = document.getElementById('btn-cancel-bookmark')
+const bookmarkStatus = document.getElementById('bookmark-status')
+
+let groupsLoaded = false
+
+async function getServerConfig() {
+  const data = await chrome.storage.local.get([SERVER_URL_KEY, SERVER_TOKEN_KEY])
+  return {
+    url: data[SERVER_URL_KEY] || 'http://localhost:3000',
+    token: data[SERVER_TOKEN_KEY] || '',
+  }
+}
+
+async function loadGroups() {
+  if (groupsLoaded) return
+  const config = await getServerConfig()
+  if (!config.token) {
+    bookmarkGroup.innerHTML = '<option value="">请先在设置中配置 Token</option>'
+    return
+  }
+  try {
+    const res = await fetch(`${config.url}/api/panels`, {
+      headers: { Authorization: `Bearer ${config.token}` },
+    })
+    if (!res.ok) throw new Error('Failed')
+    const data = await res.json()
+    const groups = data.groups || []
+    bookmarkGroup.innerHTML = groups.map(g =>
+      `<option value="${g.id}">${escapeHtml(g.name)}</option>`
+    ).join('')
+    groupsLoaded = true
+  } catch {
+    bookmarkGroup.innerHTML = '<option value="">加载分组失败，请检查连接</option>'
+  }
+}
+
+// Toggle bookmark section
+btnBookmark.addEventListener('click', async () => {
+  bookmarkSection.classList.toggle('hidden')
+  if (!bookmarkSection.classList.contains('hidden')) {
+    await loadGroups()
   }
 })
+
+btnCancelBookmark.addEventListener('click', () => {
+  bookmarkSection.classList.add('hidden')
+  bookmarkStatus.classList.add('hidden')
+})
+
+// Save bookmark
+btnSaveBookmark.addEventListener('click', async () => {
+  const groupId = bookmarkGroup.value
+  const title = bookmarkTitle.value.trim()
+  const url = bookmarkUrl.value.trim()
+
+  if (!groupId || !title || !url) {
+    showBookmarkStatus('请填写完整信息', 'error')
+    return
+  }
+
+  const config = await getServerConfig()
+  if (!config.token) {
+    showBookmarkStatus('请先在设置中配置 Token', 'error')
+    return
+  }
+
+  btnSaveBookmark.disabled = true
+  btnSaveBookmark.textContent = '保存中...'
+
+  try {
+    // Auto-fetch icon
+    let icon = ''
+    try {
+      const iconRes = await fetch(`${config.url}/api/favicon?url=${encodeURIComponent(url)}`, {
+        headers: { Authorization: `Bearer ${config.token}` },
+      })
+      if (iconRes.ok) {
+        const iconData = await iconRes.json()
+        icon = iconData.icon_name || iconData.favicon_url || ''
+        // Also auto-fill title if empty and server returned one
+        if (iconData.title && !bookmarkTitle.value.trim()) {
+          bookmarkTitle.value = iconData.title
+        }
+      }
+    } catch {}
+
+    const res = await fetch(`${config.url}/api/panels/cards`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        group_id: groupId,
+        title,
+        url,
+        icon,
+        open_type: 'new_tab',
+      }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err.error || '保存失败')
+    }
+
+    showBookmarkStatus('✅ 收藏成功！', 'success')
+    setTimeout(() => bookmarkSection.classList.add('hidden'), 1500)
+  } catch (e) {
+    showBookmarkStatus(`❌ ${e.message}`, 'error')
+  } finally {
+    btnSaveBookmark.disabled = false
+    btnSaveBookmark.textContent = '保存书签'
+  }
+})
+
+function showBookmarkStatus(msg, type) {
+  bookmarkStatus.textContent = msg
+  bookmarkStatus.className = `bookmark-status ${type}`
+  bookmarkStatus.classList.remove('hidden')
+}
 
 // Initialize
 init()
