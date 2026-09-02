@@ -1,0 +1,1119 @@
+openapi: 3.0.3
+info:
+  title: SunDash API
+  description: Self-hosted personal dashboard — Bookmarks · System monitor · Weather · RSS · Memos · MCP
+  version: 0.1.0
+  license:
+    name: MIT
+
+servers:
+  - url: /api
+    description: SunDash API
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Auth
+    description: 认证与用户管理
+  - name: Bootstrap
+    description: 首页初始化数据
+  - name: Panels
+    description: 分组与卡片管理
+  - name: Settings
+    description: 个性化设置
+  - name: Search
+    description: 书签搜索
+  - name: Favicon
+    description: 图标检测
+  - name: Memo
+    description: 便签
+  - name: RSS
+    description: RSS 订阅
+  - name: Themes
+    description: 主题管理
+  - name: Weather
+    description: 天气
+  - name: System
+    description: 系统监控
+  - name: BookmarkSync
+    description: 书签同步
+  - name: Admin
+    description: 管理后台
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 用户登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { description: 用户名或密码错误 }
+        '429': { description: 登录频率限制 }
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: 用户注册
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+                display_name: { type: string }
+      responses:
+        '200':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+                  status: { type: string, enum: [approved, pending] }
+
+  /auth/setup-status:
+    get:
+      tags: [Auth]
+      summary: 检查是否需要首次安装
+      security: []
+      responses:
+        '200':
+          description: 安装状态
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  needs_setup: { type: boolean }
+
+  /auth/setup:
+    post:
+      tags: [Auth]
+      summary: 首次安装创建管理员
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+                display_name: { type: string }
+      responses:
+        '200':
+          description: 安装成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { $ref: '#/components/schemas/User' }
+
+  /site-config:
+    get:
+      tags: [Auth]
+      summary: 获取站点公开配置
+      security: []
+      responses:
+        '200':
+          description: 站点配置
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  site_title: { type: string }
+                  site_icon_url: { type: string }
+                  site_cdn_url: { type: string }
+                  bmsync_enabled: { type: string }
+                  search_engine: { type: string }
+
+  /profile:
+    get:
+      tags: [Auth]
+      summary: 获取当前用户信息
+      responses:
+        '200':
+          description: 用户信息
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+    put:
+      tags: [Auth]
+      summary: 更新用户信息
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name: { type: string }
+                avatar: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+
+  /profile/password:
+    put:
+      tags: [Auth]
+      summary: 修改密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password: { type: string }
+                new_password: { type: string }
+      responses:
+        '200': { description: 修改成功 }
+        '400': { description: 旧密码错误 }
+
+  /bootstrap:
+    get:
+      tags: [Bootstrap]
+      summary: 获取首页初始化数据（settings + profile + panels）
+      description: 单次请求获取用户设置、个人信息和面板数据，减少首页加载请求数
+      responses:
+        '200':
+          description: 初始化数据
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings: { type: object }
+                  profile: { $ref: '#/components/schemas/User' }
+                  panels: { $ref: '#/components/schemas/PanelData' }
+
+  /panels:
+    get:
+      tags: [Panels]
+      summary: 获取用户面板数据（分组 + 卡片）
+      responses:
+        '200':
+          description: 面板数据
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PanelData' }
+
+  /panels/groups:
+    post:
+      tags: [Panels]
+      summary: 创建分组
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PanelGroup' }
+
+  /panels/groups/{id}:
+    put:
+      tags: [Panels]
+      summary: 更新分组
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                sort_order: { type: integer }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [Panels]
+      summary: 删除分组
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /panels/cards:
+    post:
+      tags: [Panels]
+      summary: 创建卡片
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCardRequest' }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Card' }
+
+  /panels/cards/{id}:
+    put:
+      tags: [Panels]
+      summary: 更新卡片
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateCardRequest' }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [Panels]
+      summary: 删除卡片
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /panels/reorder:
+    put:
+      tags: [Panels]
+      summary: 批量排序（分组 + 卡片）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                group_orders:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      sort_order: { type: integer }
+                card_orders:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      group_id: { type: string }
+                      sort_order: { type: integer }
+      responses:
+        '200': { description: 排序成功 }
+
+  /settings:
+    get:
+      tags: [Settings]
+      summary: 获取用户设置
+      responses:
+        '200':
+          description: 设置键值对
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: string }
+    put:
+      tags: [Settings]
+      summary: 更新单个设置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key]
+              properties:
+                key: { type: string }
+                value: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+
+  /settings/batch:
+    put:
+      tags: [Settings]
+      summary: 批量更新设置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [settings]
+              properties:
+                settings:
+                  type: object
+                  additionalProperties: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+
+  /search:
+    get:
+      tags: [Search]
+      summary: 搜索书签
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: 搜索结果
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    card_id: { type: string }
+                    title: { type: string }
+                    url: { type: string }
+                    description: { type: string }
+                    rank: { type: number }
+
+  /search/suggestions:
+    get:
+      tags: [Search]
+      summary: 搜索建议
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 建议列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+
+  /favicon:
+    get:
+      tags: [Favicon]
+      summary: 检测单个 URL 的 favicon
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 检测结果
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FaviconResponse' }
+
+  /favicons:
+    post:
+      tags: [Favicon]
+      summary: 批量检测 favicon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [urls]
+              properties:
+                urls:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200':
+          description: 批量结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/FaviconResponse' }
+
+  /system/stats:
+    get:
+      tags: [System]
+      summary: 获取系统状态（CPU/内存/磁盘/网络）
+      responses:
+        '200':
+          description: 系统状态
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SystemStats' }
+
+  /weather:
+    get:
+      tags: [Weather]
+      summary: 获取天气信息
+      responses:
+        '200':
+          description: 天气数据
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Weather' }
+
+  /memo:
+    get:
+      tags: [Memo]
+      summary: 获取便签列表
+      responses:
+        '200':
+          description: 便签列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Memo' }
+    post:
+      tags: [Memo]
+      summary: 创建便签
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Memo' }
+
+  /memo/{id}:
+    put:
+      tags: [Memo]
+      summary: 更新便签
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [Memo]
+      summary: 删除便签
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /memo/{id}/archive:
+    put:
+      tags: [Memo]
+      summary: 归档/取消归档便签
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 操作成功 }
+
+  /rss:
+    get:
+      tags: [RSS]
+      summary: 获取 RSS 订阅列表
+      responses:
+        '200':
+          description: 订阅列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RSSFeed' }
+    post:
+      tags: [RSS]
+      summary: 添加 RSS 订阅
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, description: 'RSS Feed URL' }
+                title: { type: string }
+      responses:
+        '201':
+          description: 添加成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RSSFeed' }
+
+  /rss/{id}:
+    put:
+      tags: [RSS]
+      summary: 更新 RSS 订阅
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                url: { type: string }
+                update_interval_minutes: { type: integer }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [RSS]
+      summary: 删除 RSS 订阅
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /rss/{id}/items:
+    get:
+      tags: [RSS]
+      summary: 获取订阅文章列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: 文章列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RSSItem' }
+
+  /themes:
+    get:
+      tags: [Themes]
+      summary: 获取主题列表
+      responses:
+        '200':
+          description: 主题列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Theme' }
+    post:
+      tags: [Themes]
+      summary: 创建主题
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, css_content]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                css_content: { type: string, description: 'CSS 自定义变量（如 :root { --sd-primary: #ff0000 }）' }
+                author: { type: string }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Theme' }
+
+  /themes/{id}:
+    put:
+      tags: [Themes]
+      summary: 更新主题
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                css_content: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [Themes]
+      summary: 删除主题（内置主题不可删除）
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /bmsync/status:
+    get:
+      tags: [BookmarkSync]
+      summary: 获取书签同步状态
+      responses:
+        '200':
+          description: 同步状态
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled: { type: boolean }
+                  server_url: { type: string }
+                  device_id: { type: string }
+
+  /bmsync/tree:
+    get:
+      tags: [BookmarkSync]
+      summary: 获取同步树
+      responses:
+        '200':
+          description: 同步树数据
+
+  /bmsync/pull:
+    post:
+      tags: [BookmarkSync]
+      summary: 从服务器拉取书签变更
+      responses:
+        '200': { description: 拉取成功 }
+
+  /bmsync/push:
+    post:
+      tags: [BookmarkSync]
+      summary: 推送本地变更到服务器
+      responses:
+        '200': { description: 推送成功 }
+
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: 获取全局设置（admin only）
+      responses:
+        '200':
+          description: 全局设置
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: string }
+    put:
+      tags: [Admin]
+      summary: 更新全局设置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: { type: string }
+      responses:
+        '200': { description: 更新成功 }
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: 获取用户列表
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/User' }
+
+  /admin/users/{id}:
+    put:
+      tags: [Admin]
+      summary: 更新用户
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [admin, user] }
+                display_name: { type: string }
+                status: { type: string, enum: [approved, pending, rejected] }
+      responses:
+        '200': { description: 更新成功 }
+    delete:
+      tags: [Admin]
+      summary: 删除用户
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 删除成功 }
+
+  /admin/users/{id}/reset-password:
+    post:
+      tags: [Admin]
+      summary: 重置用户密码
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [new_password]
+              properties:
+                new_password: { type: string }
+      responses:
+        '200': { description: 重置成功 }
+
+  /admin/users/{id}/approve:
+    post:
+      tags: [Admin]
+      summary: 审批通过用户
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 审批通过 }
+
+  /admin/users/{id}/reject:
+    post:
+      tags: [Admin]
+      summary: 拒绝用户
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: 已拒绝 }
+
+  /admin/backup:
+    get:
+      tags: [Admin]
+      summary: 下载数据库备份（VACUUM INTO 快照）
+      responses:
+        '200':
+          description: SQLite 数据库文件
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /admin/restore:
+    post:
+      tags: [Admin]
+      summary: 从备份文件恢复数据库
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 'SQLite 数据库文件（.db）'
+      responses:
+        '200':
+          description: 恢复成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  backup: { type: string }
+                  file: { type: string }
+                  size: { type: integer }
+
+  /admin/suggest-categorize:
+    get:
+      tags: [Admin]
+      summary: AI 智能归类建议（分析「暂停使用」「其他」分组中的卡片）
+      responses:
+        '200':
+          description: 归类建议
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        card_id: { type: string }
+                        card_title: { type: string }
+                        source_group: { type: string }
+                        target_group: { type: string }
+                        target_id: { type: string }
+                        confidence: { type: string, enum: [high, medium] }
+                  summary:
+                    type: object
+                    additionalProperties: { type: integer }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        username: { type: string }
+        display_name: { type: string }
+        avatar: { type: string }
+        role: { type: string, enum: [admin, user] }
+        status: { type: string, enum: [approved, pending, rejected] }
+        created_at: { type: string, format: date-time }
+
+    PanelGroup:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        name: { type: string }
+        sort_order: { type: integer }
+        created_at: { type: string, format: date-time }
+        cards:
+          type: array
+          items: { $ref: '#/components/schemas/Card' }
+
+    Card:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        group_id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        title: { type: string }
+        url: { type: string }
+        url_internal: { type: string }
+        icon: { type: string, description: 'Iconify key 或图片 URL' }
+        icon_color: { type: string }
+        bg_color: { type: string }
+        description: { type: string }
+        open_type: { type: string, enum: [new_tab, iframe] }
+        sort_order: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    PanelData:
+      type: object
+      properties:
+        groups:
+          type: array
+          items: { $ref: '#/components/schemas/PanelGroup' }
+
+    CreateCardRequest:
+      type: object
+      required: [group_id, title, url]
+      properties:
+        group_id: { type: string }
+        title: { type: string }
+        url: { type: string }
+        url_internal: { type: string }
+        icon: { type: string }
+        icon_color: { type: string }
+        bg_color: { type: string }
+        description: { type: string }
+        open_type: { type: string, enum: [new_tab, iframe] }
+
+    UpdateCardRequest:
+      type: object
+      properties:
+        title: { type: string }
+        url: { type: string }
+        url_internal: { type: string }
+        icon: { type: string }
+        icon_color: { type: string }
+        bg_color: { type: string }
+        description: { type: string }
+        open_type: { type: string }
+        sort_order: { type: integer }
+
+    FaviconResponse:
+      type: object
+      properties:
+        icon_name: { type: string, description: 'Iconify key（如 mdi:github）' }
+        favicon_url: { type: string, description: '站点真实 favicon URL' }
+        source: { type: string, enum: [mapping, iconify, favicon, none] }
+        title: { type: string, description: '页面标题' }
+
+    Memo:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string }
+        content: { type: string }
+        is_archived: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    RSSFeed:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string }
+        title: { type: string }
+        url: { type: string }
+        description: { type: string }
+        image_url: { type: string }
+        last_fetched: { type: string, format: date-time }
+        update_interval_minutes: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    RSSItem:
+      type: object
+      properties:
+        id: { type: string }
+        feed_id: { type: string }
+        title: { type: string }
+        link: { type: string }
+        description: { type: string }
+        pub_date: { type: string, format: date-time }
+        author: { type: string }
+
+    Theme:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string }
+        css_content: { type: string }
+        author: { type: string }
+        is_builtin: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    Weather:
+      type: object
+      properties:
+        temperature: { type: number, description: '摄氏度' }
+        windspeed: { type: number, description: 'km/h' }
+        winddirection: { type: number, description: '角度' }
+        weathercode: { type: integer, description: 'WMO 天气代码' }
+        time: { type: string }
+        timezone: { type: string }
+
+    SystemStats:
+      type: object
+      properties:
+        cpu:
+          type: object
+          properties:
+            usage: { type: number }
+            cores: { type: integer }
+        memory:
+          type: object
+          properties:
+            used: { type: integer }
+            total: { type: integer }
+            percent: { type: number }
+        disk:
+          type: object
+          properties:
+            used: { type: integer }
+            total: { type: integer }
+            percent: { type: number }
+        network:
+          type: object
+          properties:
+            bytes_sent: { type: integer }
+            bytes_recv: { type: integer }

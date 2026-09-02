@@ -17,6 +17,7 @@ type FaviconResponse struct {
 	IconName   string `json:"icon_name"`   // Iconify icon name like "mdi:github"
 	FaviconURL string `json:"favicon_url"` // Direct favicon URL if no iconify match
 	Source     string `json:"source"`      // "mapping", "iconify", "favicon", "none"
+	Title      string `json:"title"`       // Page title from <title> or og:title
 }
 
 // siteIconMap maps known domains to Iconify icons.
@@ -118,6 +119,18 @@ func (s *FaviconService) FetchFavicon(rawURL string) (FaviconResponse, error) {
 		return resp, nil
 	}
 	html := string(body)
+
+	// Extract page title from <title> or og:title
+	titleRegex := regexp.MustCompile(`(?i)<title[^>]*>([^<]+)</title>`)
+	ogTitleRegex := regexp.MustCompile(`(?i)<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']`)
+	ogTitleRegex2 := regexp.MustCompile(`(?i)<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']`)
+	if m := titleRegex.FindStringSubmatch(html); len(m) >= 2 {
+		resp.Title = strings.TrimSpace(m[1])
+	} else if m := ogTitleRegex.FindStringSubmatch(html); len(m) >= 2 {
+		resp.Title = strings.TrimSpace(m[1])
+	} else if m := ogTitleRegex2.FindStringSubmatch(html); len(m) >= 2 {
+		resp.Title = strings.TrimSpace(m[1])
+	}
 
 	// Iconify references: icon-sets.iconify.design/PREFIX/NAME or api.iconify.design/PREFIX/NAME.svg
 	iconifyRegex := regexp.MustCompile(`(?:icon-sets\.iconify\.design|api\.iconify\.design)[/"]+([\w-]+)/([\w-]+)`)
