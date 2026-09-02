@@ -1,0 +1,31 @@
+{
+  "name": "SunDash",
+  "short_name": "SunDash",
+  "description": "Self-hosted personal dashboard — Bookmarks · System monitor · Weather · RSS · Memos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2F2F7",
+  "theme_color": "#007AFF",
+  "orientation": "any",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "管理后台",
+      "url": "/admin",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "书签同步",
+      "url": "/bookmarks",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}
