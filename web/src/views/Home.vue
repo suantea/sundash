@@ -51,6 +51,9 @@
         <button v-if="appStore.bmsyncEnabled" class="hdr-btn" @click="router.push('/bookmarks')" :title="$t('bookmarks.title')">
           <Icon icon="mdi:bookmark-multiple-outline" :width="17" :height="17" />
         </button>
+        <button class="hdr-btn" :class="{ accent: viewMode === 'infohub' }" @click="viewMode = viewMode === 'bookmarks' ? 'infohub' : 'bookmarks'" :title="viewMode === 'bookmarks' ? '信息台' : '书签'">
+          <Icon :icon="viewMode === 'bookmarks' ? 'mdi:view-dashboard-outline' : 'mdi:view-grid-outline'" :width="17" :height="17" />
+        </button>
         <button class="hdr-btn accent" @click="showAddGroup = true" :title="$t('home.addGroup')">
           <Icon icon="mdi:plus" :width="17" :height="17" />
         </button>
@@ -67,11 +70,32 @@
 
     <!-- Search bar -->
     <div class="home-search">
-      <SearchBar />
+      <SearchBar ref="searchBarRef" />
     </div>
 
     <!-- Main Content -->
     <main class="home-content">
+      <!-- Info Hub Mode -->
+      <div v-if="viewMode === 'infohub'" class="infohub">
+        <div class="infohub-grid">
+          <div class="infohub-cell infohub-weather">
+            <WeatherWidget />
+          </div>
+          <div class="infohub-cell infohub-memo">
+            <MemoWidget />
+          </div>
+          <div class="infohub-cell infohub-rss">
+            <RSSWidget />
+          </div>
+          <div class="infohub-cell infohub-status">
+            <SystemStatus />
+            <SystemMonitor />
+          </div>
+        </div>
+      </div>
+
+      <!-- Bookmarks Mode -->
+      <template v-else>
       <!-- System Status -->
       <SystemStatus />
 
@@ -87,8 +111,27 @@
       <!-- RSS Widget (可选：设置里开启) -->
       <RSSWidget v-if="appStore.showRSSWidget" />
 
+      <!-- Skeleton Loading -->
+      <div v-if="panelStore.loading && panelStore.groups.length === 0" class="skeleton-container">
+        <div v-for="n in 3" :key="n" class="skeleton-group">
+          <div class="skeleton-group-head">
+            <div class="skeleton-bar skeleton-title"></div>
+            <div class="skeleton-bar skeleton-badge"></div>
+          </div>
+          <div class="skeleton-cards">
+            <div v-for="c in 4" :key="c" class="skeleton-card">
+              <div class="skeleton-icon"></div>
+              <div class="skeleton-text">
+                <div class="skeleton-bar skeleton-line"></div>
+                <div class="skeleton-bar skeleton-line short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Empty State -->
-      <div v-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
+      <div v-else-if="panelStore.groups.length === 0 && !panelStore.loading" class="empty-state">
         <div class="empty-icon">
           <svg width="56" height="56" viewBox="0 0 48 48" fill="none">
             <rect x="4" y="4" width="18" height="18" rx="5" fill="#007AFF"/>
@@ -174,6 +217,7 @@
         <div v-if="appStore.footerHtml" class="footer-content" v-text="appStore.footerHtml"></div>
         <div class="copyright-notice">SunDash · Open Source · MIT License</div>
       </footer>
+      </template>
     </main>
 
     <!-- Modals -->
@@ -298,6 +342,35 @@ onMounted(async () => {
 onMounted(() => window.addEventListener('resize', onViewportResize))
 onUnmounted(() => window.removeEventListener('resize', onViewportResize))
 
+// Keyboard shortcuts
+const searchBarRef = ref<InstanceType<typeof SearchBar> | null>(null)
+function onKeydown(e: KeyboardEvent) {
+  // Skip when typing in an input/textarea
+  const tag = (e.target as HTMLElement)?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) {
+    // Esc still works to blur
+    if (e.key === 'Escape') {
+      ;(e.target as HTMLElement).blur()
+      e.preventDefault()
+    }
+    return
+  }
+  if (e.key === '/') {
+    e.preventDefault()
+    searchBarRef.value?.focus()
+  } else if (e.key === 'Escape') {
+    showSettings.value = false
+    showCardEditor.value = false
+    showAddGroup.value = false
+    showDeleteConfirm.value = false
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault()
+    openAddCard(panelStore.groups[0]?.id)
+  }
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
+
 // Theme
 function toggleTheme() {
   appStore.setTheme(appStore.isDark ? 'light' : 'dark')
@@ -334,6 +407,7 @@ function handleUserMenu(key: string) {
 
 // Group management
 const showAddGroup = ref(false)
+const viewMode = ref<'bookmarks' | 'infohub'>('bookmarks')
 const showEditGroup = ref(false)
 const showSettings = ref(false)
 const newGroupName = ref('')
@@ -781,6 +855,48 @@ function openCardUrl(card: Card) {
   padding: 0 var(--sd-content-padding-x, 5%) var(--sd-content-padding-bottom, 5%);
 }
 
+/* === Info Hub Dashboard === */
+.infohub {
+  margin-top: var(--sd-space-4);
+}
+
+.infohub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.infohub-cell {
+  border-radius: 16px;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .infohub-cell {
+  background: rgba(44,44,46,0.4);
+  border-color: rgba(255,255,255,0.06);
+}
+
+.infohub-rss {
+  grid-column: 1 / -1;
+}
+
+.infohub-status {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .infohub-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* === Empty State === */
 .empty-state {
   display: flex;
@@ -856,6 +972,103 @@ function openCardUrl(card: Card) {
   display: flex;
   flex-direction: column;
   gap: var(--sd-space-6);
+}
+
+/* === Skeleton Loading === */
+.skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sd-space-6);
+}
+
+.skeleton-group {
+  background: rgba(255,255,255,0.4);
+  border-radius: 16px;
+  padding: var(--sd-space-5);
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+:root[data-theme="dark"] .skeleton-group {
+  background: rgba(44,44,46,0.4);
+}
+
+.skeleton-group-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--sd-space-4);
+}
+
+.skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.skeleton-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.5);
+}
+
+:root[data-theme="dark"] .skeleton-card {
+  background: rgba(55,55,58,0.5);
+}
+
+.skeleton-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+:root[data-theme="dark"] .skeleton-icon {
+  background: rgba(255,255,255,0.08);
+}
+
+.skeleton-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-bar {
+  border-radius: 6px;
+  background: rgba(0,0,0,0.06);
+}
+
+:root[data-theme="dark"] .skeleton-bar {
+  background: rgba(255,255,255,0.08);
+}
+
+.skeleton-title {
+  width: 120px;
+  height: 20px;
+}
+
+.skeleton-badge {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+}
+
+.skeleton-line {
+  height: 12px;
+  width: 100%;
+}
+
+.skeleton-line.short {
+  width: 60%;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .group-wrapper {
