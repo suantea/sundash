@@ -7,11 +7,11 @@
       </div>
       <div class="group-actions">
         <button class="group-action-btn" @click="$emit('addCard', group.id)" :title="t('home.addBookmark')">
-          <Icon icon="mdi:plus" :size="16" />
+          <Icon icon="mdi:plus" :width="16" :height="16" />
         </button>
         <n-dropdown :options="menuOptions" @select="handleMenu" trigger="click" placement="bottom-end">
           <button class="group-action-btn">
-            <Icon icon="mdi:dots-horizontal" :size="16" />
+            <Icon icon="mdi:dots-horizontal" :width="16" :height="16" />
           </button>
         </n-dropdown>
       </div>
@@ -39,7 +39,7 @@
 
     <div class="cards-grid cards-grid-footer" :style="gridStyle">
       <button class="card-add" @click="$emit('addCard', group.id)">
-        <Icon icon="mdi:plus" :size="20" color="var(--sd-text-tertiary)" />
+        <Icon icon="mdi:plus" :width="20" :height="20" color="var(--sd-text-tertiary)" />
         <span>{{ t('home.addBookmark') }}</span>
       </button>
     </div>

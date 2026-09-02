@@ -2,44 +2,44 @@
   <div class="card-item" :style="cardItemStyle" @click="$emit('click')" @dblclick.stop @contextmenu.prevent="onContextMenu">
     <div class="card-icon-box" :style="iconBoxStyle">
       <img v-if="isIconUrl && card.icon" :src="card.icon" class="card-icon-img" :alt="card.title" />
-      <Icon v-else :icon="resolvedIconName" :size="38" :color="card.icon_color || iconFallbackColor" />
+      <Icon v-else :icon="resolvedIconName" :width="36" :height="36" :color="card.icon_color || iconFallbackColor" />
     </div>
     <div class="card-info">
       <div class="card-title" :style="cardTitleStyle">{{ card.title }}</div>
-      <div v-if="card.description" class="card-desc">{{ card.description }}</div>
+      <div v-if="card.description && !isNarrow" class="card-desc">{{ card.description }}</div>
     </div>
-    <div v-if="card.url_internal" class="card-net-dot" :title="t('home.internalAccess')"></div>
+    <div v-if="card.url_internal && !isNarrow" class="card-net-dot" :title="t('home.internalAccess')"></div>
     
     <!-- Context Menu -->
     <teleport to="body">
       <div v-if="showContextMenu" class="card-context-menu" :style="contextMenuStyle" @click.stop>
         <div class="ctx-menu-item" @click="handleAction('open')">
-          <Icon icon="mdi:open-in-new" :size="16" />
+          <Icon icon="mdi:open-in-new" :width="16" :height="16" />
           <span>{{ t('home.visitLink') }}</span>
         </div>
         <div v-if="card.url_internal" class="ctx-menu-item" @click="handleAction('open-internal')">
-          <Icon icon="mdi:lan" :size="16" />
+          <Icon icon="mdi:lan" :width="16" :height="16" />
           <span>{{ t('home.visitInternal') }}</span>
         </div>
         <div class="ctx-menu-item" @click="handleAction('copy')">
-          <Icon icon="mdi:content-copy" :size="16" />
+          <Icon icon="mdi:content-copy" :width="16" :height="16" />
           <span>{{ t('home.copyExternalLink') }}</span>
         </div>
         <div v-if="card.url_internal" class="ctx-menu-item" @click="handleAction('copy-internal')">
-          <Icon icon="mdi:content-copy" :size="16" />
+          <Icon icon="mdi:content-copy" :width="16" :height="16" />
           <span>{{ t('home.copyInternalLink') }}</span>
         </div>
         <div class="ctx-menu-divider"></div>
         <div class="ctx-menu-item" @click="handleAction('hide')">
-          <Icon icon="mdi:eye-off" :size="16" />
+          <Icon icon="mdi:eye-off" :width="16" :height="16" />
           <span>{{ t('common.hide') }}</span>
         </div>
         <div class="ctx-menu-item" @click="handleAction('edit')">
-          <Icon icon="mdi:pencil-outline" :size="16" />
+          <Icon icon="mdi:pencil-outline" :width="16" :height="16" />
           <span>{{ t('home.editBookmark') }}</span>
         </div>
         <div class="ctx-menu-item danger" @click="handleAction('delete')">
-          <Icon icon="mdi:delete-outline" :size="16" />
+          <Icon icon="mdi:delete-outline" :width="16" :height="16" />
           <span>{{ t('home.deleteBookmark') }}</span>
         </div>
       </div>
@@ -57,6 +57,10 @@ import type { Card } from '../../types'
 const { t } = useI18n()
 const appStore = useAppStore()
 const props = defineProps<{ card: Card }>()
+
+// 窄屏检测（≤480px 时卡片竖排）
+const isNarrow = computed(() => window.innerWidth <= 768)
+window.addEventListener('resize', () => { isNarrow.value = window.innerWidth <= 768 })
 
 const iconFallbackColor = computed(() => appStore.primaryColor || '#007AFF')
 
@@ -177,7 +181,7 @@ const defaultIcon = computed(() => {
   if (color.includes('FF') || color.includes('ff')) return 'mdi:star-four-points'
   if (color.includes('34C759') || color.includes('34c759')) return 'mdi:leaf'
   if (color.includes('5856D6') || color.includes('5856d6')) return 'mdi:shape'
-  return 'mdi:compass'
+  return 'mdi:bookmark'
 })
 
 // Icon box background style
@@ -223,6 +227,44 @@ const cardTitleStyle = computed(() => {
   -webkit-user-select: none;
 }
 
+/* 窄屏竖排模式 */
+@media (max-width: 480px) {
+  .card-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 4px;
+    gap: 6px;
+  }
+
+  .card-icon-box {
+    width: 44px;
+    height: 44px;
+  }
+
+  .card-icon-img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .card-info {
+    width: 100%;
+  }
+
+  .card-title {
+    font-size: 12px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
 :root[data-theme="dark"] .card-item {
   background: rgba(44,44,46,0.5);
   border-color: rgba(255,255,255,0.06);
@@ -253,6 +295,7 @@ const cardTitleStyle = computed(() => {
   justify-content: center;
   flex-shrink: 0;
   transition: transform 0.2s ease;
+  overflow: hidden;
 }
 
 .card-item:hover .card-icon-box {
@@ -260,10 +303,11 @@ const cardTitleStyle = computed(() => {
 }
 
 .card-icon-img {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .card-info {
@@ -306,11 +350,41 @@ const cardTitleStyle = computed(() => {
   opacity: 1;
 }
 
-/* Mobile */
+/* Tablet横排: title 换行，图标略缩 */
+@media (max-width: 768px) {
+  .card-item {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .card-icon-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-icon-img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .card-title {
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 12px;
+  }
+}
+
+/* 窄屏竖排模式 */
 @media (max-width: 480px) {
   .card-item {
-    padding: 8px 10px;
-    gap: 8px;
+    padding: 10px 6px;
+    gap: 6px;
     border-radius: 12px;
   }
 
@@ -320,8 +394,21 @@ const cardTitleStyle = computed(() => {
     border-radius: 10px;
   }
 
+  .card-icon-img {
+    width: 36px;
+    height: 36px;
+  }
+
   .card-title {
-    font-size: 13px;
+    font-size: 12px;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   .card-desc {
@@ -329,9 +416,10 @@ const cardTitleStyle = computed(() => {
   }
 
   .card-style-round .card-item {
-    padding: 8px;
-    min-width: 76px;
-    max-width: 76px;
+    padding: 10px 6px;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
   }
 }
 

@@ -15,8 +15,8 @@
           <div v-if="showPreview" class="preview-box" :class="{ 'canvas-transparent': canvasTransparent }">
             <div class="preview-card preview-card-h" :style="{ background: form.bg_color || 'rgba(42,42,42,0.42)' }">
               <div class="preview-icon">
-                <Icon v-if="form.icon" :icon="parsedIconName" :size="38" :color="form.icon_color || '#2080f0'" />
-                <Icon v-else icon="mdi:compass" :size="38" color="#999" />
+                <Icon v-if="form.icon" :icon="parsedIconName" :width="38" :height="38" :color="form.icon_color || '#2080f0'" />
+                <Icon v-else icon="mdi:compass" :width="38" :height="38" color="#999" />
               </div>
               <div class="preview-info">
                 <div class="preview-title">{{ form.title || t('home.cardTitle') }}</div>
@@ -65,7 +65,7 @@
         <div class="right-header">
           <span class="right-label">{{ t('home.iconSettings') }}</span>
           <a class="iconify-link" href="https://icon-sets.iconify.design/" target="blank" rel="noopener">
-            <Icon icon="mdi:open-in-new" :size="11" />
+            <Icon icon="mdi:open-in-new" :width="11" :height="11" />
             <span>{{ t('home.iconifyGallery') }}</span>
           </a>
         </div>
@@ -75,7 +75,7 @@
           <n-input v-model:value="form.icon" :placeholder="t('home.iconPlaceholder')" size="small" clearable
             @update:value="onIconInput" style="flex:1;" />
           <button type="button" class="fetch-btn" @click="fetchFavicon" :disabled="!form.url || fetchingIcon">
-            <Icon :icon="fetchingIcon ? 'mdi:loading' : 'mdi:image-sync-outline'" :size="14" :class="{ 'spin-icon': fetchingIcon }" />
+            <Icon :icon="fetchingIcon ? 'mdi:loading' : 'mdi:image-sync-outline'" :width="14" :height="14" :class="{ 'spin-icon': fetchingIcon }" />
             <span>{{ fetchingIcon ? '...' : 'ICO' }}</span>
           </button>
         </div>
@@ -83,11 +83,11 @@
         <!-- Icon Picker Toggle -->
         <button type="button" class="icon-picker-trigger" @click="showIconPicker = !showIconPicker">
           <div class="trigger-icon">
-            <Icon v-if="form.icon" :icon="parsedIconName" :size="20" :color="form.icon_color || '#2080f0'" />
-            <Icon v-else icon="mdi:compass" :size="20" color="#999" />
+            <Icon v-if="form.icon" :icon="parsedIconName" :width="20" :height="20" :color="form.icon_color || '#2080f0'" />
+            <Icon v-else icon="mdi:compass" :width="20" :height="20" color="#999" />
           </div>
           <span class="trigger-label">{{ t('home.selectIcon') }}</span>
-          <Icon :icon="showIconPicker ? 'mdi:chevron-up' : 'mdi:chevron-down'" :size="14" class="trigger-arrow" />
+          <Icon :icon="showIconPicker ? 'mdi:chevron-up' : 'mdi:chevron-down'" :width="14" :height="14" class="trigger-arrow" />
         </button>
         <div v-if="showIconPicker" class="icon-popover-content">
           <div v-for="cat in iconCategories" :key="cat.name" class="icon-cat">
@@ -96,7 +96,7 @@
               <button v-for="icon in cat.icons" :key="icon" type="button"
                 class="icon-btn" :class="{ active: form.icon === icon }"
                 @click="form.icon = icon; showIconPicker = false">
-                <Icon :icon="icon" :size="18" />
+                <Icon :icon="icon" :width="18" :height="18" />
               </button>
             </div>
           </div>
@@ -115,7 +115,7 @@
             <n-color-picker v-model:value="form.icon_color" :show-alpha="true" format="hex" size="small" style="width: 56px;" />
           </div>
           <button type="button" class="apply-btn" @click="applyColorToAll">
-            <Icon icon="mdi:apply-edit" :size="12" /> {{ t('home.applyToAll') }}
+            <Icon icon="mdi:apply-edit" :width="12" :height="12" /> {{ t('home.applyToAll') }}
           </button>
         </div>
 
@@ -128,7 +128,7 @@
             <n-color-picker v-model:value="form.bg_color" :show-alpha="true" format="hex" size="small" style="width: 56px;" />
           </div>
           <button type="button" class="apply-btn" @click="applyBgColorToAll">
-            <Icon icon="mdi:apply-edit" :size="12" /> {{ t('home.applyToAll') }}
+            <Icon icon="mdi:apply-edit" :width="12" :height="12" /> {{ t('home.applyToAll') }}
           </button>
         </div>
       </div>
@@ -329,6 +329,18 @@ watch(() => props.show, (val) => {
       }
     }
   }
+})
+
+// 自动获取 favicon：URL 变化时自动触发（创建模式）
+let urlWatchTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => form.value.url, (newUrl) => {
+  if (!props.card || !newUrl) return // 编辑模式不自动触发，创建模式才触发
+  if (urlWatchTimer) clearTimeout(urlWatchTimer)
+  urlWatchTimer = setTimeout(() => {
+    if (newUrl && !form.value.icon) {
+      fetchFavicon()
+    }
+  }, 800) // 防抖 800ms
 })
 
 async function handleSave() {
