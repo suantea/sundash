@@ -32,11 +32,12 @@ type Server struct {
 	system  *service.SystemService
 	search  *service.SearchService
 	memo    *service.MemoService
+	docker  *service.DockerService
 }
 
 // New creates an MCPServer with all sundash bookmark-management tools.
-func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService, search *service.SearchService, memo *service.MemoService) *Server {
-	s := &Server{panels: panels, favicon: favicon, system: system, search: search, memo: memo}
+func New(panels *service.PanelService, favicon *service.FaviconService, system *service.SystemService, search *service.SearchService, memo *service.MemoService, docker *service.DockerService) *Server {
+	s := &Server{panels: panels, favicon: favicon, system: system, search: search, memo: memo, docker: docker}
 	mcps := server.NewMCPServer(
 		"sundash",
 		"0.1.0",
@@ -49,6 +50,7 @@ func New(panels *service.PanelService, favicon *service.FaviconService, system *
 	registerSystemTools(mcps, s)
 	registerSearchTools(mcps, s)
 	registerMemoTools(mcps, s)
+	registerDockerTools(mcps, s)
 
 	s.server = mcps
 	return s
@@ -534,6 +536,90 @@ func (s *Server) handleSystemStatus(ctx context.Context, req mcp.CallToolRequest
 		return mcp.NewToolResultError("获取系统状态失败: " + err.Error()), nil
 	}
 	return mcp.NewToolResultJSON(stats)
+}
+
+// --- docker tools -----------------------------------------------------------
+
+func registerDockerTools(mcps *server.MCPServer, s *Server) {
+	mcps.AddTool(mcp.NewTool(
+		"sundash_docker_overview",
+		mcp.WithDescription("获取 Docker 容器概览：运行中/已停止数量、容器列表、资源占用。用于 AI 分析 NAS 上 Docker 服务状态。"),
+		mcp.WithReadOnlyHintAnnotation(true),
+	), s.handleDockerOverview)
+
+	mcps.AddTool(mcp.NewTool(
+		"sundash_docker_list",
+		mcp.WithDescription("列出 Docker 容器"),
+		mcp.WithBoolean("all", mcp.Description("显示所有容器（含已停止，默认仅运行中）")),
+	), s.handleDockerList)
+
+	mcps.AddTool(mcp.NewTool(
+		"sundash_docker_action",
+		mcp.WithDescription("对 Docker 容器执行操作（start/stop/restart）"),
+		mcp.WithString("action", mcp.Required(), mcp.Description("操作：start、stop 或 restart")),
+		mcp.WithString("container", mcp.Required(), mcp.Description("容器名或 ID")),
+	), s.handleDockerAction)
+
+	mcps.AddTool(mcp.NewTool(
+		"sundash_docker_logs",
+		mcp.WithDescription("查看 Docker 容器日志"),
+		mcp.WithString("container", mcp.Required(), mcp.Description("容器名或 ID")),
+		mcp.WithNumber("tail", mcp.Description("显示最后 N 行（默认 50）")),
+	), s.handleDockerLogs)
+}
+
+func (s *Server) handleDockerOverview(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	overview, err := s.docker.GetOverview()
+	if err != nil {
+		return mcp.NewToolResultError("获取 Docker 概览失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultJSON(overview)
+}
+
+func (s *Server) handleDockerList(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	showAll := false
+	if v, ok := req.Params.Arguments.(map[string]any); ok {
+		if b, ok := v["all"].(bool); ok {
+			showAll = b
+		}
+	}
+	containers, err := s.docker.ListContainers(showAll)
+	if err != nil {
+		return mcp.NewToolResultError("列出容器失败: " + err.Error()), nil
+	}
+	return mcp.NewToolResultJSON(containers)
+}
+
+func (s *Server) handleDockerAction(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	args, _ := req.Params.Arguments.(map[string]any)
+	action, _ := args["action"].(string)
+	container, _ := args["container"].(string)
+	if action == "" || container == "" {
+		return mcp.NewToolResultError("缺少参数 action 或 container"), nil
+	}
+	out, err := s.docker.ContainerAction(action, container)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	msg := fmt.Sprintf("容器 %s %s 成功", container, action)
+	if out != "" {
+		msg += ": " + out
+	}
+	return mcp.NewToolResultText(msg), nil
+}
+
+func (s *Server) handleDockerLogs(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	args, _ := req.Params.Arguments.(map[string]any)
+	container, _ := args["container"].(string)
+	tail := 50
+	if v, ok := args["tail"].(float64); ok && v > 0 {
+		tail = int(v)
+	}
+	logs, err := s.docker.ContainerLogs(container, tail)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return mcp.NewToolResultText(logs), nil
 }
 
 func (s *Server) handleDeleteCard(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
