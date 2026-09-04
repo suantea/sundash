@@ -17,6 +17,7 @@
   --sd-bg-surface-secondary: #F9F9FB;
   --sd-bg-elevated: #FFFFFF;
   --sd-bg-grouped: #F2F2F7;
+  --sd-bg-card: #FFFFFF;
 
   /* Text Colors */
   --sd-text-primary: #1C1C1E;
@@ -132,6 +133,7 @@
   --sd-bg-surface-secondary: #2C2C2E;
   --sd-bg-elevated: #2C2C2E;
   --sd-bg-grouped: #000000;
+  --sd-bg-card: #1C1C1E;
 
   --sd-text-primary: #F2F2F7;
   --sd-text-secondary: #8E8E93;
