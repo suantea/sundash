@@ -293,6 +293,94 @@
         </div>
         <div v-if="users.length === 0" class="table-empty">{{ t('admin.noUsers') }}</div>
       </div>
+
+      <!-- ===== Backup/Restore Section ===== -->
+      <div class="section-header">
+        <div>
+          <h2>{{ t('admin.backupRestore') || '备份与恢复' }}</h2>
+          <p>{{ t('admin.backupRestoreDesc') || '下载完整数据库备份或从备份文件恢复' }}</p>
+        </div>
+      </div>
+      <div class="settings-card">
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
+              <Icon icon="mdi:download" :width="18" :height="18" color="#007AFF" />
+            </div>
+            <div>
+              <div class="setting-title">{{ t('admin.downloadBackup') || '下载备份' }}</div>
+              <div class="setting-desc">{{ t('admin.backupDownloadDesc') || '将当前数据库完整备份为 .db 文件下载到本地' }}</div>
+            </div>
+          </div>
+          <button class="add-btn" @click="handleBackup">
+            <Icon icon="mdi:download" :width="16" :height="16" />
+            {{ t('admin.downloadBackup') || '下载备份' }}
+          </button>
+        </div>
+        <div class="setting-divider"></div>
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
+              <Icon icon="mdi:upload" :width="18" :height="18" color="#FF9500" />
+            </div>
+            <div>
+              <div class="setting-title">{{ t('admin.restoreBackup') || '从备份恢复' }}</div>
+              <div class="setting-desc">{{ t('admin.restoreBackupDesc') || '从 .db 或 .sqlite 备份文件恢复，将覆盖现有数据' }}</div>
+            </div>
+          </div>
+          <button class="add-btn add-btn-warning" @click="restoreInput?.click()">
+            <Icon icon="mdi:upload" :width="16" :height="16" />
+            {{ t('admin.restoreBackup') || '从备份恢复' }}
+          </button>
+          <input ref="restoreInput" type="file" accept=".db,.sqlite" style="display:none" @change="handleRestore" />
+        </div>
+      </div>
+
+      <!-- ===== AI Auto-Categorize ===== -->
+      <div class="section-header">
+        <div>
+          <h2>{{ t('admin.autoCategorize') || 'AI 智能归类' }}</h2>
+          <p>{{ t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</p>
+        </div>
+      </div>
+      <div class="settings-card">
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
+              <Icon icon="mdi:auto-fix" :width="18" :height="18" color="#AF52DE" />
+            </div>
+            <div>
+              <div class="setting-title">{{ t('admin.startCategorize') || '开始分析' }}</div>
+              <div class="setting-desc">{{ t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</div>
+            </div>
+          </div>
+          <button class="add-btn add-btn-ai" @click="handleSuggestCategorize" :disabled="categorizeLoading">
+            <Icon icon="mdi:auto-fix" :width="16" :height="16" />
+            {{ categorizeLoading ? '分析中...' : (t('admin.startCategorize') || '开始分析') }}
+          </button>
+        </div>
+        <div v-if="categorizeSuggestions.length > 0" class="setting-divider"></div>
+        <div v-if="categorizeSuggestions.length > 0" class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
+              <Icon icon="mdi:check-all" :width="18" :height="18" color="#34C759" />
+            </div>
+            <div>
+              <div class="setting-title">{{ t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})</div>
+              <div class="setting-desc">{{ t('admin.applyCategorizeDesc') || '确认后将书签移动到建议的分组' }}</div>
+            </div>
+          </div>
+          <button class="add-btn add-btn-success" @click="handleApplyCategorize">
+            <Icon icon="mdi:check-all" :width="16" :height="16" />
+            {{ t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})
+          </button>
+        </div>
+        <div v-if="categorizeSummary" class="categorize-summary">
+          <div v-for="(count, group) in categorizeSummary" :key="group" class="summary-pill">
+            {{ group }}: {{ count }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ===== User Bookmarks Modal ===== -->
@@ -346,94 +434,6 @@
       </div>
       <n-input v-model:value="newDisplayName" :placeholder="t('admin.enterNewDisplayName')" @keyup.enter="handleEditDisplayName" />
     </n-modal>
-
-    <!-- ===== Backup/Restore Section ===== -->
-    <div class="section-header">
-      <div>
-        <h2>{{ t('admin.backupRestore') || '备份与恢复' }}</h2>
-        <p>{{ t('admin.backupRestoreDesc') || '下载完整数据库备份或从备份文件恢复' }}</p>
-      </div>
-    </div>
-    <div class="settings-card">
-      <div class="setting-row">
-        <div class="setting-left">
-          <div class="setting-icon" style="background: rgba(0,122,255,0.1);">
-            <Icon icon="mdi:download" :width="18" :height="18" color="#007AFF" />
-          </div>
-          <div>
-            <div class="setting-title">{{ t('admin.downloadBackup') || '下载备份' }}</div>
-            <div class="setting-desc">{{ t('admin.backupDownloadDesc') || '将当前数据库完整备份为 .db 文件下载到本地' }}</div>
-          </div>
-        </div>
-        <button class="add-btn" @click="handleBackup">
-          <Icon icon="mdi:download" :width="16" :height="16" />
-          {{ t('admin.downloadBackup') || '下载备份' }}
-        </button>
-      </div>
-      <div class="setting-divider"></div>
-      <div class="setting-row">
-        <div class="setting-left">
-          <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
-            <Icon icon="mdi:upload" :width="18" :height="18" color="#FF9500" />
-          </div>
-          <div>
-            <div class="setting-title">{{ t('admin.restoreBackup') || '从备份恢复' }}</div>
-            <div class="setting-desc">{{ t('admin.restoreBackupDesc') || '从 .db 或 .sqlite 备份文件恢复，将覆盖现有数据' }}</div>
-          </div>
-        </div>
-        <button class="add-btn add-btn-warning" @click="restoreInput?.click()">
-          <Icon icon="mdi:upload" :width="16" :height="16" />
-          {{ t('admin.restoreBackup') || '从备份恢复' }}
-        </button>
-        <input ref="restoreInput" type="file" accept=".db,.sqlite" style="display:none" @change="handleRestore" />
-      </div>
-    </div>
-
-    <!-- ===== AI Auto-Categorize ===== -->
-    <div class="section-header">
-      <div>
-        <h2>{{ t('admin.autoCategorize') || 'AI 智能归类' }}</h2>
-        <p>{{ t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</p>
-      </div>
-    </div>
-    <div class="settings-card">
-      <div class="setting-row">
-        <div class="setting-left">
-          <div class="setting-icon" style="background: rgba(175,82,222,0.1);">
-            <Icon icon="mdi:auto-fix" :width="18" :height="18" color="#AF52DE" />
-          </div>
-          <div>
-            <div class="setting-title">{{ t('admin.startCategorize') || '开始分析' }}</div>
-            <div class="setting-desc">{{ t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</div>
-          </div>
-        </div>
-        <button class="add-btn add-btn-ai" @click="handleSuggestCategorize" :disabled="categorizeLoading">
-          <Icon icon="mdi:auto-fix" :width="16" :height="16" />
-          {{ categorizeLoading ? '分析中...' : (t('admin.startCategorize') || '开始分析') }}
-        </button>
-      </div>
-      <div v-if="categorizeSuggestions.length > 0" class="setting-divider"></div>
-      <div v-if="categorizeSuggestions.length > 0" class="setting-row">
-        <div class="setting-left">
-          <div class="setting-icon" style="background: rgba(52,199,89,0.1);">
-            <Icon icon="mdi:check-all" :width="18" :height="18" color="#34C759" />
-          </div>
-          <div>
-            <div class="setting-title">{{ t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})</div>
-            <div class="setting-desc">{{ t('admin.applyCategorizeDesc') || '确认后将书签移动到建议的分组' }}</div>
-          </div>
-        </div>
-        <button class="add-btn add-btn-success" @click="handleApplyCategorize">
-          <Icon icon="mdi:check-all" :width="16" :height="16" />
-          {{ t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})
-        </button>
-      </div>
-      <div v-if="categorizeSummary" class="categorize-summary">
-        <div v-for="(count, group) in categorizeSummary" :key="group" class="summary-pill">
-          {{ group }}: {{ count }}
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
