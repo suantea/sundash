@@ -8,9 +8,9 @@
     <header class="page-header">
       <button class="back-btn" @click="$router.push('/')">
         <Icon icon="mdi:chevron-left" :width="18" :height="18" />
-        <span>{{ $t("common.back") }}</span>
+        <span>{{ t("common.back") }}</span>
       </button>
-      <h1>{{ $t("admin.title") }}</h1>
+      <h1>{{ t("admin.title") }}</h1>
       <div style="width: 70px;"></div>
     </header>
 
@@ -18,8 +18,8 @@
       <!-- ===== 1. System Settings ===== -->
       <div class="section-header">
         <div>
-          <h2>{{ $t("admin.systemSettings") }}</h2>
-          <p>{{ $t("admin.manageRegistrationDefaults") }}</p>
+          <h2>{{ t("admin.systemSettings") }}</h2>
+          <p>{{ t("admin.manageRegistrationDefaults") }}</p>
         </div>
       </div>
 
@@ -30,8 +30,8 @@
               <Icon icon="mdi:account-plus" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">{{ $t("admin.allowRegistration") }}</div>
-              <div class="setting-desc">{{ $t("admin.allowRegistrationDesc") }}</div>
+              <div class="setting-title">{{ t("admin.allowRegistration") }}</div>
+              <div class="setting-desc">{{ t("admin.allowRegistrationDesc") }}</div>
             </div>
           </div>
           <n-switch v-model:value="globalSettings.allow_registration" @update:value="saveGlobalSetting('allow_registration', $event)" />
@@ -43,8 +43,8 @@
               <Icon icon="mdi:shield-check" :width="18" :height="18" color="#FF9500" />
             </div>
             <div>
-              <div class="setting-title">{{ $t("admin.requireApproval") }}</div>
-              <div class="setting-desc">{{ $t("admin.requireApprovalDesc") }}</div>
+              <div class="setting-title">{{ t("admin.requireApproval") }}</div>
+              <div class="setting-desc">{{ t("admin.requireApprovalDesc") }}</div>
             </div>
           </div>
           <n-switch v-model:value="globalSettings.require_approval" @update:value="saveGlobalSetting('require_approval', $event)" />
@@ -56,18 +56,18 @@
               <Icon icon="mdi:image" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">{{ $t("admin.defaultWallpaperType") }}</div>
-              <div class="setting-desc">{{ $t("admin.defaultWallpaperTypeDesc") }}</div>
+              <div class="setting-title">{{ t("admin.defaultWallpaperType") }}</div>
+              <div class="setting-desc">{{ t("admin.defaultWallpaperTypeDesc") }}</div>
             </div>
           </div>
           <div class="seg-control">
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === '' }]" @click="saveGlobalSetting('default_wallpaper_type', '')">{{ $t("common.default") }}</button>
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'bing' }]" @click="saveGlobalSetting('default_wallpaper_type', 'bing')">{{ $t("settings.bingWallpaper") }}</button>
-            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'custom' }]" @click="saveGlobalSetting('default_wallpaper_type', 'custom')">{{ $t("common.custom") }}</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === '' }]" @click="saveGlobalSetting('default_wallpaper_type', '')">{{ t("common.default") }}</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'bing' }]" @click="saveGlobalSetting('default_wallpaper_type', 'bing')">{{ t("settings.bingWallpaper") }}</button>
+            <button :class="['seg-btn', { active: globalSettings.default_wallpaper_type === 'custom' }]" @click="saveGlobalSetting('default_wallpaper_type', 'custom')">{{ t("common.custom") }}</button>
           </div>
         </div>
         <div v-if="globalSettings.default_wallpaper_type === 'custom'" class="setting-sub">
-          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" :placeholder="$t('admin.enterBackgroundUrl')" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
+          <input v-model="globalSettings.default_wallpaper_url" class="bg-url-input" :placeholder="t('admin.enterBackgroundUrl')" @change="saveGlobalSetting('default_wallpaper_url', globalSettings.default_wallpaper_url)" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -76,20 +76,20 @@
               <Icon icon="mdi:sync" :width="18" :height="18" color="#5AC8FA" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.bookmarkSync') }}</div>
-              <div class="setting-desc">{{ $t('admin.bookmarkSyncDesc') }}</div>
+              <div class="setting-title">{{ t('admin.bookmarkSync') }}</div>
+              <div class="setting-desc">{{ t('admin.bookmarkSyncDesc') }}</div>
             </div>
           </div>
           <div class="setting-toggle-row">
-            <span>{{ $t('admin.bookmarkSyncEnabled') }}</span>
+            <span>{{ t('admin.bookmarkSyncEnabled') }}</span>
             <n-switch v-model:value="globalSettings.bmsync_enabled" @update:value="saveGlobalSetting('bmsync_enabled', $event)" />
           </div>
           <div v-if="globalSettings.bmsync_enabled" class="setting-sub">
-            <input v-model="globalSettings.bmsync_server_url" class="bg-url-input" :placeholder="$t('admin.bmsyncServerUrlPlaceholder')" @change="saveGlobalSetting('bmsync_server_url', globalSettings.bmsync_server_url)" />
-            <input v-model="globalSettings.bmsync_token" type="password" class="bg-url-input" :placeholder="$t('admin.bmsyncTokenPlaceholder')" @change="saveGlobalSetting('bmsync_token', globalSettings.bmsync_token)" />
+            <input v-model="globalSettings.bmsync_server_url" class="bg-url-input" :placeholder="t('admin.bmsyncServerUrlPlaceholder')" @change="saveGlobalSetting('bmsync_server_url', globalSettings.bmsync_server_url)" />
+            <input v-model="globalSettings.bmsync_token" type="password" class="bg-url-input" :placeholder="t('admin.bmsyncTokenPlaceholder')" @change="saveGlobalSetting('bmsync_token', globalSettings.bmsync_token)" />
           </div>
           <div v-else class="setting-sub disabled-hint">
-            {{ $t('admin.bookmarkSyncDisabledHint') }}
+            {{ t('admin.bookmarkSyncDisabledHint') }}
           </div>
         </div>
         <div class="setting-divider"></div>
@@ -99,8 +99,8 @@
               <Icon icon="mdi:magnify" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.searchEngine') }}</div>
-              <div class="setting-desc">{{ $t('admin.searchEngineDesc') }}</div>
+              <div class="setting-title">{{ t('admin.searchEngine') }}</div>
+              <div class="setting-desc">{{ t('admin.searchEngineDesc') }}</div>
             </div>
           </div>
           <div class="seg-control">
@@ -115,14 +115,14 @@
       </div>
 
       <!-- ===== 2. Site Configuration ===== -->
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header">
         <div>
-          <h2>{{ $t("admin.siteConfig") }}</h2>
-          <p>{{ $t("admin.manageWebsiteConfig") }}</p>
+          <h2>{{ t("admin.siteConfig") }}</h2>
+          <p>{{ t("admin.manageWebsiteConfig") }}</p>
         </div>
         <button class="add-btn" @click="saveAllSiteConfig" :disabled="siteSaving">
           <Icon icon="mdi:content-save" :width="16" :height="16" />
-          {{ siteSaving ? $t('common.saving') : $t('admin.saveConfig') }}
+          {{ siteSaving ? t('common.saving') : t('admin.saveConfig') }}
         </button>
       </div>
 
@@ -133,11 +133,11 @@
               <Icon icon="mdi:text-short" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('settings.siteTitle') }}</div>
-              <div class="setting-desc">{{ $t('admin.siteTitleDesc') }}</div>
+              <div class="setting-title">{{ t('settings.siteTitle') }}</div>
+              <div class="setting-desc">{{ t('admin.siteTitleDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_title" class="mini-text-input" :placeholder="$t('admin.siteTitlePlaceholder')" />
+          <input v-model="siteConfig.site_title" class="mini-text-input" :placeholder="t('admin.siteTitlePlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
@@ -146,11 +146,11 @@
               <Icon icon="mdi:icon" :width="18" :height="18" color="#FF9500" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.siteIcon') }}</div>
-              <div class="setting-desc">{{ $t('admin.siteIconDesc') }}</div>
+              <div class="setting-title">{{ t('admin.siteIcon') }}</div>
+              <div class="setting-desc">{{ t('admin.siteIconDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" :placeholder="$t('admin.siteIconPlaceholder')" />
+          <input v-model="siteConfig.site_icon_url" class="mini-text-input wide" :placeholder="t('admin.siteIconPlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row">
@@ -159,11 +159,11 @@
               <Icon icon="mdi:cloud" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.cdnUrl') }}</div>
-              <div class="setting-desc">{{ $t('admin.cdnUrlDesc') }}</div>
+              <div class="setting-title">{{ t('admin.cdnUrl') }}</div>
+              <div class="setting-desc">{{ t('admin.cdnUrlDesc') }}</div>
             </div>
           </div>
-          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" :placeholder="$t('admin.cdnPlaceholder')" />
+          <input v-model="siteConfig.site_cdn_url" class="mini-text-input wide" :placeholder="t('admin.cdnPlaceholder')" />
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -172,11 +172,11 @@
               <Icon icon="mdi:chart-line" :width="18" :height="18" color="#AF52DE" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.analyticsCode') }}</div>
-              <div class="setting-desc">{{ $t('admin.analyticsCodeDesc') }}</div>
+              <div class="setting-title">{{ t('admin.analyticsCode') }}</div>
+              <div class="setting-desc">{{ t('admin.analyticsCodeDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_analytics_code" class="code-input" :placeholder="$t('admin.analyticsCodePlaceholder')" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_analytics_code" class="code-input" :placeholder="t('admin.analyticsCodePlaceholder')" rows="3"></textarea>
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -185,11 +185,11 @@
               <Icon icon="mdi:code-tags" :width="18" :height="18" color="#007AFF" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.customHead') }}</div>
-              <div class="setting-desc">{{ $t('admin.customHeadDesc') }}</div>
+              <div class="setting-title">{{ t('admin.customHead') }}</div>
+              <div class="setting-desc">{{ t('admin.customHeadDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_custom_head" class="code-input" :placeholder="$t('admin.customHeadPlaceholder')" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_custom_head" class="code-input" :placeholder="t('admin.customHeadPlaceholder')" rows="3"></textarea>
         </div>
         <div class="setting-divider"></div>
         <div class="setting-row" style="flex-direction: column; align-items: stretch; gap: 12px;">
@@ -198,24 +198,24 @@
               <Icon icon="mdi:code-tags" :width="18" :height="18" color="#34C759" />
             </div>
             <div>
-              <div class="setting-title">{{ $t('admin.customFooter') }}</div>
-              <div class="setting-desc">{{ $t('admin.customFooterDesc') }}</div>
+              <div class="setting-title">{{ t('admin.customFooter') }}</div>
+              <div class="setting-desc">{{ t('admin.customFooterDesc') }}</div>
             </div>
           </div>
-          <textarea v-model="siteConfig.site_custom_footer" class="code-input" :placeholder="$t('admin.customFooterCodePlaceholder')" rows="3"></textarea>
+          <textarea v-model="siteConfig.site_custom_footer" class="code-input" :placeholder="t('admin.customFooterCodePlaceholder')" rows="3"></textarea>
         </div>
       </div>
 
       <!-- ===== 3. Pending Users ===== -->
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header">
         <div>
-          <h2>{{ $t("admin.pendingUsers") }}</h2>
-          <p>{{ $t("admin.approveNewUsers") }}</p>
+          <h2>{{ t("admin.pendingUsers") }}</h2>
+          <p>{{ t("admin.approveNewUsers") }}</p>
         </div>
         <span v-if="pendingUsers.length" class="badge">{{ pendingUsers.length }}</span>
       </div>
 
-      <div class="table-card">
+      <div class="table-card pending-table">
         <div v-for="user in pendingUsers" :key="user.id" class="table-row">
           <div class="td" style="flex: 2.5;">
             <span class="u-avatar pending">{{ user.username[0].toUpperCase() }}</span>
@@ -225,36 +225,36 @@
           <div class="td" style="flex: 2; gap: 6px;">
             <button class="row-btn approve" @click="approveUser(user)">
               <Icon icon="mdi:check" :width="14" :height="14" />
-              {{ $t("admin.approve") }}
+              {{ t("admin.approve") }}
             </button>
             <button class="row-btn danger" @click="rejectUser(user)">
               <Icon icon="mdi:close" :width="14" :height="14" />
-              {{ $t("admin.reject") }}
+              {{ t("admin.reject") }}
             </button>
           </div>
         </div>
-        <div v-if="pendingUsers.length === 0" class="table-empty">{{ $t('admin.noPendingUsers') }}</div>
+        <div v-if="pendingUsers.length === 0" class="table-empty">{{ t('admin.noPendingUsers') }}</div>
       </div>
 
       <!-- ===== 3. All Users ===== -->
-      <div class="section-header" style="margin-top: 32px;">
+      <div class="section-header">
         <div>
-          <h2>{{ $t("admin.userManagement") }}</h2>
-          <p>{{ $t("admin.manageAllUsers") }}</p>
+          <h2>{{ t("admin.userManagement") }}</h2>
+          <p>{{ t("admin.manageAllUsers") }}</p>
         </div>
         <button class="add-btn" @click="showAddUser = true">
           <Icon icon="mdi:plus" :width="16" :height="16" />
-          {{ $t("admin.addUser") }}
+          {{ t("admin.addUser") }}
         </button>
       </div>
 
-      <div class="table-card">
+      <div class="table-card users-table">
         <div class="table-head">
-          <div class="th" style="flex: 2.5;">{{ $t('admin.user') }}</div>
-          <div class="th" style="flex: 2;">{{ $t('admin.displayName') }}</div>
-          <div class="th" style="flex: 1;">{{ $t('user.role') }}</div>
-          <div class="th" style="flex: 1;">{{ $t('common.status') }}</div>
-          <div class="th" style="flex: 2.5;">{{ $t('common.actions') }}</div>
+          <div class="th" style="flex: 2.5;">{{ t('admin.user') }}</div>
+          <div class="th" style="flex: 2;">{{ t('admin.displayName') }}</div>
+          <div class="th" style="flex: 1;">{{ t('user.role') }}</div>
+          <div class="th" style="flex: 1;">{{ t('common.status') }}</div>
+          <div class="th" style="flex: 2.5;">{{ t('common.actions') }}</div>
         </div>
         <div v-for="user in users" :key="user.id" class="table-row">
           <div class="td" style="flex: 2.5;">
@@ -264,7 +264,7 @@
           <div class="td" style="flex: 2; color: var(--sd-text-secondary);">{{ user.display_name || '-' }}</div>
           <div class="td" style="flex: 1;">
             <span :class="['role-pill', user.role === 'admin' ? 'is-admin' : 'is-user']">
-              {{ user.role === 'admin' ? $t('admin.roleAdmin') : $t('admin.roleUser') }}
+              {{ user.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleUser') }}
             </span>
           </div>
           <div class="td" style="flex: 1;">
@@ -274,35 +274,35 @@
           </div>
           <div class="td td-actions">
             <button class="row-btn" @click="toggleRole(user)">
-              {{ user.role === 'admin' ? $t('admin.setAsUser') : $t('admin.setAsAdmin') }}
+              {{ user.role === 'admin' ? t('admin.setAsUser') : t('admin.setAsAdmin') }}
             </button>
             <button class="row-btn" @click="viewUserPanel(user)">
               <Icon icon="mdi:view-grid" :width="14" :height="14" />
-              {{ $t("admin.bookmarks") }}
+              {{ t("admin.bookmarks") }}
             </button>
-            <button class="row-btn danger" @click="deleteUser(user)"> {{ $t('common.delete') }}</button>
+            <button class="row-btn danger" @click="deleteUser(user)"> {{ t('common.delete') }}</button>
             <button class="row-btn" @click="openEditDisplayName(user)">
               <Icon icon="mdi:rename-box" :width="14" :height="14" />
-              {{ $t("admin.rename") }}
+              {{ t("admin.rename") }}
             </button>
             <button class="row-btn" @click="openResetPassword(user)" style="color: #FF9500; border-color: rgba(255,149,0,0.3);">
               <Icon icon="mdi:key-variant" :width="14" :height="14" />
-              {{ $t("admin.resetPassword") }}
+              {{ t("admin.resetPassword") }}
             </button>
           </div>
         </div>
-        <div v-if="users.length === 0" class="table-empty">{{ $t('admin.noUsers') }}</div>
+        <div v-if="users.length === 0" class="table-empty">{{ t('admin.noUsers') }}</div>
       </div>
     </div>
 
     <!-- ===== User Bookmarks Modal ===== -->
-    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} {{ $t('admin.sBookmarks') }}`" style="max-width: 700px;" :bordered="false">
-      <div v-if="viewingGroups.length === 0" class="table-empty">{{ $t('admin.noBookmarksForUser') }}</div>
+    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} {{ t('admin.sBookmarks') }}`" style="max-width: 700px;" :bordered="false">
+      <div v-if="viewingGroups.length === 0" class="table-empty">{{ t('admin.noBookmarksForUser') }}</div>
       <div v-for="group in viewingGroups" :key="group.id" class="view-group">
         <div class="view-group-name">
           <Icon icon="mdi:folder" :width="16" :height="16" color="#007AFF" />
           {{ group.name }}
-          <span class="view-card-count">{{ group.cards?.length || 0 }} {{ $t('admin.bookmarkCount') }}</span>
+          <span class="view-card-count">{{ group.cards?.length || 0 }} {{ t('admin.bookmarkCount') }}</span>
         </div>
         <div v-if="group.cards && group.cards.length" class="view-cards">
           <div v-for="card in group.cards" :key="card.id" class="view-card">
@@ -314,78 +314,82 @@
     </n-modal>
 
     <!-- ===== Add User Modal ===== -->
-    <n-modal v-model:show="showAddUser" preset="dialog" :title="$t('admin.addUser')" :positive-text="$t('admin.create')" :negative-text="$t('common.cancel')"
+    <n-modal v-model:show="showAddUser" preset="dialog" :title="t('admin.addUser')" :positive-text="t('admin.create')" :negative-text="t('common.cancel')"
       :loading="modalLoading" @positive-click="handleCreateUser">
       <n-form label-placement="top">
-        <n-form-item :label="$t('login.username')">
-          <n-input v-model:value="newUser.username" :placeholder="$t('admin.enterUsername')" @keyup.enter="handleCreateUser" />
+        <n-form-item :label="t('login.username')">
+          <n-input v-model:value="newUser.username" :placeholder="t('admin.enterUsername')" @keyup.enter="handleCreateUser" />
         </n-form-item>
-        <n-form-item :label="$t('login.password')">
-          <n-input v-model:value="newUser.password" type="password" :placeholder="$t('admin.enterPassword')" show-password-on="click" @keyup.enter="handleCreateUser" />
+        <n-form-item :label="t('login.password')">
+          <n-input v-model:value="newUser.password" type="password" :placeholder="t('admin.enterPassword')" show-password-on="click" @keyup.enter="handleCreateUser" />
         </n-form-item>
-        <n-form-item :label="$t('admin.displayName')">
-          <n-input v-model:value="newUser.displayName" :placeholder="$t('admin.enterDisplayName')" @keyup.enter="handleCreateUser" />
+        <n-form-item :label="t('admin.displayName')">
+          <n-input v-model:value="newUser.displayName" :placeholder="t('admin.enterDisplayName')" @keyup.enter="handleCreateUser" />
         </n-form-item>
       </n-form>
     </n-modal>
 
     <!-- ===== Reset Password Modal ===== -->
-    <n-modal v-model:show="showResetPassword" preset="dialog" :title="$t('admin.resetUserPassword')" :positive-text="$t('admin.reset')" :negative-text="$t('common.cancel')"
+    <n-modal v-model:show="showResetPassword" preset="dialog" :title="t('admin.resetUserPassword')" :positive-text="t('admin.reset')" :negative-text="t('common.cancel')"
       :loading="resetPasswordLoading" @positive-click="handleResetPassword">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
-        {{ $t("admin.setPasswordForUser") }} <strong>{{ resettingUser?.username }}</strong> {{ $t('admin.setNewPassword') }}
+        {{ t("admin.setPasswordForUser") }} <strong>{{ resettingUser?.username }}</strong> {{ t('admin.setNewPassword') }}
       </div>
-      <n-input v-model:value="newResetPassword" type="password" :placeholder="$t('admin.enterNewPassword')" show-password-on="click" @keyup.enter="handleResetPassword" />
+      <n-input v-model:value="newResetPassword" type="password" :placeholder="t('admin.enterNewPassword')" show-password-on="click" @keyup.enter="handleResetPassword" />
     </n-modal>
 
     <!-- ===== Edit Display Name Modal ===== -->
-    <n-modal v-model:show="showEditDisplayName" preset="dialog" :title="$t('admin.editDisplayName')" :positive-text="$t('common.save')" :negative-text="$t('common.cancel')"
+    <n-modal v-model:show="showEditDisplayName" preset="dialog" :title="t('admin.editDisplayName')" :positive-text="t('common.save')" :negative-text="t('common.cancel')"
       :loading="editDisplayNameLoading" @positive-click="handleEditDisplayName">
       <div style="margin-bottom: 12px; color: var(--sd-text-secondary); font-size: 14px;">
-        {{ $t('admin.editUser') }} <strong>{{ editingDisplayNameUser?.username }}</strong> {{ $t('admin.sDisplayName') }}
+        {{ t('admin.editUser') }} <strong>{{ editingDisplayNameUser?.username }}</strong> {{ t('admin.sDisplayName') }}
       </div>
-      <n-input v-model:value="newDisplayName" :placeholder="$t('admin.enterNewDisplayName')" @keyup.enter="handleEditDisplayName" />
+      <n-input v-model:value="newDisplayName" :placeholder="t('admin.enterNewDisplayName')" @keyup.enter="handleEditDisplayName" />
     </n-modal>
 
     <!-- ===== Backup/Restore Section ===== -->
-    <div class="section-header" style="margin-top: 32px;">
+    <div class="section-header">
       <div>
-        <h2>{{ $t('admin.backupRestore') || '备份与恢复' }}</h2>
-        <p>{{ $t('admin.backupRestoreDesc') || '下载完整数据库备份或从备份文件恢复' }}</p>
+        <h2>{{ t('admin.backupRestore') || '备份与恢复' }}</h2>
+        <p>{{ t('admin.backupRestoreDesc') || '下载完整数据库备份或从备份文件恢复' }}</p>
       </div>
     </div>
-    <div class="backup-actions">
-      <button class="add-btn" @click="handleBackup">
-        <Icon icon="mdi:download" :width="16" :height="16" />
-        {{ $t('admin.downloadBackup') || '下载备份' }}
-      </button>
-      <button class="add-btn" style="background: var(--sd-warning, #FF9500);" @click="restoreInput?.click()">
-        <Icon icon="mdi:upload" :width="16" :height="16" />
-        {{ $t('admin.restoreBackup') || '从备份恢复' }}
-      </button>
-      <input ref="restoreInput" type="file" accept=".db,.sqlite" style="display:none" @change="handleRestore" />
+    <div class="settings-card">
+      <div class="backup-actions">
+        <button class="add-btn" @click="handleBackup">
+          <Icon icon="mdi:download" :width="16" :height="16" />
+          {{ t('admin.downloadBackup') || '下载备份' }}
+        </button>
+        <button class="add-btn add-btn-warning" @click="restoreInput?.click()">
+          <Icon icon="mdi:upload" :width="16" :height="16" />
+          {{ t('admin.restoreBackup') || '从备份恢复' }}
+        </button>
+        <input ref="restoreInput" type="file" accept=".db,.sqlite" style="display:none" @change="handleRestore" />
+      </div>
     </div>
 
     <!-- ===== AI Auto-Categorize ===== -->
-    <div class="section-header" style="margin-top: 32px;">
+    <div class="section-header">
       <div>
-        <h2>{{ $t('admin.autoCategorize') || 'AI 智能归类' }}</h2>
-        <p>{{ $t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</p>
+        <h2>{{ t('admin.autoCategorize') || 'AI 智能归类' }}</h2>
+        <p>{{ t('admin.autoCategorizeDesc') || '基于关键词分析，自动将「暂停使用」和「其他」中的书签归类到合适的分组' }}</p>
       </div>
     </div>
-    <div class="backup-actions">
-      <button class="add-btn" style="background: #AF52DE;" @click="handleSuggestCategorize" :disabled="categorizeLoading">
-        <Icon icon="mdi:auto-fix" :width="16" :height="16" />
-        {{ categorizeLoading ? '分析中...' : ($t('admin.startCategorize') || '开始分析') }}
-      </button>
-      <button v-if="categorizeSuggestions.length > 0" class="add-btn" style="background: #34C759;" @click="handleApplyCategorize">
-        <Icon icon="mdi:check-all" :width="16" :height="16" />
-        {{ $t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})
-      </button>
-    </div>
-    <div v-if="categorizeSummary" class="categorize-summary">
-      <div v-for="(count, group) in categorizeSummary" :key="group" class="summary-pill">
-        {{ group }}: {{ count }}
+    <div class="settings-card">
+      <div class="backup-actions">
+        <button class="add-btn add-btn-ai" @click="handleSuggestCategorize" :disabled="categorizeLoading">
+          <Icon icon="mdi:auto-fix" :width="16" :height="16" />
+          {{ categorizeLoading ? '分析中...' : (t('admin.startCategorize') || '开始分析') }}
+        </button>
+        <button v-if="categorizeSuggestions.length > 0" class="add-btn add-btn-success" @click="handleApplyCategorize">
+          <Icon icon="mdi:check-all" :width="16" :height="16" />
+          {{ t('admin.applyCategorize') || '应用建议' }} ({{ categorizeSuggestions.length }})
+        </button>
+      </div>
+      <div v-if="categorizeSummary" class="categorize-summary">
+        <div v-for="(count, group) in categorizeSummary" :key="group" class="summary-pill">
+          {{ group }}: {{ count }}
+        </div>
       </div>
     </div>
   </div>
@@ -454,9 +458,9 @@ onMounted(() => {
 })
 
 function statusLabel(status?: string) {
-  if (status === 'pending') return $t('admin.statusPending')
-  if (status === 'rejected') return $t('admin.statusRejected')
-  return $t('admin.statusApproved')
+  if (status === 'pending') return t('admin.statusPending')
+  if (status === 'rejected') return t('admin.statusRejected')
+  return t('admin.statusApproved')
 }
 
 async function fetchUsers() {
@@ -467,7 +471,7 @@ async function fetchUsers() {
     users.value = (Array.isArray(allUsers) ? allUsers : []).filter((u: User) => u.status !== 'pending')
     pendingUsers.value = (Array.isArray(allUsers) ? allUsers : []).filter((u: User) => u.status === 'pending')
   } catch {
-    message.error($t('admin.failedToLoadUsers'))
+    message.error(t('admin.failedToLoadUsers'))
   } finally {
     loading.value = false
   }
@@ -506,9 +510,9 @@ async function saveGlobalSetting(key: string, value: any) {
   const strValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : String(value)
   try {
     await api.put('admin/settings', { settings: { [key]: strValue } })
-    message.success($t('common.settingsSaved'))
+    message.success(t('common.settingsSaved'))
   } catch {
-    message.error($t('common.saveFailed'))
+    message.error(t('common.saveFailed'))
   }
 }
 
@@ -525,9 +529,9 @@ async function saveAllSiteConfig() {
         site_custom_footer: siteConfig.site_custom_footer,
       }
     })
-    message.success($t('admin.siteConfigSaved'))
+    message.success(t('admin.siteConfigSaved'))
   } catch {
-    message.error($t('common.saveFailed'))
+    message.error(t('common.saveFailed'))
   } finally {
     siteSaving.value = false
   }
@@ -542,12 +546,12 @@ async function handleCreateUser() {
       password: newUser.value.password,
       display_name: newUser.value.displayName,
     })
-    message.success($t('admin.userCreated'))
+    message.success(t('admin.userCreated'))
     showAddUser.value = false
     newUser.value = { username: '', password: '', displayName: '' }
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('admin.createFailed'))
+    message.error(e.response?.data?.error || t('admin.createFailed'))
   } finally {
     modalLoading.value = false
   }
@@ -559,40 +563,40 @@ async function toggleRole(user: User) {
   try {
     await api.put(`users/${user.id}`, { role: newRole })
     user.role = newRole
-    message.success($t('admin.roleUpdated'))
+    message.success(t('admin.roleUpdated'))
   } catch {
-    message.error($t('admin.updateFailed'))
+    message.error(t('admin.updateFailed'))
   }
 }
 
 async function deleteUser(user: User) {
   try {
     await api.delete(`users/${user.id}`)
-    message.success($t('admin.userDeleted'))
+    message.success(t('admin.userDeleted'))
     await fetchUsers()
   } catch {
-    message.error($t('admin.deleteFailed'))
+    message.error(t('admin.deleteFailed'))
   }
 }
 
 async function approveUser(user: User) {
   try {
     await api.post(`users/${user.id}/approve`)
-    message.success(`${user.username} {{ $t('admin.approved') }}`)
+    message.success(`${user.username} ${t('admin.approved')}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('admin.approvalFailed'))
+    message.error(e.response?.data?.error || t('admin.approvalFailed'))
   }
 }
 
 async function rejectUser(user: User) {
   try {
     await api.post(`users/${user.id}/reject`)
-    message.success(`${user.username} {{ $t('admin.rejected') }}`)
+    message.success(`${user.username} ${t('admin.rejected')}`)
     pendingUsers.value = pendingUsers.value.filter(u => u.id !== user.id)
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('admin.operationFailed'))
+    message.error(e.response?.data?.error || t('admin.operationFailed'))
   }
 }
 
@@ -603,7 +607,7 @@ async function viewUserPanel(user: User) {
     viewingGroups.value = res.data.groups || []
     showUserPanel.value = true
   } catch {
-    message.error($t('admin.failedToLoadBookmarks'))
+    message.error(t('admin.failedToLoadBookmarks'))
   }
 }
 
@@ -622,7 +626,7 @@ function openEditDisplayName(user: User) {
 async function handleEditDisplayName() {
   if (!editingDisplayNameUser.value) return false
   if (!newDisplayName.value.trim()) {
-    message.warning($t('admin.displayNameCannotBeEmpty'))
+    message.warning(t('admin.displayNameCannotBeEmpty'))
     return false
   }
   editDisplayNameLoading.value = true
@@ -630,11 +634,11 @@ async function handleEditDisplayName() {
     await api.put(`users/${editingDisplayNameUser.value.id}`, {
       display_name: newDisplayName.value.trim(),
     })
-    message.success(`${editingDisplayNameUser.value.username} {{ $t('admin.sDisplayNameUpdated') }}`)
+    message.success(`${editingDisplayNameUser.value.username} ${t('admin.sDisplayNameUpdated')}`)
     showEditDisplayName.value = false
     await fetchUsers()
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('admin.updateFailed'))
+    message.error(e.response?.data?.error || t('admin.updateFailed'))
     return false
   } finally {
     editDisplayNameLoading.value = false
@@ -657,7 +661,7 @@ function openResetPassword(user: User) {
 async function handleResetPassword() {
   if (!resettingUser.value) return false
   if (!newResetPassword.value || newResetPassword.value.length < 6) {
-    message.warning($t('admin.passwordMin6Chars'))
+    message.warning(t('admin.passwordMin6Chars'))
     return false
   }
   resetPasswordLoading.value = true
@@ -665,10 +669,10 @@ async function handleResetPassword() {
     await api.post(`users/${resettingUser.value.id}/reset-password`, {
       new_password: newResetPassword.value,
     })
-    message.success(`${resettingUser.value.username} {{ $t('admin.sPasswordReset') }}`)
+    message.success(`${resettingUser.value.username} ${t('admin.sPasswordReset')}`)
     showResetPassword.value = false
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('admin.resetFailed'))
+    message.error(e.response?.data?.error || t('admin.resetFailed'))
     return false
   } finally {
     resetPasswordLoading.value = false
@@ -874,6 +878,15 @@ async function handleApplyCategorize() {
   margin-bottom: var(--sd-space-5);
 }
 
+.section-header + .section-header {
+  margin-top: var(--sd-space-8);
+}
+
+.settings-card + .section-header,
+.table-card + .section-header {
+  margin-top: var(--sd-space-8);
+}
+
 .section-header h2 {
   font-size: 22px;
   font-weight: 600;
@@ -921,6 +934,30 @@ async function handleApplyCategorize() {
 .add-btn:hover {
   background: var(--sd-primary-hover);
   transform: translateY(-1px);
+}
+
+.add-btn-warning {
+  background: var(--sd-warning, #FF9500);
+}
+
+.add-btn-warning:hover {
+  background: #D97F00;
+}
+
+.add-btn-ai {
+  background: #AF52DE;
+}
+
+.add-btn-ai:hover {
+  background: #9636C8;
+}
+
+.add-btn-success {
+  background: var(--sd-success, #34C759);
+}
+
+.add-btn-success:hover {
+  background: #28A745;
 }
 
 /* Settings Card */
@@ -1092,7 +1129,7 @@ async function handleApplyCategorize() {
   border: 1px solid rgba(0,0,0,0.1);
   border-radius: 8px;
   font-size: 12px;
-  font-family: monospace;
+  font-family: var(--sd-font-mono);
   background: var(--sd-bg-card);
   color: var(--sd-text-primary);
   resize: vertical;
@@ -1343,11 +1380,11 @@ async function handleApplyCategorize() {
     gap: 8px;
   }
 
-  /* Hide role/status columns on mobile, use card layout */
-  .table-head .th:nth-child(3),
-  .table-head .th:nth-child(4),
-  .table-row .td:nth-child(3),
-  .table-row .td:nth-child(4) {
+  /* Hide role/status columns on mobile, use card layout (users table only) */
+  .users-table .th:nth-child(3),
+  .users-table .th:nth-child(4),
+  .users-table .td:nth-child(3),
+  .users-table .td:nth-child(4) {
     display: none;
   }
 
@@ -1451,13 +1488,14 @@ async function handleApplyCategorize() {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 14px 16px;
 }
 
 .categorize-summary {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  padding: 0 16px 16px;
 }
 
 .summary-pill {
