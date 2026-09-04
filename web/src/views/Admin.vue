@@ -384,7 +384,7 @@
     </div>
 
     <!-- ===== User Bookmarks Modal ===== -->
-    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} {{ t('admin.sBookmarks') }}`" style="max-width: 700px;" :bordered="false">
+    <n-modal v-model:show="showUserPanel" preset="card" :title="`${viewingUser?.username || ''} ${t('admin.sBookmarks')}`" style="max-width: 700px;" :bordered="false">
       <div v-if="viewingGroups.length === 0" class="table-empty">{{ t('admin.noBookmarksForUser') }}</div>
       <div v-for="group in viewingGroups" :key="group.id" class="view-group">
         <div class="view-group-name">
