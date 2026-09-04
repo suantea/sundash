@@ -98,7 +98,7 @@
         <section class="settings-section">
           <div class="section-label">{{ $t('settings.appearance') }}</div>
           <div class="settings-card">
-            <div class="setting-row">
+            <div class="setting-row theme-row">
               <div class="setting-left">
                 <div class="setting-icon" style="background: rgba(255,149,0,0.1);">
                   <Icon icon="mdi:theme-light-dark" :width="18" :height="18" color="#FF9500" />
@@ -125,10 +125,6 @@
                   </button>
                 </div>
               </div>
-              <button class="apply-btn theme-add-btn" @click="openThemeEditor">
-                <Icon icon="mdi:plus" :width="14" :height="14" />
-                {{ $t('settings.createTheme') || '新建主题' }}
-              </button>
             </div>
             <div class="setting-divider"></div>
             <div class="setting-row">
@@ -833,17 +829,6 @@ function extractPrimaryColor(css: string): string {
   return m ? m[1] : '#007AFF'
 }
 
-function openThemeEditor() {
-  const name = prompt('主题名称：')
-  if (!name) return
-  const css = prompt('CSS 内容（自定义变量，如 :root { --sd-primary: #ff0000 }）：')
-  if (!css) return
-  api.post('themes', { name, css_content: css }).then(res => {
-    customThemes.value.push(res.data)
-    message.success('主题已创建')
-  }).catch(() => message.error('创建失败'))
-}
-
 // Restore active theme on mount
 const savedThemeId = localStorage.getItem('sundash-active-theme')
 if (savedThemeId) {
@@ -1052,18 +1037,6 @@ if (savedThemeId) {
   background: #0066DD;
 }
 
-/* 主题区「新建主题」按钮：在 flex 行内独立占一行，不再与分段控件挤压 */
-.theme-add-btn {
-  width: 100%;
-  justify-content: center;
-  margin-top: 8px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
 .bing-preview {
   display: block;
   margin-top: 8px;
@@ -1232,9 +1205,6 @@ if (savedThemeId) {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
-  width: 100%;
-  flex-shrink: 0;
 }
 
 .theme-chip {
