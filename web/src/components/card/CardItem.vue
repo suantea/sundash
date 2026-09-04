@@ -59,7 +59,7 @@ const appStore = useAppStore()
 const props = defineProps<{ card: Card }>()
 
 // 窄屏检测（≤480px 时卡片竖排）
-const isNarrow = computed(() => window.innerWidth <= 768)
+const isNarrow = ref(window.innerWidth <= 768)
 window.addEventListener('resize', () => { isNarrow.value = window.innerWidth <= 768 })
 
 const iconFallbackColor = computed(() => appStore.primaryColor || '#007AFF')

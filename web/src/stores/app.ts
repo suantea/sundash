@@ -319,7 +319,9 @@ export const useAppStore = defineStore('app', () => {
     setSiteTitle, setSiteIconUrl, setLoginBgUrl, setEnableCaptcha,
     // Components
     showSystemStatus, showWeatherWidget, showMemo, showRSSWidget, bmsyncEnabled, networkModeAuto, groupCardTransparent, searchEngine, cardStyle,
+    showSystemMonitor,
     setShowSystemStatus, setShowWeatherWidget, setShowMemo, setShowRSSWidget, setNetworkModeAuto, setGroupCardTransparent, setSearchEngine, setCardStyle,
+    setShowSystemMonitor,
     // Server sync
     loadSettingsFromServer, applyServerSettings,
     // Auth settings

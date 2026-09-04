@@ -39,7 +39,7 @@
                 <button class="rss-action-btn" @click="editFeed(feed.id)">
                   <Icon icon="mdi:lead-pencil" />
                 </button>
-                <button class="rss-action-btn" @confirm="deleteFeed(feed.id)" @cancel="clearDeleteConfirm" :loading="deletingFeedId === feed.id" @show="showDeleteConfirm = true">
+                <button class="rss-action-btn" @click="deleteFeed(feed.id)">
                   <Icon icon="mdi:delete" />
                 </button>
               </div>
@@ -147,6 +147,7 @@ const showAddFeed = ref(false)
 const showEditFeed = ref(false)
 const showDeleteConfirm = ref(false)
 const deletingFeedId = ref<string>('')
+let editFeedId = ''
 const newFeedUrl = ref('')
 const editFeedUrl = ref('')
 let timer: ReturnType<typeof setInterval> | null = null
@@ -204,6 +205,11 @@ async function updateFeed() {
 async function deleteFeed(feedId: string) {
   editFeedId = feedId
   showDeleteConfirm.value = true
+}
+
+function clearDeleteConfirm() {
+  showDeleteConfirm.value = false
+  editFeedId = ''
 }
 
 async function confirmDeleteFeed() {

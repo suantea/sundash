@@ -184,8 +184,8 @@ function getWeatherIcon(code: number | undefined): string {
   return iconMap[code] || 'mdi:weather-cloudy'
 }
 
-const weatherIcon = computed(() => getWeatherIcon(weather?.weathercode))
-const weatherCondition = computed(() => getWeatherDescription(weather?.weathercode))
+const weatherIcon = computed(() => getWeatherIcon(weather.value?.weathercode))
+const weatherCondition = computed(() => getWeatherDescription(weather.value?.weathercode))
 
 onMounted(() => {
   fetchWeather()

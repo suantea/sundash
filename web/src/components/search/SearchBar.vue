@@ -92,7 +92,12 @@ const defaultEngine = computed(() => {
 const searchResults = ref<Array<{ id: string; title: string; url: string; icon?: string }>>([])
 
 // Debounce timer for suggestions
-let suggestionTimer: NodeJS.Timeout | null = null
+let suggestionTimer: ReturnType<typeof setTimeout> | null = null
+
+// Open a bookmark search result in a new tab
+function openBookmark(url: string) {
+  window.open(url, '_blank')
+}
 
 function handleSearch() {
   if (query.value.trim()) {

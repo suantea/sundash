@@ -40,7 +40,7 @@
             <div class="detail-bar">
               <div class="detail-bar-fill" :style="{ width: Math.min(stats?.cpu.usage_percent || 0, 100) + '%' }" :class="getUsageClass(stats?.cpu.usage_percent || 0)"></div>
             </div>
-            <div class="detail-meta">{{ t('system.cores', { count: stats?.cpu.coreCount }) }} · {{ stats?.cpu.model_name }}</div>
+            <div class="detail-meta">{{ t('system.cores', { count: stats?.cpu.core_count }) }} · {{ stats?.cpu.model_name }}</div>
           </div>
 
           <!-- Memory Detail -->

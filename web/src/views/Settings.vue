@@ -550,20 +550,20 @@ async function fetchBingWallpaper() {
     const res = await api.get('wallpaper/bing')
     if (res.data && res.data.images && res.data.images[0]) {
       appStore.setWallpaperUrl(res.data.images[0].url)
-      message.success($t('settings.bingWallpaperRefreshed'))
+      message.success(t('settings.bingWallpaperRefreshed'))
     }
   } catch (e) {
-    message.error($t('settings.failedToGetBingWallpaper'))
+    message.error(t('settings.failedToGetBingWallpaper'))
   }
 }
 
 function applyCustomBackground() {
   if (!customUrl.value.trim()) {
-    message.error($t('settings.pleaseEnterImageUrl'))
+    message.error(t('settings.pleaseEnterImageUrl'))
     return
   }
   appStore.setWallpaperUrl(customUrl.value.trim())
-  message.success($t('settings.customBackgroundApplied'))
+  message.success(t('settings.customBackgroundApplied'))
 }
 
 // Component toggles
@@ -576,7 +576,7 @@ function toggleSearchBar(val: boolean) {
 function updateSiteTitle() {
   const title = siteTitleInput.value.trim() || 'SunDash'
   appStore.setSiteTitle(title)
-  message.success($t('settings.siteTitleUpdated'))
+  message.success(t('settings.siteTitleUpdated'))
 }
 
 function setNetwork(mode: 'internal' | 'external') {
@@ -586,10 +586,10 @@ function setNetwork(mode: 'internal' | 'external') {
 
 function handleResetSettings() {
   dialog.warning({
-    title: $t('settings.resetSettings'),
-    content: $t('settings.resetSettingsConfirm'),
-    positiveText: $t('settings.confirmReset'),
-    negativeText: $t('common.cancel'),
+    title: t('settings.resetSettings'),
+    content: t('settings.resetSettingsConfirm'),
+    positiveText: t('settings.confirmReset'),
+    negativeText: t('common.cancel'),
     onPositiveClick: () => {
       // Clear all sundash localStorage keys
       const keys = Object.keys(localStorage).filter(k => k.startsWith('sundash-'))
@@ -652,7 +652,7 @@ function handleExport() {
   a.download = `sundash-backup-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
-  message.success($t('settings.dataExported'))
+  message.success(t('settings.dataExported'))
 }
 
 function triggerImport() {
@@ -661,15 +661,15 @@ function triggerImport() {
 
 // Import a built-in template (common navigation) with confirmation.
 function importTemplate() {
-  const t = importTemplates[0]
-  const cardCount = t.groups.reduce((sum: number, g: any) => sum + (g.cards?.length || 0), 0)
+  const tmpl = importTemplates[0]
+  const cardCount = tmpl.groups.reduce((sum: number, g: any) => sum + (g.cards?.length || 0), 0)
   dialog.warning({
-    title: $t('settings.confirmImportTemplate'),
-    content: `${$t('settings.importTemplateConfirm', { name: t.name, groups: t.groups.length, cards: cardCount })}`,
-    positiveText: $t('settings.confirmImport'),
-    negativeText: $t('common.cancel'),
+    title: t('settings.confirmImportTemplate'),
+    content: `${t('settings.importTemplateConfirm', { name: tmpl.name, groups: tmpl.groups.length, cards: cardCount })}`,
+    positiveText: t('settings.confirmImport'),
+    negativeText: t('common.cancel'),
     onPositiveClick: async () => {
-      await doImport({ groups: t.groups })
+      await doImport({ groups: tmpl.groups })
     },
   })
 }
@@ -683,7 +683,7 @@ async function handleImport(e: Event) {
     const text = await file.text()
     const data = JSON.parse(text)
     if (!data.groups || !Array.isArray(data.groups)) {
-      message.error($t('settings.invalidBackupFormat'))
+      message.error(t('settings.invalidBackupFormat'))
       return
     }
     
@@ -691,16 +691,16 @@ async function handleImport(e: Event) {
     const cardCount = data.groups.reduce((sum: number, g: any) => sum + (g.cards?.length || 0), 0)
     
     dialog.warning({
-      title: $t('settings.confirmImport'),
-      content: `${$t('settings.importConfirm', { groups: groupCount, cards: cardCount })}`,
-      positiveText: $t('settings.confirmImport'),
-      negativeText: $t('common.cancel'),
+      title: t('settings.confirmImport'),
+      content: `${t('settings.importConfirm', { groups: groupCount, cards: cardCount })}`,
+      positiveText: t('settings.confirmImport'),
+      negativeText: t('common.cancel'),
       onPositiveClick: async () => {
         await doImport(data)
       },
     })
   } catch {
-    message.error($t('settings.importFailedInvalidFormat'))
+    message.error(t('settings.importFailedInvalidFormat'))
   } finally {
     input.value = ''
   }
@@ -717,7 +717,7 @@ async function doImport(data: any) {
       }
       // Reload settings from server to apply
       await appStore.loadSettingsFromServer()
-      message.success($t('settings.settingsRestored'))
+      message.success(t('settings.settingsRestored'))
     }
     // Import groups and cards
     if (data.groups && Array.isArray(data.groups)) {
@@ -740,10 +740,10 @@ async function doImport(data: any) {
         }
       }
       await panelStore.fetchPanel()
-      message.success($t('settings.importSuccess', { count: data.groups.length }))
+      message.success(t('settings.importSuccess', { count: data.groups.length }))
     }
   } catch {
-    message.error($t('settings.importFailed'))
+    message.error(t('settings.importFailed'))
   }
 }
 

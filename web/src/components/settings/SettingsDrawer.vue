@@ -503,6 +503,7 @@ import { useAppStore } from '../../stores/app'
 import { useUserStore } from '../../stores/user'
 import { usePanelStore } from '../../stores/panel'
 import { importTemplates } from '../../data/importTemplates'
+import { api } from '../../api'
 
 defineProps<{ show: boolean }>()
 const emit = defineEmits<{ 'update:show': [val: boolean] }>()

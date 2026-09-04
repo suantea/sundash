@@ -121,7 +121,7 @@ onMounted(() => {
 
 async function saveDisplayName() {
   if (!displayName.value.trim()) {
-    message.warning($t('user.displayNameCannotBeEmpty'))
+    message.warning(t('user.displayNameCannotBeEmpty'))
     return
   }
   displayNameSaving.value = true
@@ -130,9 +130,9 @@ async function saveDisplayName() {
     if (userStore.user) {
       userStore.user.display_name = displayName.value.trim()
     }
-    message.success($t('user.displayNameUpdated'))
+    message.success(t('user.displayNameUpdated'))
   } catch {
-    message.error($t('user.updateFailed'))
+    message.error(t('user.updateFailed'))
   } finally {
     displayNameSaving.value = false
   }
@@ -140,15 +140,15 @@ async function saveDisplayName() {
 
 async function handleChangePassword() {
   if (!passwordForm.value.oldPassword) {
-    message.warning($t('user.pleaseEnterCurrentPassword'))
+    message.warning(t('user.pleaseEnterCurrentPassword'))
     return
   }
   if (!passwordForm.value.newPassword || passwordForm.value.newPassword.length < 6) {
-    message.warning($t('user.newPasswordAtLeast6'))
+    message.warning(t('user.newPasswordAtLeast6'))
     return
   }
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    message.warning($t('user.passwordsDoNotMatch'))
+    message.warning(t('user.passwordsDoNotMatch'))
     return
   }
   passwordSaving.value = true
@@ -157,10 +157,10 @@ async function handleChangePassword() {
       old_password: passwordForm.value.oldPassword,
       new_password: passwordForm.value.newPassword,
     })
-    message.success($t('user.passwordChanged'))
+    message.success(t('user.passwordChanged'))
     passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
   } catch (e: any) {
-    message.error(e.response?.data?.error || $t('user.changePasswordFailed'))
+    message.error(e.response?.data?.error || t('user.changePasswordFailed'))
   } finally {
     passwordSaving.value = false
   }
